@@ -21,9 +21,9 @@ void Scene3::simulateStep() {
 }
 
 void Scene3::onDraw(Renderer& renderer) {
-    renderer.drawSphere(p1.getPosition(), 0.1f, {0.0f, 0.0f, 1.0f, 1.0f});
-    renderer.drawSphere(p2.getPosition(), 0.1f, {0.0f, 0.0f, 1.0f, 1.0f});
-    renderer.drawLine(p1.getPosition(), p2.getPosition(), glm::vec4(1, 0, 0, 1));
+    renderer.drawSphere(p1.getPosition(), 0.1f, glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
+    renderer.drawSphere(p2.getPosition(), 0.1f, glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
+    renderer.drawLine(p1.getPosition(), p2.getPosition(), glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
 }
 
 void Scene3::onGUI() {
