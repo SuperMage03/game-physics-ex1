@@ -1,7 +1,11 @@
-#include "Scene.h"
+#pragma once
 #include <map>
 
-#include "Scene1.h"
+#include "SceneTest.h"
+#include "SceneSingleStep.h"
+#include "SceneEulerSimulation.h"
+#include "SceneMidpointSimulation.h"
+#include "SceneComplexSimulation.h"
 
 using SceneCreator = std::function<std::unique_ptr<Scene>()>;
 
@@ -13,6 +17,11 @@ SceneCreator creator()
 }
 
 std::map<std::string, SceneCreator> scenesCreators = {
-    {"Demo Scene", creator<Scene1>()},
+    // {"DEBUG", creator<Scene>()},
+    {"Demo Scene", creator<SceneTest>()},
+    {"Single Step", creator<SceneSingleStep>()},
+    {"Euler Simulation", creator<SceneEulerSimulation>()},
+    {"Midpoint Simulation", creator<SceneMidpointSimulation>()},
+    {"Complex Simulation", creator<SceneComplexSimulation>()}
     // add more Scene types here
 };
