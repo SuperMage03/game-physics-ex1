@@ -4,4 +4,8 @@
         "${workspaceFolder}/src/**",
         "${workspaceFolder}/thirdparty/**",
     ],
+    "files.associations": {
+        "ostream": "cpp",
+        "type_traits": "cpp"
+    },
 }
