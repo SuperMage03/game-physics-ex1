@@ -1,4 +1,3 @@
-#pragma once
 #include "Scene.h"
 #include "glm/glm.hpp"
 #include <vector>
@@ -20,20 +19,17 @@ public:
         useLeapFrog = false;
         gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 
-        // Initialize 10 mass points in a line
         for (int i = 0; i < 10; ++i) {
-            positions.emplace_back(i * 0.5f, 5.0f, 0.0f); // Start above the ground
+            positions.emplace_back(i * 0.5f, 5.0f, 0.0f);
             velocities.emplace_back(0.0f, 0.0f, 0.0f);
         }
 
-        // Create springs connecting adjacent mass points
         for (int i = 0; i < 9; ++i) {
             springs.emplace_back(i, i + 1);
         }
     }
 
     void simulateStep() override {
-        // Choose the integration method
         if (useLeapFrog) {
             simulateLeapFrog();
         } else if (useMidpoint) {
@@ -42,7 +38,6 @@ public:
             simulateEuler();
         }
 
-        // Apply gravity and handle collisions
         applyGravity();
         handleCollisions();
     }
