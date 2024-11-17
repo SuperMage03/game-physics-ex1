@@ -18,8 +18,7 @@ public:
         glm::vec3 v1_mid = v1 + (dt / 2.0f) * (-k * (x0 - x1) / m);
         glm::vec3 x0_mid = x0 + dt * v0_mid;
         glm::vec3 x1_mid = x1 + dt * v1_mid;
-
-        // Print results
+        
         std::cout << "Euler: x0 = (" << x0_euler.x << ", " << x0_euler.y << ", " << x0_euler.z << "), "
           << "x1 = (" << x1_euler.x << ", " << x1_euler.y << ", " << x1_euler.z << ")" << std::endl;
 
