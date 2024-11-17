@@ -1,5 +1,4 @@
-// File: Scene2_EulerSimulation.h
-#pragma once
+
 #include "Scene.h"
 #include "glm/glm.hpp"
 #include <vector>
@@ -32,12 +31,8 @@ public:
     }
     void onDraw(Renderer &renderer) override {
         glm::vec3 color = glm::vec3(1.0f, 0.0f, 0.0f);
-
-        // Draw the points using small spheres
         renderer.drawSphere(x0, 0.05f, glm::vec4(color, 1.0f));
         renderer.drawSphere(x1, 0.05f, glm::vec4(color, 1.0f));
-
-        // Draw the line connecting the two points
         renderer.drawLine(x0, x1, color);
     }
 
