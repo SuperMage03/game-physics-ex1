@@ -1,12 +1,9 @@
 #include "Scene.h"
 #include <map>
-//#include "SceneRegistry.h"
 #include "Scene1_SingleStep.h"
 #include "Scene2_EulerSimulation.h"
 #include "Scene3_MidpointSimulation.h"
 #include "Scene4_ComplexSimulation.h"
-//REGISTER_SCENE(Scene1_SingleStep, "Single Step");
-
 #include "Scene1.h"
 
 using SceneCreator = std::function<std::unique_ptr<Scene>()>;
