@@ -23,5 +23,8 @@ public:
     virtual void onDraw(Renderer &renderer);
     /// @brief Define the GUI for the scene. Gets called every frame after onDraw.
     virtual void onGUI() {};
+    virtual void update(float deltaTime) {};
+    virtual void render() {};
     virtual ~Scene() = default;
+
 };
