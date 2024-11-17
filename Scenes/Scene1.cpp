@@ -1,7 +1,6 @@
 #include "Scene1.h"
 #include <glm/gtx/quaternion.hpp>
 #include <imgui.h>
-
 void Scene1::onDraw(Renderer& renderer){
     renderer.drawWireCube(glm::vec3(0), glm::vec3(5), glm::vec3(1));
 
