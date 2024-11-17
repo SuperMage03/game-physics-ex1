@@ -50,12 +50,13 @@ void Scene4::init() {
     force_registry_->clear();
     collision_registry_ = CollisionRegistry::getInstance();
     collision_registry_->clear();
-    
+
+    // Generates the Icosahedron from AssignmentSpecificValues.h
     GenerateIcosahedron();
 }
 
 void Scene4::simulateStep() {
-    point_registry_->simulateStep(step);
+    point_registry_->simulateStep(step_);
 }
 
 void Scene4::onDraw(Renderer& renderer) {
@@ -77,5 +78,34 @@ void Scene4::onDraw(Renderer& renderer) {
 }
 
 void Scene4::onGUI() {
-    ImGui::SliderFloat("Time Step", &step, 0.001f, 0.1f);
+    ImGui::SliderFloat("Time Step", &step_, 0.001f, 0.1f);
+    
+    const char* integration_options[] = { "EULER", "MIDPOINT" };
+
+    // Default to be Euler Step
+    static const char* current_integration_option = integration_options[0];
+
+    if (ImGui::BeginCombo("Integration Mode", current_integration_option)) {
+        for (int i = 0; i < 2; i++) {
+            bool is_selected = (current_integration_option == integration_options[i]);
+            if (ImGui::Selectable(integration_options[i], is_selected)) {
+                switch (i) {
+                case 0:
+                    point_registry_->setIntegrationMode(PointRegistry::IntegrationMode::EULER);
+                    break;
+                case 1:
+                    point_registry_->setIntegrationMode(PointRegistry::IntegrationMode::MIDPOINT);
+                    break;
+                default:
+                    break;
+                }
+                current_integration_option = integration_options[i];
+            }
+            
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
 }
