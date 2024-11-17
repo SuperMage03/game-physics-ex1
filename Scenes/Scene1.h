@@ -1,7 +1,6 @@
 #include "Scene.h"
 #include <random>
 #include <vector>
-
 struct Particle
 {
     glm::vec3 position;
