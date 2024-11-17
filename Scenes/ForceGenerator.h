@@ -7,11 +7,18 @@
 // Abstract class for Force Generators
 class ForceGenerator {
 public:
-    virtual ~ForceGenerator() = default;
+    virtual ~ForceGenerator();
     virtual void updateForce(Point& point, float duration) = 0;
 };
 
-// SpringForceGenerator Force Generator
+class GravityForceGenerator : public ForceGenerator {
+private:
+    glm::vec3 gravity_;
+public:
+    GravityForceGenerator(const glm::vec3& gravity);
+    void updateForce(Point& point, float duration) override;
+};
+
 class SpringForceGenerator : public ForceGenerator {
 private:
     Point& other_;

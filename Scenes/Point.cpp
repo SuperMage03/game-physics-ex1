@@ -1,5 +1,6 @@
 #include "Point.h"
 #include "ForceGenerator.h"
+#include "CollisionGenerator.h"
 
 // --------- Point class method implementations ------------
 Point::Point(float mass): 
@@ -7,6 +8,10 @@ Point::Point(float mass):
 
 Point::Point(glm::vec3 position, glm::vec3 velocity, glm::vec3 force, float mass, float damping): 
     position_{position}, velocity_{velocity}, force_{force}, mass_{mass}, damping_{damping} {}
+
+float Point::getMass() const {
+    return mass_;
+}
 
 glm::vec3 Point::getPosition() const {
     return position_;
@@ -64,7 +69,7 @@ std::unique_ptr<PointRegistry> PointRegistry::singleton_ = nullptr;
 
 PointRegistry* PointRegistry::getInstance() {
     if (!singleton_) {
-        singleton_ = std::move(std::unique_ptr<PointRegistry>(new PointRegistry()));
+        singleton_ = std::unique_ptr<PointRegistry>(new PointRegistry());
     }
     return singleton_.get();
 }
@@ -132,6 +137,8 @@ void PointRegistry::simulateStepMidpoint(const float& step) {
         result_point.setPosition(result_point.getPosition() + step * simulated_point.getVelocity());
     }
 
+    // Check Collision
+    CollisionRegistry::getInstance()->applyCollisions();
     // Let the forces to be recalculated
     clearForces();
     ForceRegistry::getInstance()->updateForces();
@@ -154,6 +161,8 @@ void PointRegistry::simulateStepMidpoint(const float& step) {
 }
 
 void PointRegistry::simulateStep(const float& step) {
+    // Check Collision
+    CollisionRegistry::getInstance()->applyCollisions();
     // Calculate the forces
     clearForces();
     ForceRegistry::getInstance()->updateForces();

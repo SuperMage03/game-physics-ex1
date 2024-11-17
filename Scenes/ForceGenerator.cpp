@@ -1,6 +1,16 @@
 #include "ForceGenerator.h"
 #include <glm/glm.hpp>
 
+// --------- ForceGenerator class method implementations ------------
+ForceGenerator::~ForceGenerator() = default;
+
+// --------- GravityForceGenerator class method implementations ------------
+GravityForceGenerator::GravityForceGenerator(const glm::vec3 &gravity): gravity_{gravity} {}
+
+void GravityForceGenerator::updateForce(Point& point, float duration) {
+    point.addForce(point.getMass() * gravity_);
+}
+
 // --------- SpringForceGenerator class method implementations ------------
 SpringForceGenerator::SpringForceGenerator(Point& other, float stiffness, float initial_length): 
     other_{other}, stiffness_{stiffness}, initial_length_{initial_length} {}
@@ -27,7 +37,7 @@ std::unique_ptr<ForceRegistry> ForceRegistry::singleton_ = nullptr;
 
 ForceRegistry* ForceRegistry::getInstance() {
     if (!singleton_) {
-        singleton_ = std::move(std::unique_ptr<ForceRegistry>(new ForceRegistry()));
+        singleton_ = std::unique_ptr<ForceRegistry>(new ForceRegistry());
     }
     return singleton_.get();
 }

@@ -16,6 +16,7 @@ public:
     Point(float mass=1.0f);
     Point(glm::vec3 position, glm::vec3 velocity, glm::vec3 force, float mass, float damping);
     // Getters
+    float getMass() const;
     glm::vec3 getPosition() const;
     glm::vec3 getVelocity() const;
     glm::vec3 getForce() const;
