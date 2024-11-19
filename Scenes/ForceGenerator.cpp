@@ -26,6 +26,10 @@ void SpringForceGenerator::updateForce(Point& point, float duration) {
     point.addForce(spring_force_magnitude * direction);
 }
 
+void DampingForceGenerator::updateForce(Point &point, float duration) {
+    point.addForce(-point.getDamping() * point.getVelocity());
+}
+
 // --------- ForceRegistry::ForceRegistration struct method implementations ------------
 ForceRegistry::ForceRegistration::ForceRegistration(Point*const& point, ForceGenerator*const& force_generator):
     point{point}, force_generator{force_generator} {}

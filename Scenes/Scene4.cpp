@@ -32,11 +32,12 @@ void Scene4::SpringForcePair::registerSpringForcePair(ForceRegistry &force_regis
 
 void Scene4::GenerateIcosahedron() {
     for (int i = 0; i < ICOSAHEDRON_VERTEX_COUNT; i++) {
-        icosahedron_vertices_[i] = std::make_unique<Point>(ICOSAHEDRON_VERTICES[i], glm::vec3(0), glm::vec3(0), DEFAULT_POINT_MASS, 0.0f);
+        icosahedron_vertices_[i] = std::make_unique<Point>(ICOSAHEDRON_VERTICES[i], glm::vec3(0), glm::vec3(0), DEFAULT_POINT_MASS, 2.0f);
         // Register the created point
         point_registry_->add(*(icosahedron_vertices_[i]));
         // Adds gravity to all points
         force_registry_->add(*(icosahedron_vertices_[i]), gravity_force_generator_);
+        force_registry_->add(*(icosahedron_vertices_[i]), damping_force_generator_);
         // Adds Collision detection with bounding box to all points
         collision_registry_->add(*(icosahedron_vertices_[i]), bounding_box_collision_generator_);
     }
@@ -44,7 +45,7 @@ void Scene4::GenerateIcosahedron() {
     for (int i = 0; i < ICOSAHEDRON_EDGE_COUNT; i++) {
         const auto& [vertex_a, vertex_b] = ICOSAHEDRON_EDGES[i];
         if (!icosahedron_vertices_[vertex_a] || !icosahedron_vertices_[vertex_b]) continue;
-        icosahedron_edges_[i] = std::make_unique<SpringForcePair>(*(icosahedron_vertices_[vertex_a]), *(icosahedron_vertices_[vertex_b]), SPRING_STIFFNESS);
+        icosahedron_edges_[i] = std::make_unique<SpringForcePair>(*(icosahedron_vertices_[vertex_a]), *(icosahedron_vertices_[vertex_b]), 2000.0f);
         // Registers the spring force pair to the force registry
         icosahedron_edges_[i]->registerSpringForcePair(*force_registry_);
     }

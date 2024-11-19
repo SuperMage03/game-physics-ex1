@@ -19,6 +19,7 @@ private:
     float step_ = 0.005f;
 
     GravityForceGenerator gravity_force_generator_{glm::vec3{0.0f, 0.0f, -9.81f}};
+    DampingForceGenerator damping_force_generator_{};
     BoundingBoxCollisionGenerator bounding_box_collision_generator_{BOUNDING_BOX_POSITION, BOUNDING_BOX_SCALE};
     
     PointRegistry* point_registry_ = nullptr;

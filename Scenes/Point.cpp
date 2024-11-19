@@ -13,6 +13,10 @@ float Point::getMass() const {
     return mass_;
 }
 
+float Point::getDamping() const {
+    return damping_;
+}
+
 glm::vec3 Point::getPosition() const {
     return position_;
 }

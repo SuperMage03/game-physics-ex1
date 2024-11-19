@@ -29,6 +29,11 @@ public:
     void updateForce(Point& point, float duration) override;
 };
 
+class DampingForceGenerator: public ForceGenerator {
+public:
+    void updateForce(Point& point, float duration) override;
+};
+
 // Singleton class for managing force generators
 class ForceRegistry {
 protected:
