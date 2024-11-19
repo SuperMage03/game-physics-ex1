@@ -3,9 +3,7 @@
 
 void Scene1::init() {
     point_registry_ = PointRegistry::getInstance();
-    point_registry_->clear();
     force_registry_ = ForceRegistry::getInstance();
-    force_registry_->clear();
 
     // Register Points and Force Generators
     point_registry_->add(p1);
@@ -42,4 +40,9 @@ void Scene1::init() {
     std::cout << p1 << std::endl;
     std::cout << "POINT 2:" << std::endl;
     std::cout << p2 << std::endl;
+}
+
+Scene1::~Scene1() {
+    force_registry_->clear();
+    point_registry_->clear();
 }

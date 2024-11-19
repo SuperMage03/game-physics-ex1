@@ -3,9 +3,7 @@
 
 void Scene2::init() {
     point_registry_ = PointRegistry::getInstance();
-    point_registry_->clear();
     force_registry_ = ForceRegistry::getInstance();
-    force_registry_->clear();
     
     // Register Points and Force Generators
     point_registry_->add(p1);
@@ -28,4 +26,9 @@ void Scene2::onDraw(Renderer& renderer) {
 
 void Scene2::onGUI() {
     ImGui::SliderFloat("Time Step", &step, 0.001f, 0.1f);
+}
+
+Scene2::~Scene2() {
+    force_registry_->clear();
+    point_registry_->clear();
 }

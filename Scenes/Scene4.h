@@ -34,4 +34,5 @@ public:
     void simulateStep() override;
     void onDraw(Renderer& renderer) override;
     void onGUI() override;
+    ~Scene4() override;
 };

@@ -21,4 +21,5 @@ public:
     void simulateStep() override;
     void onDraw(Renderer& renderer) override;
     void onGUI() override;
+    ~Scene3() override;
 };

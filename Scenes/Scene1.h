@@ -18,4 +18,5 @@ private:
     ForceRegistry* force_registry_ = nullptr;
 public:
     void init() override;
+    ~Scene1() override;
 };
