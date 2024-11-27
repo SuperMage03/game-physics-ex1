@@ -306,14 +306,9 @@ struct RigidObject3D {
 		calculateAngularVelocity();
 	}
 
-	void lfIntegrate(float delta) {
+	void euIntegrate(float delta) {
 		// Integrate linear velocity
 		f_velocity += delta * f_centralForce / f_mass;
-
-		// Integrate rotational velocity
-		f_angularMomentum += delta * f_torque;
-		calculateAngularVelocity();
-
 		// Integrate position
 		f_transform.f_position += delta * f_velocity;
 
@@ -323,8 +318,50 @@ struct RigidObject3D {
 			* f_transform.f_quat;
 		// Normalize quaternion
 		f_transform.f_quat = glm::normalize(f_transform.f_quat);
+		// Integrate angular momentum
+		f_angularMomentum += delta * f_torque;
 		// Update inertia tensor
 		calculateInertiaTensorInv();
+		// Calculate angular velocity
+		calculateAngularVelocity();
+	}
+
+	void mpIntegrate(float delta) {
+		// Integrate linear velocity
+		f_velocity += delta * f_centralForce / f_mass;
+		// Integrate position
+		f_transform.f_position += delta * f_velocity;
+
+		// Integrate rotation
+		// Save initial quat
+		glm::quat initialQuat = f_transform.f_quat;
+
+		// Set midpoint values
+		f_transform.f_quat += (delta / 4.f) 
+			* glm::quat(0.f, f_angularVelocity[0], f_angularVelocity[1], f_angularVelocity[2])
+			* f_transform.f_quat;
+		// Normalize quaternion
+		f_transform.f_quat = glm::normalize(f_transform.f_quat);
+		// Set midpoint angular momentum
+		f_angularMomentum += delta * f_torque / 2.f;
+		// Set midpoint inertia tensor
+		calculateInertiaTensorInv();
+		// Set midpoint angular velocity
+		calculateAngularVelocity();
+
+		// MP integrate
+		f_transform.f_quat = initialQuat + (delta / 2.f) 
+			* glm::quat(0.f, f_angularVelocity[0], f_angularVelocity[1], f_angularVelocity[2])
+			* f_transform.f_quat;
+		// Normalize quaternion
+		f_transform.f_quat = glm::normalize(f_transform.f_quat);
+		// Integrate angular momentum
+		f_angularMomentum += delta * f_torque / 2.f;
+		// Update inertia tensor
+		calculateInertiaTensorInv();
+		// Calculate angular velocity
+		calculateAngularVelocity();
+
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const RigidObject3D& object) {
@@ -467,6 +504,16 @@ struct Box: public RigidObject3D {
 			f_transform.f_quat,
 			f_transform.f_scale,
 			glm::vec4(0.7f, 0.7f, 0.7f, 1.f)
+		);
+		renderer.drawLine(
+			f_transform.f_position,
+			f_transform.f_position + 0.5f * f_angularVelocity,
+			glm::vec3(1.f, 0.05f, 0.05f)
+		);
+		renderer.drawSphere(
+			f_transform.f_position + 0.5f * f_angularVelocity,
+			0.03f,
+			glm::vec4(1.f, 0.05f, 0.05f, 1.f)
 		);
 	}
 };

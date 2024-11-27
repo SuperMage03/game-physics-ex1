@@ -46,7 +46,7 @@ public:
         );
 
         float delta = 2.f;
-        ROPE.lfIntegrate(delta);
+        ROPE.euIntegrate(delta);
 
         std::cout << "======== Final system state ========" << std::endl
         << ROPE << std::endl << std::endl;

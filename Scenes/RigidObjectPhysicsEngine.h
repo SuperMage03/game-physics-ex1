@@ -37,9 +37,16 @@ public:
         f_objects.at(id)->applyImpulse(impulse, applicationPoint);
     }
 
-    void lfIntegrate(float delta) {
+    void euIntegrate(float delta) {
         for (auto object: f_objects) {
-            object->lfIntegrate(delta);
+            object->euIntegrate(delta);
+            object->flushForces();
+        }
+    }
+
+    void mpIntegrate(float delta) {
+        for (auto object: f_objects) {
+            object->mpIntegrate(delta);
             object->flushForces();
         }
     }
