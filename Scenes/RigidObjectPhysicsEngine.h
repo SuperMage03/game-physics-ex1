@@ -3,6 +3,7 @@
 
 #include "RigidObject3D.h"
 #include "StaticObject3D.h"
+#include "util/CollisionDetection.h"
 
 class RigidObjectPhysicsEngine {
 private:
@@ -85,10 +86,13 @@ public:
 
         std::vector<Collision> collisions;
         // Check for collisions
-        for (const auto objA: f_objects) {
-            for (const auto objB: f_objects) {
+        // checkCollisionSAT (Mat4& obj2World_A, Mat4& obj2World_B)
+        for (int idA = 0; idA < f_objects.size(); idA++) {
+            for (int idB = idA + 1; idB < f_objects.size(); idB++) {
+                RigidObject3D* objA = f_objects.at(idA);
+                RigidObject3D* objB = f_objects.at(idB);
                 // Continue if same object
-                if (objA == objB) continue;
+                // if (objA == objB) continue;
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // !!!!!!!!!!!!!! Cast to Box !!!!!!!!!!!!!!
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -96,17 +100,18 @@ public:
                 Box* boxA = dynamic_cast<Box*>(objA);
                 Box* boxB = dynamic_cast<Box*>(objB);
                 // Get collision point of object A if exists
-                unsigned collisionCornerAId = boxB->containsPoint(boxA->getCornerPoints());
-                if (collisionCornerAId == -1) continue;
+                glm::mat4 transformA = objA->f_transform.getTransform();
+                glm::mat4 transformB = objB->f_transform.getTransform();
+                auto collisionInfo = collisionTools::checkCollisionSAT(transformA, transformB);
 
-                // Collision point
-                glm::vec3 collsionPoint =  boxA->getCornerPointId(collisionCornerAId);
+                if (!collisionInfo.isColliding) continue;
+                
                 // Create collision
                 Collision collision(
                     boxA,
                     boxB,
-                    collsionPoint,
-                    boxB->getNormalForCollisionPoint(collsionPoint)
+                    collisionInfo.collisionPointWorld,
+                    collisionInfo.normalWorld
                 );
                 collisions.emplace_back(std::move(collision));
             }
@@ -129,7 +134,7 @@ public:
                 int collisionCornerAId = wall.pointInside(boxA->getCornerPoints());
                 if (collisionCornerAId == -1) continue;
                 // Collision point
-                glm::vec3 collsionPoint =  boxA->getCornerPointId(collisionCornerAId);
+                glm::vec3 collisionPoint =  boxA->getCornerPointId(collisionCornerAId);
                 // Collision point local
                 // Relative velocity
                 glm::vec3 relativeVelocity = boxA->getCornerPointVelocityId(collisionCornerAId);
@@ -163,7 +168,7 @@ public:
                 glm::vec3 resultVelocity = boxA->getCornerPointVelocityId(collisionCornerAId);
                 
                 // Push out of the wall
-                boxA->f_transform.f_position += (wall.f_surface - glm::dot(collsionPoint, wall.f_normal) + 0.00001f) * wall.f_normal;
+                boxA->f_transform.f_position += (wall.f_surface - glm::dot(collisionPoint, wall.f_normal) + 0.00001f) * wall.f_normal;
             }
         }
 

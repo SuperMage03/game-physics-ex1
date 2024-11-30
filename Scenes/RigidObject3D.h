@@ -98,15 +98,19 @@ struct Transform3D {
 	}
 
 	glm::mat4 getTransform() const {
-		glm::mat4 transform = glm::mat4_cast(f_quat);
-		transform[0][0] = f_scale[0];
-		transform[1][1] = f_scale[1];
-		transform[2][2] = f_scale[2];
+		glm::mat4 rotationMatrix = glm::toMat4(f_quat);
+		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.f), f_scale);
+		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.f), f_position);
+		glm::mat4 transform = translationMatrix * rotationMatrix * scaleMatrix;
+		// glm::mat4 transform = glm::mat4_cast(f_quat);
+		// transform[0][0] = f_scale[0];
+		// transform[1][1] = f_scale[1];
+		// transform[2][2] = f_scale[2];
 
-		transform[0][3] = f_position[0];
-		transform[1][3] = f_position[0];
-		transform[2][3] = f_position[0];
-		transform[3][3] = 1.f;
+		// transform[0][3] = f_position[0];
+		// transform[1][3] = f_position[1];
+		// transform[2][3] = f_position[2];
+		// transform[3][3] = 1.f;
 		return transform;
 	}
 
@@ -396,26 +400,22 @@ struct RigidObject3D {
 
 	friend std::ostream& operator<<(std::ostream& os, const RigidObject3D& object) {
 		os << std::setprecision(3)
-		<< "    <^> Mass:   "
+		<< "        <^> Elasticity:   "
+		<< object.f_c << std::endl
+		<< "        <^> Friction coefficient:   "
+		<< object.f_mu << std::endl
+		<< "        <^> Mass:   "
 		<< object.f_mass << std::endl
-		<< "    <^> Transform:   " << std::endl
+		<< "        <^> Transform:   " << std::endl
 		<< object.f_transform << std::endl
-		<< "    <^> Velocity:   ("
+		<< "        <^> Velocity:   ("
 		<< object.f_velocity[0] << "; "
 		<< object.f_velocity[1] << "; "
 		<< object.f_velocity[2] << ")" << std::endl
-		<< "    <^> Angular velocity:   ("
+		<< "        <^> Angular velocity:   ("
 		<< object.f_angularVelocity[0] << "; "
 		<< object.f_angularVelocity[1] << "; "
-		<< object.f_angularVelocity[2] << ")" << std::endl
-		<< "    <^> Central force:   ("
-		<< object.f_centralForce[0] << "; "
-		<< object.f_centralForce[1] << "; "
-		<< object.f_centralForce[2] << ")" << std::endl
-		<< "    <^> Torque:   ("
-		<< object.f_torque[0] << "; "
-		<< object.f_torque[1] << "; "
-		<< object.f_torque[2] << ")";
+		<< object.f_angularVelocity[2] << ")";
 
 		return os;
 	}
@@ -424,6 +424,7 @@ struct RigidObject3D {
 };
 
 struct Box: public RigidObject3D {
+	glm::vec4 f_color = glm::vec4(0.7f, 0.7f, 0.7f, 1.f);
 
 	#pragma region Constructors
 	Box(): RigidObject3D()
@@ -546,9 +547,9 @@ struct Box: public RigidObject3D {
 
 	bool containsPoint(const glm::vec3& point) const {
 		glm::vec3 pointLocal = f_transform.transformGlobalToLocal(point);
-		return (abs(pointLocal[0]) <= f_transform.f_scale[0])
-			&& (abs(pointLocal[1]) <= f_transform.f_scale[1])
-			&& (abs(pointLocal[2]) <= f_transform.f_scale[2]);
+		return (abs(pointLocal[0]) <= f_transform.f_scale[0] / 2.f)
+			&& (abs(pointLocal[1]) <= f_transform.f_scale[1] / 2.f)
+			&& (abs(pointLocal[2]) <= f_transform.f_scale[2] / 2.f);
 	}
 
 	unsigned containsPoint(const std::vector<glm::vec3> points) const {
@@ -699,7 +700,7 @@ struct Box: public RigidObject3D {
 			f_transform.f_position,
 			f_transform.f_quat,
 			f_transform.f_scale,
-			glm::vec4(0.7f, 0.7f, 0.7f, 1.f)
+			f_color
 		);
 		renderer.drawLine(
 			f_transform.f_position,
