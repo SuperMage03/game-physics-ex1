@@ -110,6 +110,34 @@ struct Transform3D {
 		return transform;
 	}
 
+	glm::vec3 transformLocalToGlobal(const glm::vec3 position) const {
+		return getRotationMatrix() * position + f_position;
+	}
+
+	glm::vec3 transformGlobalToLocal(const glm::vec3 position) const {
+		return glm::inverse(getRotationMatrix()) * position - glm::inverse(getRotationMatrix()) * f_position;
+	}
+
+	glm::vec3 transformLocalToGlobalRotation(const glm::vec3 vector) const {
+		return getRotationMatrix() * vector;
+	}
+
+	glm::vec3 transformGlobalToLocalRotation(const glm::vec3 vector) const {
+		return glm::inverse(getRotationMatrix()) * vector;
+	}
+
+	Force transformLocalForceToGlobalForce(const Force& force) const {
+		glm::vec3 globalApplicationPoint = transformLocalToGlobal(force.f_applicationPoint);
+		glm::vec3 globalForce = getRotationMatrix() * force.f_force;
+		return Force(globalForce, globalApplicationPoint);
+	}
+
+	Force transformGlobalForceToLocalForce(const Force& force) const {
+		glm::vec3 localApplicationPoint = transformGlobalToLocal(force.f_applicationPoint);
+		glm::vec3 localForce = glm::inverse(getRotationMatrix()) * force.f_force;
+		return Force(localForce, localApplicationPoint);
+	}
+
 	friend std::ostream& operator<<(std::ostream& os, const Transform3D& transform) {
 		os << std::setprecision(3)
 		<< "    <^> Position:   ("
@@ -128,26 +156,6 @@ struct Transform3D {
 
 		return os;
 	}
-
-	glm::vec3 transformLocalToGlobal(const glm::vec3 position) {
-		return getRotationMatrix() * position + f_position;
-	}
-
-	glm::vec3 transformGlobalToLocal(const glm::vec3 position) {
-		return glm::inverse(getRotationMatrix()) * position - glm::inverse(getRotationMatrix()) * f_position;
-	}
-
-	Force transformLocalForceToGlobalForce(const Force& force) {
-		glm::vec3 globalApplicationPoint = transformLocalToGlobal(force.f_applicationPoint);
-		glm::vec3 globalForce = getRotationMatrix() * force.f_force;
-		return Force(globalForce, globalApplicationPoint);
-	}
-
-	Force transformGlobalForceToLocalForce(const Force& force) {
-		glm::vec3 localApplicationPoint = transformGlobalToLocal(force.f_applicationPoint);
-		glm::vec3 localForce = glm::inverse(getRotationMatrix()) * force.f_force;
-		return Force(localForce, localApplicationPoint);
-	}
 };
 
 struct RigidObject3D {
@@ -155,6 +163,10 @@ struct RigidObject3D {
 	float f_mass;
 	// Current Inertia tensor
 	glm::mat3 f_inertiaTensorInv;
+	// Elasticity/Plasticity
+	float f_c;
+	// Coefficient of friction
+	float f_mu;
 
 	// Object transform
 	Transform3D f_transform;
@@ -175,6 +187,8 @@ struct RigidObject3D {
 	RigidObject3D():
 	f_mass(1.f),
 	f_inertiaTensorInv(0.f),
+	f_c(0.f),
+	f_mu(0.f),
 
 	f_transform(),
 	f_velocity(0.f),
@@ -187,6 +201,8 @@ struct RigidObject3D {
 
 	RigidObject3D(
 		float mass,
+		float c,
+		float mu,
 		const glm::vec3& position,
 		const glm::vec3& scale,
 		const glm::quat& quat,
@@ -195,6 +211,8 @@ struct RigidObject3D {
 	):
 	f_mass(mass),
 	f_inertiaTensorInv(0.f),
+	f_c(c),
+	f_mu(mu),
 
 	f_transform(position, scale, quat),
 	f_velocity(velocity),
@@ -206,6 +224,8 @@ struct RigidObject3D {
 
 	RigidObject3D(
 		float mass,
+		float c,
+		float mu,
 		const glm::vec3& position,
 		const glm::vec3& scale,
 		const glm::vec3& angles,
@@ -214,6 +234,8 @@ struct RigidObject3D {
 	):
 	f_mass(mass),
 	f_inertiaTensorInv(0.f),
+	f_c(c),
+	f_mu(mu),
 
 	f_transform(position, scale, angles),
 	f_velocity(velocity),
@@ -225,6 +247,8 @@ struct RigidObject3D {
 
 	RigidObject3D(
 		float mass,
+		float c,
+		float mu,
 		glm::vec3&& position,
 		glm::vec3&& scale,
 		glm::quat&& quat,
@@ -233,6 +257,8 @@ struct RigidObject3D {
 	):
 	f_mass(mass),
 	f_inertiaTensorInv(0.f),
+	f_c(c),
+	f_mu(mu),
 
 	f_transform(std::move(position), std::move(scale), std::move(quat)),
 	f_velocity(std::move(velocity)),
@@ -244,6 +270,8 @@ struct RigidObject3D {
 
 	RigidObject3D(
 		float mass,
+		float c,
+		float mu,
 		glm::vec3&& position,
 		glm::vec3&& scale,
 		glm::vec3&& angles,
@@ -252,6 +280,8 @@ struct RigidObject3D {
 	):
 	f_mass(mass),
 	f_inertiaTensorInv(0.f),
+	f_c(c),
+	f_mu(mu),
 
 	f_transform(std::move(position), std::move(scale), std::move(angles)),
 	f_velocity(std::move(velocity)),
@@ -401,6 +431,8 @@ struct Box: public RigidObject3D {
 
 	Box(
 		float mass,
+		float c,
+		float mu,
 		const glm::vec3& position,
 		const glm::vec3& scale,
 		const glm::quat& quat,
@@ -409,6 +441,8 @@ struct Box: public RigidObject3D {
 	):
 	RigidObject3D(
 		mass,
+		c,
+		mu,
 		position,
 		scale,
 		quat,
@@ -422,6 +456,8 @@ struct Box: public RigidObject3D {
 
 	Box(
 		float mass,
+		float c,
+		float mu,
 		const glm::vec3& position,
 		const glm::vec3& scale,
 		const glm::vec3& angles,
@@ -430,6 +466,8 @@ struct Box: public RigidObject3D {
 	):
 	RigidObject3D(
 		mass,
+		c,
+		mu,
 		position,
 		scale,
 		angles,
@@ -443,6 +481,8 @@ struct Box: public RigidObject3D {
 
 	Box(
 		float mass,
+		float c,
+		float mu,
 		glm::vec3&& position,
 		glm::vec3&& scale,
 		glm::quat&& quat,
@@ -451,6 +491,8 @@ struct Box: public RigidObject3D {
 	):
 	RigidObject3D(
 		mass,
+		c,
+		mu,
 		std::move(position),
 		std::move(scale),
 		std::move(quat),
@@ -464,6 +506,8 @@ struct Box: public RigidObject3D {
 
 	Box(
 		float mass,
+		float c,
+		float mu,
 		glm::vec3&& position,
 		glm::vec3&& scale,
 		glm::vec3&& angles,
@@ -472,6 +516,8 @@ struct Box: public RigidObject3D {
 	):
 	RigidObject3D(
 		mass,
+		c,
+		mu,
 		std::move(position),
 		std::move(scale),
 		std::move(angles),
@@ -498,6 +544,156 @@ struct Box: public RigidObject3D {
 		return inertiaTensorInv;
 	}
 
+	bool containsPoint(const glm::vec3& point) const {
+		glm::vec3 pointLocal = f_transform.transformGlobalToLocal(point);
+		return (abs(pointLocal[0]) <= f_transform.f_scale[0])
+			&& (abs(pointLocal[1]) <= f_transform.f_scale[1])
+			&& (abs(pointLocal[2]) <= f_transform.f_scale[2]);
+	}
+
+	unsigned containsPoint(const std::vector<glm::vec3> points) const {
+		unsigned maxDistInsideId = -1;
+        unsigned id = 0;
+        float maxDistInside = 0.f;
+		for (const auto point: points) {
+			if (containsPoint(point)) return id;
+			id++;
+		}
+		return -1;
+	}
+
+	glm::vec3 getNormalForCollisionPoint(const glm::vec3 collsionPoint) const {
+		// Transform to local coordinates
+		glm::vec3 collsionPointLocal = f_transform.transformGlobalToLocal(collsionPoint);
+		// Create distances to cuboid surfaces array
+		float distancesToSurfaces[6];
+		// -X, X, -Y, Y, -Z, Z
+		distancesToSurfaces[0] = abs(collsionPointLocal[0] - (-f_transform.f_scale[0] / 2.f));
+		distancesToSurfaces[1] = abs(collsionPointLocal[0] - (f_transform.f_scale[0] / 2.f));
+		distancesToSurfaces[2] = abs(collsionPointLocal[1] - (-f_transform.f_scale[1] / 2.f));
+		distancesToSurfaces[3] = abs(collsionPointLocal[1] - (f_transform.f_scale[1] / 2.f));
+		distancesToSurfaces[4] = abs(collsionPointLocal[2] - (-f_transform.f_scale[2] / 2.f));
+		distancesToSurfaces[5] = abs(collsionPointLocal[2] - (f_transform.f_scale[2] / 2.f));
+
+		// Find surface with min distance to collision point
+		unsigned minDistanceSurfaceId = 0;
+		float minDistance = distancesToSurfaces[0];
+
+		for (int i = 1; i < 6; i++) {
+			if (minDistance > distancesToSurfaces[i]) {
+				minDistance = distancesToSurfaces[i];
+				minDistanceSurfaceId = i;
+			}
+		}
+
+		// Return respective normal
+		switch (minDistanceSurfaceId)
+		{
+		case 0:
+			return glm::vec3(-1.f, 0.f, 0.f);
+			break;
+		case 1:
+			return glm::vec3(1.f, 0.f, 0.f);
+			break;
+		case 2:
+			return glm::vec3(0.f, -1.f, 0.f);
+			break;
+		case 3:
+			return glm::vec3(0.f, 1.f, 0.f);
+			break;
+		case 4:
+			return glm::vec3(0.f, 0.f, -1.f);
+			break;
+		case 5:
+			return glm::vec3(0.f, 0.f, 1.f);
+			break;
+		default:
+			return glm::vec3(0.f);
+			break;
+		}
+	}
+
+	std::vector<glm::vec3> getCornerPoints() const {
+		std::vector<glm::vec3> cornerPoints;
+		for (int id = 0; id < 8; id++) {
+			cornerPoints.emplace_back(std::move(getCornerPointId(id)));
+		}
+		return cornerPoints;
+	}
+
+	glm::vec3 getCornerPointLocalId(unsigned id) const {
+		switch (id)
+		{
+		case 0:
+			return std::move(glm::vec3(
+					-f_transform.f_scale[0] / 2., 
+					-f_transform.f_scale[1] / 2., 
+					-f_transform.f_scale[2] / 2.
+			));
+			break;
+		case 1:
+			return std::move(glm::vec3(
+					-f_transform.f_scale[0] / 2., 
+					-f_transform.f_scale[1] / 2., 
+					f_transform.f_scale[2] / 2.
+			));
+			break;
+		case 2:
+			return std::move(glm::vec3(
+					-f_transform.f_scale[0] / 2., 
+					f_transform.f_scale[1] / 2., 
+					-f_transform.f_scale[2] / 2.
+			));
+			break;
+		case 3:
+			return std::move(glm::vec3(
+					-f_transform.f_scale[0] / 2., 
+					f_transform.f_scale[1] / 2., 
+					f_transform.f_scale[2] / 2.
+			));
+			break;
+		case 4:
+			return std::move(glm::vec3(
+					f_transform.f_scale[0] / 2., 
+					-f_transform.f_scale[1] / 2., 
+					-f_transform.f_scale[2] / 2.
+			));
+			break;
+		case 5:
+			return std::move(glm::vec3(
+					f_transform.f_scale[0] / 2., 
+					-f_transform.f_scale[1] / 2., 
+					f_transform.f_scale[2] / 2.
+			));
+			break;
+		case 6:
+			return std::move(glm::vec3(
+					f_transform.f_scale[0] / 2., 
+					f_transform.f_scale[1] / 2., 
+					-f_transform.f_scale[2] / 2.
+			));
+			break;
+		case 7:
+			return std::move(glm::vec3(
+					f_transform.f_scale[0] / 2., 
+					f_transform.f_scale[1] / 2., 
+					f_transform.f_scale[2] / 2.
+			));
+			break;
+		default:
+			return glm::vec3(0.f);
+			break;
+		}
+	}
+
+	glm::vec3 getCornerPointId(unsigned id) const {
+		return std::move(f_transform.transformLocalToGlobal(getCornerPointLocalId(id)));
+	}
+
+	glm::vec3 getCornerPointVelocityId(unsigned id) const {
+		return std::move(f_velocity + glm::cross(f_angularVelocity, getCornerPointId(id) - f_transform.f_position));
+	}
+
 	void onDraw(Renderer &renderer) {
 		renderer.drawCube(
 			f_transform.f_position,
@@ -515,5 +711,79 @@ struct Box: public RigidObject3D {
 			0.03f,
 			glm::vec4(1.f, 0.05f, 0.05f, 1.f)
 		);
+	}
+
+	
+};
+
+struct Collision {
+    RigidObject3D* f_objA;
+    RigidObject3D* f_objB;
+	glm::vec3 f_collisionPoint;
+	glm::vec3 f_collisionPointALocal;
+	glm::vec3 f_collisionPointBLocal;
+	glm::vec3 f_relativeVelocity;
+	glm::vec3 f_normal;
+	glm::vec3 f_tangent;
+
+	float f_impulse;
+
+    Collision():
+    f_objA(nullptr),
+    f_objB(nullptr),
+	f_collisionPoint(0.f),
+	f_collisionPointALocal(0.f),
+	f_collisionPointBLocal(0.f),
+	f_relativeVelocity(0.f),
+	f_normal(0.f),
+	f_tangent(0.f),
+	f_impulse(0.f)
+    {}
+
+    Collision(
+		RigidObject3D* objA, 
+		RigidObject3D* objB,
+		glm::vec3 collisionPoint,
+		glm::vec3 normal
+	):
+    f_objA(objA),
+    f_objB(objB),
+	f_collisionPoint(collisionPoint),
+	f_normal(normal)
+    {
+		calculateRelativeVelocity();
+		calculateTangent();
+		calculateImpulse();
+	}
+
+private:
+	void calculateRelativeVelocity() {
+		// Calculate local collision point coordinates
+		f_collisionPointALocal = f_objA->f_transform.transformLocalToGlobalRotation(f_objA->f_transform.transformGlobalToLocal(f_collisionPoint));
+		f_collisionPointBLocal = f_objB->f_transform.transformLocalToGlobalRotation(f_objB->f_transform.transformGlobalToLocal(f_collisionPoint));
+
+		// Calculate collision point velocities
+		glm::vec3 collPointVelocityA = f_objA->f_velocity + glm::cross(f_objA->f_angularVelocity, f_collisionPointALocal);
+		glm::vec3 collPointVelocityB = f_objB->f_velocity + glm::cross(f_objB->f_angularVelocity, f_collisionPointBLocal);
+
+		// Calculate relative velocity
+		f_relativeVelocity = collPointVelocityA - collPointVelocityB;
+	}
+
+	void calculateTangent() {
+		glm::vec3 tangent = glm::cross(glm::cross(f_normal, f_relativeVelocity), f_normal);
+		f_tangent = glm::vec3(0.f);
+		if (glm::length(tangent) != 0) f_tangent = glm::normalize(tangent);
+	}
+
+	void calculateImpulse() {
+		f_impulse =
+			-(1 + (f_objA->f_c + f_objB->f_c) / 2.f) * std::min(glm::dot(f_relativeVelocity, f_normal), 0.f)
+			/ (
+				1.f / f_objA->f_mass
+				+ 1.f / f_objB->f_mass
+				+ glm::dot(glm::cross((f_objA->f_inertiaTensorInv * glm::cross(f_collisionPointALocal, f_normal)), f_collisionPointALocal), f_normal)
+				+ glm::dot(glm::cross((f_objB->f_inertiaTensorInv * glm::cross(f_collisionPointBLocal, f_normal)), f_collisionPointBLocal), f_normal)
+			);
 	}
 };

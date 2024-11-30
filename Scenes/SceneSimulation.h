@@ -15,19 +15,37 @@ public:
     {}
 
     void init() override {
+        ROPE.f_integrationType = 0;
+
         Box* box1 = new Box(
-            2.f,
-            std::move(glm::vec3(0.f)),
-            std::move(glm::vec3(1.f, 0.6f, 0.5f)),
-            std::move(glm::vec3(0.f, 0.f, glm::pi<float>() / 2.f)),
-            std::move(glm::vec3(0.f)),
-            std::move(glm::vec3(5.f, 5.f, 0.f))
+            2.f, // mass
+            0.5f, // c
+            1.f, // mu
+            std::move(glm::vec3(0.f)), // pos
+            std::move(glm::vec3(1.f, 1.0f, 1.0f)), // scale
+            std::move(glm::vec3(0.9554, glm::pi<float>() / 4.f, 0.f)), // angles
+            std::move(glm::vec3(1.f, 0.f, 0.f)), // velocity
+            std::move(glm::vec3(0.f, 0.f, 0.f)) // angular velocity
         );
 
         ROPE.addObject(box1);
 
-        std::cout << "======== Initial system state ========" << std::endl
-        << ROPE << std::endl << std::endl;
+        // Add walls
+        Wall Xm(glm::vec3(1.f, 0.f, 0.f), -2.5f);
+        Wall Xp(glm::vec3(-1.f, 0.f, 0.f), -2.5f);
+        Wall Ym(glm::vec3(0.f, 1.f, 0.f), -2.5f);
+        Wall Yp(glm::vec3(0.f, -1.f, 0.f), -2.5f);
+        Wall Zm(glm::vec3(0.f, 0.f, 1.f), -2.5f);
+        Wall Zp(glm::vec3(0.f, 0.f, -1.f), -2.5f);
+        ROPE.addWall(std::move(Xm));
+        ROPE.addWall(std::move(Xp));
+        ROPE.addWall(std::move(Ym));
+        ROPE.addWall(std::move(Yp));
+        ROPE.addWall(std::move(Zm));
+        ROPE.addWall(std::move(Zp));
+
+        // std::cout << "======== Initial system state ========" << std::endl
+        // << ROPE << std::endl << std::endl;
 
         forceCopy = Force(
             std::move(glm::vec3(1.f, 1.f, 0.f)),
@@ -42,7 +60,7 @@ public:
             //     forceCopy
             // );
             // ROPE.euIntegrate(delta);
-            ROPE.mpIntegrate(delta);
+            ROPE.simulateStep(delta);
             // TEST RENORMALIZE ANGULAR VELOCITY
             // ROPE.getObject(0).f_angularVelocity = glm::normalize(ROPE.getObject(0).f_angularVelocity) * 8.f;
             // std::cout << "    <^> Angular velocity:   ("
@@ -60,8 +78,8 @@ public:
             // << "    <^> Angular momentum length:   "
             // << glm::length(ROPE.getObject(0).f_angularMomentum) << "; " << std::endl << std::endl;
 
-            std::cout << "    <^> Kinetic energy:"
-		    << glm::dot(ROPE.getObject(0).f_angularVelocity, ROPE.getObject(0).f_inertiaTensorInv * ROPE.getObject(0).f_angularVelocity) / 2.f << std::endl;
+            // std::cout << "    <^> Kinetic energy:"
+		    // << glm::dot(ROPE.getObject(0).f_angularVelocity, ROPE.getObject(0).f_inertiaTensorInv * ROPE.getObject(0).f_angularVelocity) / 2.f << std::endl;
             // std::cout << "    <^> Inertia tensor inv determinant:   "
             // << glm::determinant(ROPE.getObject(0).f_inertiaTensorInv) << "; " << std::endl << std::endl;
             // std::cout << "    <^> Iw:   ("

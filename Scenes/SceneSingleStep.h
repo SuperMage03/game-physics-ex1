@@ -15,6 +15,8 @@ public:
     void init() override {
         initialStateCopy = new Box(
             2.f,
+            0.f,
+            0.5f,
             std::move(glm::vec3(0.f)),
             std::move(glm::vec3(1.f, 0.6f, 0.5f)),
             std::move(glm::vec3(0.f, 0.f, glm::pi<float>() / 2.f)),
@@ -24,6 +26,8 @@ public:
 
         Box* box1 = new Box(
             2.f,
+            0.f,
+            0.5f,
             std::move(glm::vec3(0.f)),
             std::move(glm::vec3(1.f, 0.6f, 0.5f)),
             std::move(glm::vec3(0.f, 0.f, glm::pi<float>() / 2.f)),
