@@ -68,7 +68,7 @@ void DynamicWorld::simulateStepMidpoint(const float& step) {
 
     // Store old point data
     for (int i = 0; i < _registry.size(); i++) {
-        result[i] = std::move(_registry[i]->clone());
+        result[i] = _registry[i]->clone();
     }
 
     // Integrate Position
