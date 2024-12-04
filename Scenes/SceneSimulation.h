@@ -6,9 +6,8 @@
 
 class SceneSimulation : public Scene {
 private:
-    Force forceCopy;
     RigidObjectPhysicsEngine ROPE;
-    float delta = 0.01;
+    float delta = 0.05;
     bool pause = true;
 
     glm::mat4 cameraMatrix = glm::mat4(1);
@@ -22,7 +21,7 @@ public:
     {}
 
     void init() override {
-        ROPE.f_integrationType = 0;
+        ROPE.f_integrationType = ROPE.EULER;
 
         Box* box1 = new Box(
             2.f, // mass
@@ -34,8 +33,8 @@ public:
             std::move(glm::vec3(0.f, 0.f, 0.f)), // velocity
             std::move(glm::vec3(0.f, 0.f, 0.f)) // angular velocity
         );
-
-        box1->f_color = glm::vec4(1.f, 0.1f, 0.1f, 1.f);
+        
+        box1->f_color = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
 
         ROPE.addObject(box1);
 
@@ -56,18 +55,17 @@ public:
         std::cout << "======== Initial system state ========" << std::endl
         << ROPE << std::endl << std::endl;
 
-        forceCopy = Force(
-            std::move(glm::vec3(1.f, 1.f, 0.f)),
-            std::move(glm::vec3(0.3f, 0.5f, 0.25f))
+        ROPE.applyForceToObject(
+            0, 
+            Force(
+                std::move(glm::vec3(1.f, 1.f, 0.f)),
+                std::move(glm::vec3(0.3f, 0.5f, 0.25f))
+            )
         );
     }
 
     void simulateStep() override {
         if (!pause) {
-            ROPE.applyForceToObject(
-                0, 
-                forceCopy
-            );
             ROPE.simulateStep(delta);
             // TEST RENORMALIZE ANGULAR VELOCITY
             // ROPE.getObject(0).f_angularVelocity = glm::normalize(ROPE.getObject(0).f_angularVelocity) * 8.f;
@@ -78,15 +76,15 @@ public:
             // << "    <^> Angular velocity length:   "
             // << glm::length(ROPE.getObject(0).f_angularVelocity) << "; " << std::endl;
 
-            
+            // glm::vec3 angularMomentum = glm::inverse(ROPE.getObject(0).f_inertiaTensorInv) * ROPE.getObject(0).f_angularVelocity;
             // std::cout << "    <^> Angular momentum:   ("
-		    // << ROPE.getObject(0).f_angularMomentum[0] << "; "
-		    // << ROPE.getObject(0).f_angularMomentum[1] << "; "
-		    // << ROPE.getObject(0).f_angularMomentum[2] << ")" << std::endl
+		    // << angularMomentum[0] << "; "
+		    // << angularMomentum[1] << "; "
+		    // << angularMomentum[2] << ")" << std::endl
             // << "    <^> Angular momentum length:   "
-            // << glm::length(ROPE.getObject(0).f_angularMomentum) << "; " << std::endl << std::endl;
+            // << glm::length(angularMomentum) << "; " << std::endl << std::endl;
 
-            // std::cout << "    <^> Kinetic energy:"
+            // std::cout << "    <^> Kinetic energy:" << std::setprecision(10)
 		    // << glm::dot(ROPE.getObject(0).f_angularVelocity, ROPE.getObject(0).f_inertiaTensorInv * ROPE.getObject(0).f_angularVelocity) / 2.f << std::endl;
             // std::cout << "    <^> Inertia tensor inv determinant:   "
             // << glm::determinant(ROPE.getObject(0).f_inertiaTensorInv) << "; " << std::endl << std::endl;
@@ -94,10 +92,6 @@ public:
 		    // << (glm::inverse(ROPE.getObject(0).f_inertiaTensorInv) * ROPE.getObject(0).f_angularVelocity)[0] << "; "
 		    // << (glm::inverse(ROPE.getObject(0).f_inertiaTensorInv) * ROPE.getObject(0).f_angularVelocity)[1] << "; "
 		    // << (glm::inverse(ROPE.getObject(0).f_inertiaTensorInv) * ROPE.getObject(0).f_angularVelocity)[2] << ")" << std::endl;
-
-
-
-
         }
     }
 
@@ -108,7 +102,6 @@ public:
         up = inverse(cameraMatrix) * glm::vec4(0, 1, 0, 0);
 
         renderer.drawWireCube(glm::vec3(0), glm::vec3(5), glm::vec3(1));
-        forceCopy.onDraw(renderer);
         ROPE.onDraw(renderer);
     }
 

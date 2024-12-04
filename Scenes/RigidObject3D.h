@@ -102,15 +102,6 @@ struct Transform3D {
 		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.f), f_scale);
 		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.f), f_position);
 		glm::mat4 transform = translationMatrix * rotationMatrix * scaleMatrix;
-		// glm::mat4 transform = glm::mat4_cast(f_quat);
-		// transform[0][0] = f_scale[0];
-		// transform[1][1] = f_scale[1];
-		// transform[2][2] = f_scale[2];
-
-		// transform[0][3] = f_position[0];
-		// transform[1][3] = f_position[1];
-		// transform[2][3] = f_position[2];
-		// transform[3][3] = 1.f;
 		return transform;
 	}
 
@@ -341,10 +332,10 @@ struct RigidObject3D {
 	}
 
 	void euIntegrate(float delta) {
-		// Integrate linear velocity
-		f_velocity += delta * f_centralForce / f_mass;
 		// Integrate position
 		f_transform.f_position += delta * f_velocity;
+		// Integrate linear velocity
+		f_velocity += delta * f_centralForce / f_mass;
 
 		// Integrate rotation
 		f_transform.f_quat += (delta / 2.f) 
@@ -361,6 +352,7 @@ struct RigidObject3D {
 	}
 
 	void mpIntegrate(float delta) {
+		// Leapfrog for linear movement
 		// Integrate linear velocity
 		f_velocity += delta * f_centralForce / f_mass;
 		// Integrate position

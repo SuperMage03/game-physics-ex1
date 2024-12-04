@@ -10,6 +10,11 @@ private:
     std::vector<RigidObject3D*> f_objects;
     std::vector<Wall> f_walls;
 public:
+    enum IntegrationTypes {
+        EULER,
+        MIDPOINT
+    };
+
     int f_integrationType;
 
 public:
@@ -75,10 +80,10 @@ public:
         // Integrate
         switch (f_integrationType)
         {
-        case 0:
+        case EULER:
             euIntegrate(delta);
             break;
-        case 1:
+        case MIDPOINT:
             mpIntegrate(delta);
         default:
             break;

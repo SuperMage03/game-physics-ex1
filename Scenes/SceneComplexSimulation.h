@@ -21,7 +21,7 @@ public:
     {}
 
     void init() override {
-        ROPE.f_integrationType = 0;
+        ROPE.f_integrationType = ROPE.EULER;
 
         Box* box1 = new Box(
             2.f, // mass
