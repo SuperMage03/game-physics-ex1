@@ -97,6 +97,6 @@ void RigidBody::calculateDerviedData() {
 RigidBody::~RigidBody() {}
 
 void RigidBody::_calculateRotationMatrix() {
-    _orientation = glm::normalize(_orientation);
-    _rotation_matrix = glm::toMat3(_orientation);
+    _rotation_matrix = glm::toMat3(glm::normalize(_orientation));
 }
+
