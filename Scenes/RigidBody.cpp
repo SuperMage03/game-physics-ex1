@@ -59,7 +59,7 @@ glm::vec3 RigidBody::getAngularVelocity() const {
 }
 
 glm::quat RigidBody::getAngularVelocityQuat() const {
-    return glm::quat(0.0f, _rotation_matrix * glm::inverse(_inertia_tensor) * glm::transpose(_rotation_matrix) * _angular_momentum);
+    return glm::quat(0.0f, getAngularVelocity());
 }
 
 void RigidBody::setAngularVelocity(const glm::vec3 &angular_velocity) {
