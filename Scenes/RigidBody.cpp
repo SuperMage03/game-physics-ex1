@@ -51,11 +51,11 @@ glm::quat RigidBody::getOrientation() const {
 }
 
 void RigidBody::setOrientation(const glm::quat &orientation) {
-    _orientation = orientation;
+    _orientation = glm::normalize(orientation);
 }
 
 glm::vec3 RigidBody::getAngularVelocity() const {
-    return _rotation_matrix * glm::inverse(_inertia_tensor) * glm::transpose(_rotation_matrix) * _angular_momentum;
+    return _localToWorldBasisChange(glm::inverse(_inertia_tensor)) * _angular_momentum;
 }
 
 glm::quat RigidBody::getAngularVelocityQuat() const {
@@ -63,7 +63,7 @@ glm::quat RigidBody::getAngularVelocityQuat() const {
 }
 
 void RigidBody::setAngularVelocity(const glm::vec3 &angular_velocity) {
-    _angular_momentum = _rotation_matrix * _inertia_tensor * glm::transpose(_rotation_matrix) * angular_velocity;
+    _angular_momentum = _localToWorldBasisChange(_inertia_tensor) * angular_velocity;
 }
 
 glm::vec3 RigidBody::getAngularMomentum() const {
@@ -97,6 +97,9 @@ void RigidBody::calculateDerviedData() {
 RigidBody::~RigidBody() {}
 
 void RigidBody::_calculateRotationMatrix() {
-    _rotation_matrix = glm::toMat3(glm::normalize(_orientation));
+    _rotation_matrix = glm::toMat3(_orientation);
 }
 
+glm::mat3 RigidBody::_localToWorldBasisChange(const glm::mat3& local_matrix) const {
+    return _rotation_matrix * local_matrix * glm::transpose(_rotation_matrix);
+}
