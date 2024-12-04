@@ -5,7 +5,7 @@
 
 class RigidBody {
 public:
-    RigidBody(const float& mass, const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation);
+    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f);
     
     glm::vec3 getPosition() const;
     void setPosition(const glm::vec3& position);
@@ -32,7 +32,6 @@ public:
     void addForce(const glm::vec3& force);
     void addTorque(const glm::vec3& torque);
     void calculateDerviedData();
-    virtual void initializeData() = 0;
     virtual ~RigidBody();
     virtual std::unique_ptr<RigidBody> clone() = 0;
 protected:

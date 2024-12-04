@@ -23,7 +23,6 @@ public:
     void setIntegrationMode(const IntegrationMode& integration_mode);
 
     // Methods
-    void initRigidBodyData();
     void add(RigidBody& rb);
     void remove(RigidBody& rb);
     void clear();

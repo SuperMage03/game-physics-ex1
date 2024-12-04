@@ -1,8 +1,8 @@
 #include "MeshRigidBody.h"
 #include <cmath>
 
-void MeshRigidBody::initializeData() {
-    calculateDerviedData();
+MeshRigidBody::MeshRigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const std::vector<MeshPoint>& mesh_points): 
+    RigidBody{position, scale, orientation}, _mesh_points{mesh_points} {
     _calculateCenterOfMassFromMesh();
     _calculateInertiaTensorFromMesh();
 }

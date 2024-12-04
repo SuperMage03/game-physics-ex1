@@ -12,6 +12,6 @@ public:
     void onDraw(Renderer &renderer) override;
     ~Scene1() override;
 private:
-    CuboidRigidBody _test_cube{100.0f, glm::vec3(0.0f), glm::vec3(10.0f, 5.0f, 1.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f)};
+    CuboidRigidBody _test_cube{glm::vec3(0.0f), glm::vec3(10.0f, 5.0f, 1.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 1000.0f};
     GenericTorqueGenerator _test_torque{glm::vec3(0.0f, 0.0f, 0.0f)};
 };

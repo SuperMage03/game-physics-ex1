@@ -1,8 +1,10 @@
 #include "RigidBody.h"
 #include <glm/gtx/quaternion.hpp>
 
-RigidBody::RigidBody(const float& mass, const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation): 
-    _mass{mass}, _position{position}, _scale{scale}, _orientation{orientation} {}
+RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass): 
+    _position{position}, _scale{scale}, _orientation{orientation}, _mass{mass} {
+    _calculateRotationMatrix();
+}
 
 glm::vec3 RigidBody::getPosition() const {
     return _position;

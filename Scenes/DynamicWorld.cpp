@@ -20,12 +20,6 @@ void DynamicWorld::setIntegrationMode(const DynamicWorld::IntegrationMode& integ
     _integration_mode = integration_mode;
 }
 
-void DynamicWorld::initRigidBodyData() {
-    for (auto &rb : _registry) {
-        rb->initializeData();
-    }
-}
-
 void DynamicWorld::add(RigidBody &rb) {
     _registry.emplace_back(&rb);
 }
@@ -61,7 +55,7 @@ void DynamicWorld::simulateStepEuler(const float& step) {
 
     // Integrate Orientation
     for (auto& rb : _registry) {
-        rb->setOrientation(rb->getOrientation() + 0.5f * rb->getOrientation() * rb->getAngularVelocityQuat() * step);
+        rb->setOrientation(rb->getOrientation() + 0.5f * rb->getAngularVelocityQuat() * rb->getOrientation() * step);
     }
     // Integrate Angular Velocity
     for (auto& rb : _registry) {
@@ -85,12 +79,12 @@ void DynamicWorld::simulateStepMidpoint(const float& step) {
         simulated_body.setPosition(simulated_body.getPosition() + (step / 2) * simulated_body.getLinearVelocity());
         simulated_body.setLinearVelocity(simulated_body.getLinearVelocity() + (step / 2) * simulated_body.getLinearAcceleration());
 
-        simulated_body.setOrientation(simulated_body.getOrientation() + 0.5f * simulated_body.getOrientation() * simulated_body.getAngularVelocityQuat() * (step / 2));
+        simulated_body.setOrientation(simulated_body.getOrientation() + 0.5f * simulated_body.getAngularVelocityQuat() * simulated_body.getOrientation() * (step / 2));
         simulated_body.setAngularMomentum(simulated_body.getAngularMomentum() + (step / 2) * simulated_body.getTorque());
 
         // Calculated result position and orientation from the velocity at step / 2
         result_body.setPosition(result_body.getPosition() + step * result_body.getLinearVelocity());
-        result_body.setOrientation(result_body.getOrientation() + 0.5f * result_body.getOrientation() *  result_body.getAngularVelocityQuat() * step);
+        result_body.setOrientation(result_body.getOrientation() + 0.5f * result_body.getAngularVelocityQuat() * result_body.getOrientation() * step);
     }
 
     // Check Collision
