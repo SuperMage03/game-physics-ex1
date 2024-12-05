@@ -5,7 +5,7 @@
 
 class SceneSingleStep : public Scene {
 private:
-    Box* initialStateCopy;
+    std::shared_ptr<Box> initialStateCopy;
     Force* forceCopy;
     RigidObjectPhysicsEngine ROPE;
 
@@ -14,36 +14,33 @@ public:
     ROPE()
     {}
 
-    void init() override {
-        initialStateCopy = new Box(
-            2.f,
-            0.f,
-            0.5f,
-            std::move(glm::vec3(0.f)),
-            std::move(glm::vec3(1.f, 0.6f, 0.5f)),
-            std::move(glm::vec3(0.f, 0.f, glm::pi<float>() / 2.f)),
-            std::move(glm::vec3(0.f)),
-            std::move(glm::vec3(0.f))
-        );
+    ~SceneSingleStep() {
+        initialStateCopy.reset();
+        delete forceCopy;
+    }
 
-        Box* box1 = new Box(
-            2.f,
-            0.f,
-            0.5f,
-            std::move(glm::vec3(0.f)),
-            std::move(glm::vec3(1.f, 0.6f, 0.5f)),
-            std::move(glm::vec3(0.f, 0.f, glm::pi<float>() / 2.f)),
-            std::move(glm::vec3(0.f)),
-            std::move(glm::vec3(0.f))
-        );
+    void init() override {
+        std::shared_ptr<Box> box1 (new Box(
+            2.,
+            0.,
+            0.5,
+            std::move(glm::dvec3(0.)),
+            std::move(glm::dvec3(1., 0.6, 0.5)),
+            std::move(glm::dvec3(0., 0., glm::pi<double>() / 2.)),
+            std::move(glm::dvec3(0.)),
+            std::move(glm::dvec3(0.))
+        ));
+
+        initialStateCopy = box1;
+        
         ROPE.addObject(box1);
 
         std::cout << "======== Initial system state ========" << std::endl
         << ROPE << std::endl << std::endl;
 
         forceCopy = new Force(
-            std::move(glm::vec3(1.f, 1.f, 0.f)),
-            std::move(glm::vec3(0.3f, 0.5f, 0.25f))
+            std::move(glm::dvec3(1., 1., 0.)),
+            std::move(glm::dvec3(0.3, 0.5, 0.25))
         );
 
         ROPE.applyForceToObject(
@@ -51,7 +48,7 @@ public:
             *forceCopy
         );
 
-        float delta = 2.f;
+        double delta = 2.;
         ROPE.euIntegrate(delta);
 
         std::cout << "======== Final system state ========" << std::endl
@@ -59,7 +56,7 @@ public:
     }
 
     void onDraw(Renderer &renderer) override {
-        renderer.drawWireCube(glm::vec3(0), glm::vec3(5), glm::vec3(1));
+        renderer.drawWireCube(glm::dvec3(0), glm::dvec3(5), glm::dvec3(1));
         initialStateCopy->onDraw(renderer);
         forceCopy->onDraw(renderer);
         ROPE.onDraw(renderer);
