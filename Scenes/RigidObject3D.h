@@ -404,6 +404,10 @@ struct RigidObject3D {
 		<< object.f_velocity[0] << "; "
 		<< object.f_velocity[1] << "; "
 		<< object.f_velocity[2] << ")" << std::endl
+		<< "        <^> Angular momentum:   ("
+		<< object.f_angularMomentum[0] << "; "
+		<< object.f_angularMomentum[1] << "; "
+		<< object.f_angularMomentum[2] << ")" << std::endl
 		<< "        <^> Angular velocity:   ("
 		<< object.f_angularVelocity[0] << "; "
 		<< object.f_angularVelocity[1] << "; "
