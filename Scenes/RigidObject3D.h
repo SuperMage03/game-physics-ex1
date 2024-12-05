@@ -353,10 +353,12 @@ struct RigidObject3D {
 
 	void mpIntegrate(double delta) {
 		// Leapfrog for linear movement
-		// Integrate linear velocity
-		f_velocity += delta * f_centralForce / f_mass;
+		// Set midpoint value for linear velocity
+		f_velocity += (delta / 2.) * f_centralForce / f_mass;
 		// Integrate position
 		f_transform.f_position += delta * f_velocity;
+		// Complete linear velocity integration
+		f_velocity += (delta / 2.) * f_centralForce / f_mass;
 
 		// Integrate rotation
 		// Save initial quat
