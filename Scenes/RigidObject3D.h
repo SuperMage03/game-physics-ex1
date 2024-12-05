@@ -144,10 +144,10 @@ struct Transform3D {
 		<< transform.f_scale[1] << "; "
 		<< transform.f_scale[2] << ")" << std::endl
 		<< "    <^> Quaternion:   ("
-		<< transform.f_quat[0] << "; "
-		<< transform.f_quat[1] << "; "
-		<< transform.f_quat[2] << "; "
-		<< transform.f_quat[3] << ")";
+		<< transform.f_quat.w << "; "
+		<< transform.f_quat.x << "; "
+		<< transform.f_quat.y << "; "
+		<< transform.f_quat.z << ")";
 
 		return os;
 	}
