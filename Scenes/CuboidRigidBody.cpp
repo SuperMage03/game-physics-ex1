@@ -10,6 +10,14 @@ std::unique_ptr<RigidBody> CuboidRigidBody::clone() {
     return std::make_unique<CuboidRigidBody>(*this);
 }
 
+bool CuboidRigidBody::containsPositionInBody(const glm::vec3 &world_position) const {
+    glm::vec3 local_position = worldToLocalPosition(world_position);
+    if (fabs(local_position.x) > 0.5f * _scale.x) return false;
+    if (fabs(local_position.y) > 0.5f * _scale.y) return false;
+    if (fabs(local_position.z) > 0.5f * _scale.z) return false;
+    return true;
+}
+
 void CuboidRigidBody::_calculateInertiaTensorCuboid() {
     float I_xx = (1.0f / 12.0f) * _mass * (powf(_scale.y, 2.0f) + powf(_scale.z, 2.0f));
     float I_yy = (1.0f / 12.0f) * _mass * (powf(_scale.x, 2.0f) + powf(_scale.z, 2.0f));

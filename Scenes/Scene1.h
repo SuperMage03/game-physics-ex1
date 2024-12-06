@@ -12,6 +12,7 @@ public:
     void onDraw(Renderer &renderer) override;
     ~Scene1() override;
 private:
-    CuboidRigidBody _test_cube{glm::vec3(0.0f), glm::vec3(10.0f, 5.0f, 1.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 1000.0f};
-    GenericTorqueGenerator _test_torque{glm::vec3(0.0f, 0.0f, 0.0f)};
+    float _step = 2.0f;
+    CuboidRigidBody _test_cube{glm::vec3(0.0f), glm::vec3(1.0f, 0.6f, 0.5f), glm::quat(0.7071068f, 0.0f, 0.0f, 0.7071068f), 2.0f};
+    ExternalForceGenerator _test_external_force{glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.3f, 0.5f, 0.25f)};
 };

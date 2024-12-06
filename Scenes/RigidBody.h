@@ -1,7 +1,8 @@
 #pragma once
+#include <ostream>
 #include <memory>
 #include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 class RigidBody {
 public:
@@ -42,9 +43,18 @@ public:
     // Calculates data that changes depending on position, scale, or orientation
     void calculateDerviedData();
     
+    glm::vec3 localToWorldPosition(const glm::vec3& position) const;
+    glm::vec3 worldToLocalPosition(const glm::vec3& position) const;
+
+    glm::vec3 getVelocityOfPoint(const glm::vec3& point_world_position) const;
+
+    // Friend Functions
+    friend std::ostream& operator<< (std::ostream& out_stream, const RigidBody& rb);
+
     // Virtual Methods
     virtual ~RigidBody();
     virtual std::unique_ptr<RigidBody> clone() = 0;
+    virtual bool containsPositionInBody(const glm::vec3& world_position) const = 0;
 protected:
     // Private Member Values
     float _mass{1.0f};
@@ -62,4 +72,7 @@ protected:
     // Private Methods
     void _calculateRotationMatrix();
     glm::mat3 _localToWorldBasisChange(const glm::mat3& local_matrix) const;
+    glm::mat4 _getLocalToWorldModelMatrix() const;
+    glm::mat4 _getWorldToLocalModelMatrix() const;
+    glm::vec3 _getTangentialVelocityOfPoint(const glm::vec3& point_world_position) const;
 };

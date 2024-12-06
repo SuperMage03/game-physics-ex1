@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
 #include "RigidBody.h"
+#include <vector>
 
 class MeshRigidBody : public RigidBody {
 public:

@@ -11,8 +11,17 @@ public:
 
 class GenericTorqueGenerator : public ForceGenerator {
 public:
-    GenericTorqueGenerator(glm::vec3 torque);
+    GenericTorqueGenerator(const glm::vec3& torque);
     void updateForce(RigidBody& rb, float duration) override;
 private:
     glm::vec3 _torque;
+};
+
+class ExternalForceGenerator : public ForceGenerator {
+public:
+    ExternalForceGenerator(const glm::vec3& force, const glm::vec3& world_position);
+    void updateForce(RigidBody& rb, float duration) override;
+private:
+    glm::vec3 _force;
+    glm::vec3 _world_position;
 };
