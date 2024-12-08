@@ -61,7 +61,8 @@ void DynamicWorld::clearAccumulators() {
 void DynamicWorld::simulateStepEuler(const float& step) {
     // Integrate Position
     for (auto& rb : _objects) {
-        rb->setPosition(rb->getPosition() + step * rb->getLinearVelocity());
+        Transform& rb_transform = rb->getTransform();
+        rb_transform.setPosition(rb_transform.getPosition() + step * rb->getLinearVelocity());
     }
     // Integrate Velocity
     for (auto& rb : _objects) {
@@ -70,7 +71,8 @@ void DynamicWorld::simulateStepEuler(const float& step) {
 
     // Integrate Orientation
     for (auto& rb : _objects) {
-        rb->setOrientation(rb->getOrientation() + 0.5f * rb->getAngularVelocityQuat() * rb->getOrientation() * step);
+        Transform& rb_transform = rb->getTransform();
+        rb_transform.setOrientation(rb_transform.getOrientation() + 0.5f * rb->getAngularVelocityQuat() * rb_transform.getOrientation() * step);
     }
     // Integrate Angular Velocity
     for (auto& rb : _objects) {
@@ -90,16 +92,19 @@ void DynamicWorld::simulateStepMidpoint(const float& step) {
     for (int i = 0; i < _objects.size(); i++) {
         RigidBody& simulated_body = *(_objects[i]);
         RigidBody& result_body = *(result[i]);
-        
-        simulated_body.setPosition(simulated_body.getPosition() + (step / 2) * simulated_body.getLinearVelocity());
+
+        Transform& simulated_body_transform = simulated_body.getTransform();
+        Transform& result_body_transform = result_body.getTransform();
+
+        simulated_body_transform.setPosition(simulated_body_transform.getPosition() + (step / 2) * simulated_body.getLinearVelocity());
         simulated_body.setLinearVelocity(simulated_body.getLinearVelocity() + (step / 2) * simulated_body.getLinearAcceleration());
 
-        simulated_body.setOrientation(simulated_body.getOrientation() + 0.5f * simulated_body.getAngularVelocityQuat() * simulated_body.getOrientation() * (step / 2));
+        simulated_body_transform.setOrientation(simulated_body_transform.getOrientation() + 0.5f * simulated_body.getAngularVelocityQuat() * simulated_body_transform.getOrientation() * (step / 2.0f));
         simulated_body.setAngularMomentum(simulated_body.getAngularMomentum() + (step / 2) * simulated_body.getTorque());
 
         // Calculated result position and orientation from the velocity at step / 2
-        result_body.setPosition(result_body.getPosition() + step * result_body.getLinearVelocity());
-        result_body.setOrientation(result_body.getOrientation() + 0.5f * result_body.getAngularVelocityQuat() * result_body.getOrientation() * step);
+        result_body_transform.setPosition(result_body_transform.getPosition() + step * result_body.getLinearVelocity());
+        result_body_transform.setOrientation(result_body_transform.getOrientation() + 0.5f * result_body.getAngularVelocityQuat() * result_body_transform.getOrientation() * step);
     }
 
     // Check Collision
@@ -167,7 +172,7 @@ void DynamicWorld::simulateStep(const float& step) {
 void DynamicWorld::detectCollisions() {
     for (auto i = _objects.begin(); i < _objects.end(); i++) {
         for (auto j = i + 1; j < _objects.end(); j++) {
-            CollisionInfo collision_result = collisionTools::checkCollisionSAT((*i)->getScaledLocalToWorldMatrix(), (*j)->getScaledLocalToWorldMatrix());
+            CollisionInfo collision_result = collisionTools::checkCollisionSAT((*i)->getTransform().getScaledLocalToWorldMatrix(), (*j)->getTransform().getScaledLocalToWorldMatrix());
             if (collision_result.isColliding) {
                 _collision_contacts.emplace_back(*i, *j, collision_result);
             }

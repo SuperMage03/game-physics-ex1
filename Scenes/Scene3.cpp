@@ -12,16 +12,17 @@ static void drawWorldAxis(Renderer& renderer) {
 
 // File scope helper function for drawing the axis along the origin
 static void drawLocalAxis(Renderer& renderer, RigidBody& rb) {
-    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{1.0f, 0.0f, 0.0f}), glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
-    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{0.0f, 1.0f, 0.0f}), glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
-    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{0.0f, 0.0f, 1.0f}), glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
+    renderer.drawLine(rb.getTransform().getPosition(), rb.getTransform().getScaledLocalToWorldPosition(glm::vec3{1.0f, 0.0f, 0.0f}), glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+    renderer.drawLine(rb.getTransform().getPosition(), rb.getTransform().getScaledLocalToWorldPosition(glm::vec3{0.0f, 1.0f, 0.0f}), glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+    renderer.drawLine(rb.getTransform().getPosition(), rb.getTransform().getScaledLocalToWorldPosition(glm::vec3{0.0f, 0.0f, 1.0f}), glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
 }
 
 void Scene3::init() {
     DynamicWorld::getInstance()->addCollisionSolver(_impulse_solver);
     DynamicWorld::getInstance()->addObject(_test_cube_a);
     DynamicWorld::getInstance()->addObject(_test_cube_b);
-    _test_cube_a.setLinearVelocity(glm::vec3(0.3f, 0.0f, 0.0f));
+    _test_cube_a.setLinearVelocity(glm::vec3(0.5f, 0.0f, 0.0f));
+    // _test_cube_b.setLinearVelocity(glm::vec3(-0.2f, 0.0f, 0.0f));
     DynamicWorld::getInstance()->setIntegrationMode(DynamicWorld::IntegrationMode::EULER);
 }
 
@@ -30,8 +31,8 @@ void Scene3::simulateStep() {
 }
 
 void Scene3::onDraw(Renderer &renderer) {
-    renderer.drawCube(_test_cube_a.getPosition(), _test_cube_a.getOrientation(), _test_cube_a.getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
-    renderer.drawCube(_test_cube_b.getPosition(), _test_cube_b.getOrientation(), _test_cube_b.getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
+    renderer.drawCube(_test_cube_a.getTransform().getPosition(), _test_cube_a.getTransform().getOrientation(), _test_cube_a.getTransform().getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
+    renderer.drawCube(_test_cube_b.getTransform().getPosition(), _test_cube_b.getTransform().getOrientation(), _test_cube_b.getTransform().getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
 }
 
 void Scene3::onGUI() {

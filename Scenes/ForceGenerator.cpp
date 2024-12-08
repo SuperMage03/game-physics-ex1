@@ -14,6 +14,6 @@ void ExternalForceGenerator::updateForce(RigidBody &rb, float duration) {
     if (!rb.containsPositionInBody(_world_position)) return;
 
     rb.addForce(_force);
-    glm::vec3 resulting_torque = glm::cross(_world_position - rb.getPosition(), _force);
+    glm::vec3 resulting_torque = glm::cross(rb.getWorldToBodyPosition(_world_position), _force);
     rb.addTorque(resulting_torque);
 }

@@ -12,9 +12,9 @@ static void drawWorldAxis(Renderer& renderer) {
 
 // File scope helper function for drawing the axis along the origin
 static void drawLocalAxis(Renderer& renderer, RigidBody& rb) {
-    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{1.0f, 0.0f, 0.0f}), glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
-    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{0.0f, 1.0f, 0.0f}), glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
-    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{0.0f, 0.0f, 1.0f}), glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
+    renderer.drawLine(rb.getTransform().getPosition(), rb.getTransform().getScaledLocalToWorldPosition(glm::vec3{1.0f, 0.0f, 0.0f}), glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+    renderer.drawLine(rb.getTransform().getPosition(), rb.getTransform().getScaledLocalToWorldPosition(glm::vec3{0.0f, 1.0f, 0.0f}), glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+    renderer.drawLine(rb.getTransform().getPosition(), rb.getTransform().getScaledLocalToWorldPosition(glm::vec3{0.0f, 0.0f, 1.0f}), glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
 }
 
 void Scene2::init() {
@@ -28,7 +28,7 @@ void Scene2::simulateStep() {
 }
 
 void Scene2::onDraw(Renderer &renderer) {
-    renderer.drawCube(_test_cube.getPosition(), _test_cube.getOrientation(), _test_cube.getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
+    renderer.drawCube(_test_cube.getTransform().getPosition(), _test_cube.getTransform().getOrientation(), _test_cube.getTransform().getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
     // renderer.drawLine(_test_cube.getPosition(), _test_cube.getPosition() + _test_cube.getTorque(), glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
     // std::cout << _test_cube.getPosition().x << ", " << _test_cube.getPosition().y << ", " << _test_cube.getPosition().z << std::endl;
     // drawWorldAxis(renderer);

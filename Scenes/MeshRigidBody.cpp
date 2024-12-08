@@ -9,12 +9,12 @@ MeshRigidBody::MeshRigidBody(const glm::vec3& position, const glm::vec3& scale, 
 
 void MeshRigidBody::_calculateCenterOfMassFromMesh() {
     _mass = 0.0f;
-    _position = glm::vec3(0.0f);
+    _center_of_mass = glm::vec3(0.0f);
     for (const auto& mesh_point : _mesh_points) {
         _mass += mesh_point.mass;
-        _position += mesh_point.position;
+        _center_of_mass += mesh_point.position;
     }
-    _position /= _mass;
+    _center_of_mass /= _mass;
 }
 
 void MeshRigidBody::_calculateInertiaTensorFromMesh() {

@@ -3,17 +3,22 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "Transform.h"
+
+/*
+Body Space = World Space - Center of Mass in World Space
+*/
 
 class RigidBody {
 public:
-    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f);
+    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f,  const glm::vec3& center_of_mass = glm::vec3(0.0f));
     
     // Getters and Setters
-    glm::vec3 getPosition() const;
-    void setPosition(const glm::vec3& position);
+    Transform& getTransform();
 
-    glm::vec3 getScale() const;
-    void setScale(const glm::vec3& scale);
+    float getMass() const;
+    glm::vec3 getCenterOfMassWorld() const;
+    glm::vec3 getWorldToBodyPosition(const glm::vec3& world_position) const;
 
     glm::vec3 getLinearVelocity() const;
     void setLinearVelocity(const glm::vec3& linear_velocity);
@@ -23,9 +28,6 @@ public:
     
     glm::vec3 getForce() const;
     void setForce(const glm::vec3& force);
-
-    glm::quat getOrientation() const;
-    void setOrientation(const glm::quat& orientation);
 
     glm::vec3 getAngularVelocity() const;
     glm::quat getAngularVelocityQuat() const;
@@ -37,8 +39,6 @@ public:
     glm::vec3 getTorque() const;
     void setTorque(const glm::vec3& force);
 
-    float getMass() const;
-
     glm::mat3 getInverseInertiaTensorLocal() const;
     glm::mat3 getInverseInertiaTensorWorld() const;
 
@@ -47,16 +47,7 @@ public:
 
     // Calculates data that changes depending on position, scale, or orientation
     void calculateDerviedData();
-    
-    glm::mat4 getUnscaledLocalToWorldMatrix() const;
-    glm::mat4 getWorldToUnscaledLocalMatrix() const;
-    glm::vec3 unscaledLocalToWorldPosition(const glm::vec3& position) const;
-    glm::vec3 worldToUnscaledLocalPosition(const glm::vec3& position) const;
 
-    glm::mat4 getScaledLocalToWorldMatrix() const;
-    glm::mat4 getWorldToScaledLocalMatrix() const;
-    glm::vec3 scaledLocalToWorldPosition(const glm::vec3& position) const;
-    glm::vec3 worldToScaledLocalPosition(const glm::vec3& position) const;
 
     glm::vec3 getVelocityOfPoint(const glm::vec3& point_world_position) const;
 
@@ -69,20 +60,19 @@ public:
     virtual bool containsPositionInBody(const glm::vec3& world_position) const = 0;
 protected:
     // Private Member Values
-    glm::vec3 _position{0.0f};
-    glm::vec3 _scale{1.0f};
-    glm::quat _orientation{1.0f, 0.0f, 0.0f, 0.0f};
+    Transform _transform;
 
     float _mass{1.0f};
-    glm::vec3 _force{0.0f};
-    glm::vec3 _linear_velocity{0.0f};
-    glm::vec3 _torque{0.0f};
-    glm::vec3 _angular_momentum{0.0f};
-
-    // Matrix that converts local to world
-    glm::mat3 _rotation_matrix{0.0f};
-    // Inertia Tensor in body world
+    glm::vec3 _center_of_mass{0.0f}; // In unscaled local space
+    glm::vec3 _force{0.0f}; // Body space
+    glm::vec3 _linear_velocity{0.0f}; // Body space
+    glm::vec3 _torque{0.0f}; // Body space
+    glm::vec3 _angular_momentum{0.0f}; // Body space
+    
+    // Inertia Tensor in body space
     glm::mat3 _inertia_tensor{0.0f};
+    // Matrix that converts body space to world space
+    glm::mat3 _rotation_matrix{0.0f};
 
     // Private Methods
     void _calculateRotationMatrix();
