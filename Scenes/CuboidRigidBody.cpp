@@ -1,8 +1,8 @@
 #include "CuboidRigidBody.h"
 #include <cmath>
 
-CuboidRigidBody::CuboidRigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass):
-    RigidBody{position, scale, orientation, mass, glm::vec3(0.0f)} {
+CuboidRigidBody::CuboidRigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction):
+    RigidBody{position, scale, orientation, mass, elasticity, friction, glm::vec3(0.0f)} {
     _calculateInertiaTensorCuboid();
 }
 

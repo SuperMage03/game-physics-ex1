@@ -1,12 +1,20 @@
 #include "RigidBody.h"
 
-RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const glm::vec3& center_of_mass): 
-    _transform{position, orientation, scale}, _mass{mass}, _center_of_mass{center_of_mass} {
+RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction, const glm::vec3& center_of_mass): 
+    _transform{position, orientation, scale}, _mass{mass}, _elasticity{elasticity}, _friction{friction}, _center_of_mass{center_of_mass} {
     _calculateRotationMatrix();
 }
 
 Transform &RigidBody::getTransform() {
     return _transform;
+}
+
+float RigidBody::getElasticity() const {
+    return _elasticity;
+}
+
+float RigidBody::getFriction() const {
+    return _friction;
 }
 
 float RigidBody::getMass() const {

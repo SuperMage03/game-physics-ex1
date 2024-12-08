@@ -11,12 +11,15 @@ Body Space = World Space - Center of Mass in World Space
 
 class RigidBody {
 public:
-    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f,  const glm::vec3& center_of_mass = glm::vec3(0.0f));
+    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f, const float& elasticity = 1.0f, const float& friction = 0.0f, const glm::vec3& center_of_mass = glm::vec3(0.0f));
     
     // Getters and Setters
     Transform& getTransform();
 
     float getMass() const;
+    float getElasticity() const;
+    float getFriction() const;
+
     glm::vec3 getCenterOfMassWorld() const;
     glm::vec3 getWorldToBodyPosition(const glm::vec3& world_position) const;
 
@@ -61,9 +64,12 @@ public:
 protected:
     // Private Member Values
     Transform _transform;
-
+    
     float _mass{1.0f};
+    float _elasticity{1.0f}; // 0 (Inelastic) to 1 (Elastic)
+    float _friction{0.0f};
     glm::vec3 _center_of_mass{0.0f}; // In unscaled local space
+    
     glm::vec3 _force{0.0f}; // Body space
     glm::vec3 _linear_velocity{0.0f}; // Body space
     glm::vec3 _torque{0.0f}; // Body space
