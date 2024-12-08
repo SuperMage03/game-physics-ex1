@@ -118,10 +118,10 @@ void DynamicWorld::simulateStepMidpoint(const float& step) {
     detectCollisions();
     resolveCollisions();
 
-    // Calculate derived data
-    for (auto& rb : _objects) {
-        rb->calculateDerviedData();
-    }
+    // Calculate derived data (can be implemented if needed)
+    // for (auto& rb : _objects) {
+    //     rb->calculateDerviedData();
+    // }
 
     // Integrate Velocity
     for (int i = 0; i < _objects.size(); i++) {
@@ -152,10 +152,10 @@ void DynamicWorld::simulateStep(const float& step) {
     detectCollisions();
     resolveCollisions();
 
-    // Calculate derived data
-    for (auto& rb : _objects) {
-        rb->calculateDerviedData();
-    }
+    // Calculate derived data (can be implemented if needed)
+    // for (auto& rb : _objects) {
+    //     rb->calculateDerviedData();
+    // }
 
     switch (_integration_mode) {
     case IntegrationMode::EULER:

@@ -1,9 +1,7 @@
 #include "RigidBody.h"
 
 RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction, const glm::vec3& center_of_mass): 
-    _transform{position, orientation, scale}, _mass{mass}, _elasticity{elasticity}, _friction{friction}, _center_of_mass{center_of_mass} {
-    _calculateRotationMatrix();
-}
+    _transform{position, orientation, scale}, _mass{mass}, _elasticity{elasticity}, _friction{friction}, _center_of_mass{center_of_mass} {}
 
 Transform &RigidBody::getTransform() {
     return _transform;
@@ -54,7 +52,7 @@ void RigidBody::setForce(const glm::vec3 &force) {
 }
 
 glm::vec3 RigidBody::getAngularVelocity() const {
-    return _localToWorldBasisChange(glm::inverse(_inertia_tensor)) * _angular_momentum;
+    return localToWorldBasisChange(glm::inverse(_inertia_tensor)) * _angular_momentum;
 }
 
 glm::quat RigidBody::getAngularVelocityQuat() const {
@@ -62,7 +60,7 @@ glm::quat RigidBody::getAngularVelocityQuat() const {
 }
 
 void RigidBody::setAngularVelocity(const glm::vec3 &angular_velocity) {
-    _angular_momentum = _localToWorldBasisChange(_inertia_tensor) * angular_velocity;
+    _angular_momentum = localToWorldBasisChange(_inertia_tensor) * angular_velocity;
 }
 
 glm::vec3 RigidBody::getAngularMomentum() const {
@@ -86,7 +84,7 @@ glm::mat3 RigidBody::getInverseInertiaTensorLocal() const {
 }
 
 glm::mat3 RigidBody::getInverseInertiaTensorWorld() const {
-    return _localToWorldBasisChange(glm::inverse(_inertia_tensor));
+    return localToWorldBasisChange(glm::inverse(_inertia_tensor));
 }
 
 void RigidBody::addForce(const glm::vec3 &force) {
@@ -97,12 +95,10 @@ void RigidBody::addTorque(const glm::vec3 &torque) {
     _torque += torque;
 }
 
-void RigidBody::calculateDerviedData() {
-    _calculateRotationMatrix();
-}
+// void RigidBody::calculateDerviedData() {}
 
 glm::vec3 RigidBody::getVelocityOfPoint(const glm::vec3 &point_world_position) const {
-    return getLinearVelocity() + _getTangentialVelocityOfPoint(point_world_position);
+    return getLinearVelocity() + getTangentialVelocityOfPoint(point_world_position);
 }
 
 std::ostream &operator<<(std::ostream &out_stream, const RigidBody &rb) {
@@ -117,15 +113,12 @@ std::ostream &operator<<(std::ostream &out_stream, const RigidBody &rb) {
 
 RigidBody::~RigidBody() {}
 
-void RigidBody::_calculateRotationMatrix() {
-    _rotation_matrix = glm::toMat3(_transform.getOrientation());
+glm::mat3 RigidBody::localToWorldBasisChange(const glm::mat3& local_matrix) const {
+    glm::mat3 rotation_matrix = glm::toMat3(_transform.getOrientation());
+    return rotation_matrix * local_matrix * glm::transpose(rotation_matrix);
 }
 
-glm::mat3 RigidBody::_localToWorldBasisChange(const glm::mat3& local_matrix) const {
-    return _rotation_matrix * local_matrix * glm::transpose(_rotation_matrix);
-}
-
-glm::vec3 RigidBody::_getTangentialVelocityOfPoint(const glm::vec3 &point_world_position) const {
+glm::vec3 RigidBody::getTangentialVelocityOfPoint(const glm::vec3 &point_world_position) const {
     if (!containsPositionInBody(point_world_position)) return glm::vec3(0.0f);
     return glm::cross(getAngularVelocity(), getWorldToBodyPosition(point_world_position));
 }

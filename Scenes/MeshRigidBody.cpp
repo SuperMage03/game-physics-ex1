@@ -3,11 +3,11 @@
 
 MeshRigidBody::MeshRigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const std::vector<MeshPoint>& mesh_points): 
     RigidBody{position, scale, orientation}, _mesh_points{mesh_points} {
-    _calculateCenterOfMassFromMesh();
-    _calculateInertiaTensorFromMesh();
+    calculateCenterOfMassFromMesh();
+    calculateInertiaTensorFromMesh();
 }
 
-void MeshRigidBody::_calculateCenterOfMassFromMesh() {
+void MeshRigidBody::calculateCenterOfMassFromMesh() {
     _mass = 0.0f;
     _center_of_mass = glm::vec3(0.0f);
     for (const auto& mesh_point : _mesh_points) {
@@ -17,7 +17,7 @@ void MeshRigidBody::_calculateCenterOfMassFromMesh() {
     _center_of_mass /= _mass;
 }
 
-void MeshRigidBody::_calculateInertiaTensorFromMesh() {
+void MeshRigidBody::calculateInertiaTensorFromMesh() {
     _inertia_tensor = glm::mat3(0.0f);
     for (const auto& mesh_point : _mesh_points) {
         glm::vec3 col_0 = glm::vec3(powf(mesh_point.position.y, 2.0f) + powf(mesh_point.position.z, 2.0f), 

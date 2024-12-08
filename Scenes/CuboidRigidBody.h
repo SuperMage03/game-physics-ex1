@@ -7,5 +7,5 @@ public:
     std::unique_ptr<RigidBody> clone() override;
     bool containsPositionInBody(const glm::vec3& world_position) const override;
 private:
-    void _calculateInertiaTensorCuboid();
+    void calculateInertiaTensorCuboid();
 };

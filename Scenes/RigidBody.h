@@ -48,9 +48,8 @@ public:
     void addForce(const glm::vec3& force);
     void addTorque(const glm::vec3& torque);
 
-    // Calculates data that changes depending on position, scale, or orientation
-    void calculateDerviedData();
-
+    // Calculates data that changes depending on position, scale, or orientation (can be implemented if needed)
+    // void calculateDerviedData();
 
     glm::vec3 getVelocityOfPoint(const glm::vec3& point_world_position) const;
 
@@ -77,11 +76,8 @@ protected:
     
     // Inertia Tensor in body space
     glm::mat3 _inertia_tensor{0.0f};
-    // Matrix that converts body space to world space
-    glm::mat3 _rotation_matrix{0.0f};
 
     // Private Methods
-    void _calculateRotationMatrix();
-    glm::mat3 _localToWorldBasisChange(const glm::mat3& local_matrix) const;
-    glm::vec3 _getTangentialVelocityOfPoint(const glm::vec3& point_world_position) const;
+    glm::mat3 localToWorldBasisChange(const glm::mat3& local_matrix) const;
+    glm::vec3 getTangentialVelocityOfPoint(const glm::vec3& point_world_position) const;
 };
