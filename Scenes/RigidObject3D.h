@@ -774,8 +774,8 @@ struct Collision {
 private:
 	void calculateRelativeVelocity() {
 		// Calculate local collision point coordinates
-		f_collisionPointALocal = f_objA->f_transform.transformLocalToGlobalRotation(f_objA->f_transform.transformGlobalToLocal(f_collisionPoint));
-		f_collisionPointBLocal = f_objB->f_transform.transformLocalToGlobalRotation(f_objB->f_transform.transformGlobalToLocal(f_collisionPoint));
+		f_collisionPointALocal = f_collisionPoint - f_objA->f_transform.f_position;
+		f_collisionPointBLocal = f_collisionPoint - f_objB->f_transform.f_position;
 
 		// Calculate collision point velocities
 		glm::dvec3 collPointVelocityA = f_objA->f_velocity + glm::cross(f_objA->f_angularVelocity, f_collisionPointALocal);
