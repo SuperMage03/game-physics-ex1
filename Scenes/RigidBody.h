@@ -37,14 +37,26 @@ public:
     glm::vec3 getTorque() const;
     void setTorque(const glm::vec3& force);
 
+    float getMass() const;
+
+    glm::mat3 getInverseInertiaTensorLocal() const;
+    glm::mat3 getInverseInertiaTensorWorld() const;
+
     void addForce(const glm::vec3& force);
     void addTorque(const glm::vec3& torque);
 
     // Calculates data that changes depending on position, scale, or orientation
     void calculateDerviedData();
     
-    glm::vec3 localToWorldPosition(const glm::vec3& position) const;
-    glm::vec3 worldToLocalPosition(const glm::vec3& position) const;
+    glm::mat4 getUnscaledLocalToWorldMatrix() const;
+    glm::mat4 getWorldToUnscaledLocalMatrix() const;
+    glm::vec3 unscaledLocalToWorldPosition(const glm::vec3& position) const;
+    glm::vec3 worldToUnscaledLocalPosition(const glm::vec3& position) const;
+
+    glm::mat4 getScaledLocalToWorldMatrix() const;
+    glm::mat4 getWorldToScaledLocalMatrix() const;
+    glm::vec3 scaledLocalToWorldPosition(const glm::vec3& position) const;
+    glm::vec3 worldToScaledLocalPosition(const glm::vec3& position) const;
 
     glm::vec3 getVelocityOfPoint(const glm::vec3& point_world_position) const;
 
@@ -57,22 +69,23 @@ public:
     virtual bool containsPositionInBody(const glm::vec3& world_position) const = 0;
 protected:
     // Private Member Values
-    float _mass{1.0f};
     glm::vec3 _position{0.0f};
     glm::vec3 _scale{1.0f};
     glm::quat _orientation{1.0f, 0.0f, 0.0f, 0.0f};
+
+    float _mass{1.0f};
     glm::vec3 _force{0.0f};
     glm::vec3 _linear_velocity{0.0f};
     glm::vec3 _torque{0.0f};
     glm::vec3 _angular_momentum{0.0f};
+
     // Matrix that converts local to world
     glm::mat3 _rotation_matrix{0.0f};
     // Inertia Tensor in body world
     glm::mat3 _inertia_tensor{0.0f};
+
     // Private Methods
     void _calculateRotationMatrix();
     glm::mat3 _localToWorldBasisChange(const glm::mat3& local_matrix) const;
-    glm::mat4 _getLocalToWorldModelMatrix() const;
-    glm::mat4 _getWorldToLocalModelMatrix() const;
     glm::vec3 _getTangentialVelocityOfPoint(const glm::vec3& point_world_position) const;
 };

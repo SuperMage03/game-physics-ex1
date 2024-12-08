@@ -1,7 +1,6 @@
 #include "Scene.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "DynamicWorld.h"
 #include "ForceGenerator.h"
 #include "CuboidRigidBody.h"
 

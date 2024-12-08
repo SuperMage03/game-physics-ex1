@@ -12,13 +12,13 @@ static void drawWorldAxis(Renderer& renderer) {
 
 // File scope helper function for drawing the axis along the origin
 static void drawLocalAxis(Renderer& renderer, RigidBody& rb) {
-    renderer.drawLine(rb.getPosition(), rb.localToWorldPosition(glm::vec3{1.0f, 0.0f, 0.0f}), glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
-    renderer.drawLine(rb.getPosition(), rb.localToWorldPosition(glm::vec3{0.0f, 1.0f, 0.0f}), glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
-    renderer.drawLine(rb.getPosition(), rb.localToWorldPosition(glm::vec3{0.0f, 0.0f, 1.0f}), glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
+    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{1.0f, 0.0f, 0.0f}), glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{0.0f, 1.0f, 0.0f}), glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+    renderer.drawLine(rb.getPosition(), rb.scaledLocalToWorldPosition(glm::vec3{0.0f, 0.0f, 1.0f}), glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
 }
 
 void Scene1::init() {
-    DynamicWorld::getInstance()->add(_test_cube);
+    DynamicWorld::getInstance()->addObject(_test_cube);
     ForceRegistry::getInstance()->add(_test_cube, _test_external_force);
 
     DynamicWorld::getInstance()->setIntegrationMode(DynamicWorld::IntegrationMode::EULER);

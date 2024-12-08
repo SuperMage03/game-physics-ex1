@@ -11,10 +11,10 @@ std::unique_ptr<RigidBody> CuboidRigidBody::clone() {
 }
 
 bool CuboidRigidBody::containsPositionInBody(const glm::vec3 &world_position) const {
-    glm::vec3 local_position = worldToLocalPosition(world_position);
-    if (fabs(local_position.x) > 0.5f * _scale.x) return false;
-    if (fabs(local_position.y) > 0.5f * _scale.y) return false;
-    if (fabs(local_position.z) > 0.5f * _scale.z) return false;
+    glm::vec3 local_position = worldToScaledLocalPosition(world_position);
+    if (fabs(local_position.x) > 0.5f) return false;
+    if (fabs(local_position.y) > 0.5f) return false;
+    if (fabs(local_position.z) > 0.5f) return false;
     return true;
 }
 
