@@ -18,7 +18,7 @@ static void drawLocalAxis(Renderer& renderer, RigidBody& rb) {
 }
 
 void Scene2::init() {
-    DynamicWorld::getInstance()->addObject(_test_cube);
+    DynamicWorld::getInstance()->addDynamicObject(_test_cube);
     ForceRegistry::getInstance()->add(_test_cube, _test_external_force);
     DynamicWorld::getInstance()->setIntegrationMode(DynamicWorld::IntegrationMode::EULER);
 }

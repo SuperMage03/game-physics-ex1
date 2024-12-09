@@ -11,14 +11,16 @@ Body Space = World Space - Center of Mass in World Space
 
 class RigidBody {
 public:
-    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f, const float& elasticity = 1.0f, const float& friction = 0.0f, const glm::vec3& center_of_mass = glm::vec3(0.0f));
+    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f, const float& elasticity = 1.0f, const float& friction = 0.0f, const bool& is_dynamic = true, const glm::vec3& center_of_mass = glm::vec3(0.0f));
     
     // Getters and Setters
     Transform& getTransform();
 
     float getMass() const;
+    float getInverseMass() const;
     float getElasticity() const;
     float getFriction() const;
+    bool isDynamic() const;
 
     glm::vec3 getCenterOfMassWorld() const;
     glm::vec3 getWorldToBodyPosition(const glm::vec3& world_position) const;
@@ -41,6 +43,9 @@ public:
 
     glm::vec3 getTorque() const;
     void setTorque(const glm::vec3& force);
+
+    glm::mat3 getInertiaTensorLocal() const;
+    glm::mat3 getInertiaTensorWorld() const;
 
     glm::mat3 getInverseInertiaTensorLocal() const;
     glm::mat3 getInverseInertiaTensorWorld() const;
@@ -67,6 +72,8 @@ protected:
     float _mass{1.0f};
     float _elasticity{1.0f}; // 0 (Inelastic) to 1 (Elastic)
     float _friction{0.0f};
+    bool _is_dynamic{true};
+
     glm::vec3 _center_of_mass{0.0f}; // In unscaled local space
     
     glm::vec3 _force{0.0f}; // Body space
@@ -76,6 +83,7 @@ protected:
     
     // Inertia Tensor in body space
     glm::mat3 _inertia_tensor{0.0f};
+    glm::mat3 _inverse_inertia_tensor{0.0f};
 
     // Private Methods
     glm::mat3 localToWorldBasisChange(const glm::mat3& local_matrix) const;

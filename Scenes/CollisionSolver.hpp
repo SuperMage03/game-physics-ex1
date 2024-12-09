@@ -4,10 +4,12 @@
 
 class CollisionSolver {
 public:
-    virtual void resolveContacts(std::vector<CollisionContact>& contacts, float duration) = 0;
+    void resolveContacts(std::vector<CollisionContact>& contacts, float duration);
+protected:
+    virtual void resolveContact(const CollisionContact& contact, float duration) = 0;
 };
 
 class ImpulseSolver : public CollisionSolver {
-public:
-    void resolveContacts(std::vector<CollisionContact>& contacts, float duration) override;
+private:
+    void resolveContact(const CollisionContact& contacts, float duration) override;
 };

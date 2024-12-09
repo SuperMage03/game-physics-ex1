@@ -21,14 +21,26 @@ void DynamicWorld::setIntegrationMode(const DynamicWorld::IntegrationMode& integ
     _integration_mode = integration_mode;
 }
 
-void DynamicWorld::addObject(RigidBody &rb) {
-    _objects.emplace_back(&rb);
+void DynamicWorld::addDynamicObject(RigidBody &rb) {
+    _dynamic_objects.emplace_back(&rb);
 }
 
-void DynamicWorld::removeObject(RigidBody& rb) {
-    for (auto i = _objects.begin(); i != _objects.end(); i++) {
+void DynamicWorld::removeDynamicObject(RigidBody& rb) {
+    for (auto i = _dynamic_objects.begin(); i != _dynamic_objects.end(); i++) {
         if (*i != &rb) continue;
-        _objects.erase(i);
+        _dynamic_objects.erase(i);
+        break;
+    }
+}
+
+void DynamicWorld::addCollidableObject(RigidBody &rb) {
+    _collidable_objects.emplace_back(&rb);
+}
+
+void DynamicWorld::removeCollidableObject(RigidBody& rb) {
+    for (auto i = _collidable_objects.begin(); i != _collidable_objects.end(); i++) {
+        if (*i != &rb) continue;
+        _collidable_objects.erase(i);
         break;
     }
 }
@@ -46,13 +58,14 @@ void DynamicWorld::removeCollisionSolver(CollisionSolver& collision_solver) {
 }
 
 void DynamicWorld::clear() {
-    _objects.clear();
-    _collision_solvers.clear();
+    _collidable_objects.clear();
+    _dynamic_objects.clear();
     _collision_contacts.clear();
+    _collision_solvers.clear();
 }
 
 void DynamicWorld::clearAccumulators() {
-    for (auto& rb : _objects) {
+    for (auto& rb : _dynamic_objects) {
         rb->setForce(glm::vec3(0.0f));
         rb->setTorque(glm::vec3(0.0f));
     }
@@ -60,37 +73,37 @@ void DynamicWorld::clearAccumulators() {
 
 void DynamicWorld::simulateStepEuler(const float& step) {
     // Integrate Position
-    for (auto& rb : _objects) {
+    for (auto& rb : _dynamic_objects) {
         Transform& rb_transform = rb->getTransform();
         rb_transform.setPosition(rb_transform.getPosition() + step * rb->getLinearVelocity());
     }
     // Integrate Velocity
-    for (auto& rb : _objects) {
+    for (auto& rb : _dynamic_objects) {
         rb->setLinearVelocity(rb->getLinearVelocity() + step * rb->getLinearAcceleration());
     }
 
     // Integrate Orientation
-    for (auto& rb : _objects) {
+    for (auto& rb : _dynamic_objects) {
         Transform& rb_transform = rb->getTransform();
         rb_transform.setOrientation(rb_transform.getOrientation() + 0.5f * rb->getAngularVelocityQuat() * rb_transform.getOrientation() * step);
     }
     // Integrate Angular Velocity
-    for (auto& rb : _objects) {
+    for (auto& rb : _dynamic_objects) {
         rb->setAngularMomentum(rb->getAngularMomentum() + step * rb->getTorque());
     }
 }
 
 void DynamicWorld::simulateStepMidpoint(const float& step) {
-    std::unique_ptr<std::unique_ptr<RigidBody>[]> result = std::make_unique<std::unique_ptr<RigidBody>[]>(_objects.size());
+    std::unique_ptr<std::unique_ptr<RigidBody>[]> result = std::make_unique<std::unique_ptr<RigidBody>[]>(_dynamic_objects.size());
 
     // Store old point data
-    for (int i = 0; i < _objects.size(); i++) {
-        result[i] = _objects[i]->clone();
+    for (int i = 0; i < _dynamic_objects.size(); i++) {
+        result[i] = _dynamic_objects[i]->clone();
     }
 
     // Integrate Position
-    for (int i = 0; i < _objects.size(); i++) {
-        RigidBody& simulated_body = *(_objects[i]);
+    for (int i = 0; i < _dynamic_objects.size(); i++) {
+        RigidBody& simulated_body = *(_dynamic_objects[i]);
         RigidBody& result_body = *(result[i]);
 
         Transform& simulated_body_transform = simulated_body.getTransform();
@@ -124,8 +137,8 @@ void DynamicWorld::simulateStepMidpoint(const float& step) {
     // }
 
     // Integrate Velocity
-    for (int i = 0; i < _objects.size(); i++) {
-        RigidBody& simulated_body = *(_objects[i]);
+    for (int i = 0; i < _dynamic_objects.size(); i++) {
+        RigidBody& simulated_body = *(_dynamic_objects[i]);
         RigidBody& result_body = *(result[i]);
 
         // Calculated result linear and angular velocity from the force at step / 2
@@ -134,8 +147,8 @@ void DynamicWorld::simulateStepMidpoint(const float& step) {
     }
 
     // Finally setting the result to simulated point
-    for (int i = 0; i < _objects.size(); i++) {
-        RigidBody& simulated_body = *(_objects[i]);
+    for (int i = 0; i < _dynamic_objects.size(); i++) {
+        RigidBody& simulated_body = *(_dynamic_objects[i]);
         RigidBody& result_body = *(result[i]);
         simulated_body = result_body;
     }
@@ -170,8 +183,8 @@ void DynamicWorld::simulateStep(const float& step) {
 }
 
 void DynamicWorld::detectCollisions() {
-    for (auto i = _objects.begin(); i < _objects.end(); i++) {
-        for (auto j = i + 1; j < _objects.end(); j++) {
+    for (auto i = _collidable_objects.begin(); i < _collidable_objects.end(); i++) {
+        for (auto j = i + 1; j < _collidable_objects.end(); j++) {
             CollisionInfo collision_result = collisionTools::checkCollisionSAT((*i)->getTransform().getScaledLocalToWorldMatrix(), (*j)->getTransform().getScaledLocalToWorldMatrix());
             if (collision_result.isColliding) {
                 _collision_contacts.emplace_back(*i, *j, collision_result);

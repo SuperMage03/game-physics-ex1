@@ -25,16 +25,22 @@ public:
     void setIntegrationMode(const IntegrationMode& integration_mode);
 
     // Methods
-    void addObject(RigidBody& rb);
-    void removeObject(RigidBody& rb);
+    void addCollidableObject(RigidBody& rb);
+    void removeCollidableObject(RigidBody& rb);
     void addCollisionSolver(CollisionSolver& collision_solver);
     void removeCollisionSolver(CollisionSolver& collision_solver);
+
+    void addDynamicObject(RigidBody& rb);
+    void removeDynamicObject(RigidBody& rb);
+
     void clear();
     void simulateStep(const float& step=0.1f);
 protected:
     static std::unique_ptr<DynamicWorld> _singleton;
     
-    std::vector<RigidBody*> _objects;
+    std::vector<RigidBody*> _collidable_objects;
+    std::vector<RigidBody*> _dynamic_objects;
+    
     std::vector<CollisionSolver*> _collision_solvers;
     std::vector<CollisionContact> _collision_contacts;
 

@@ -19,10 +19,11 @@ static void drawLocalAxis(Renderer& renderer, RigidBody& rb) {
 
 void Scene3::init() {
     DynamicWorld::getInstance()->addCollisionSolver(_impulse_solver);
-    DynamicWorld::getInstance()->addObject(_test_cube_a);
+    DynamicWorld::getInstance()->addCollidableObject(_test_cube_a);
+    DynamicWorld::getInstance()->addDynamicObject(_test_cube_a);
     // DynamicWorld::getInstance()->addObject(_test_cube_b);
-    DynamicWorld::getInstance()->addObject(_test_wall_a);
-    DynamicWorld::getInstance()->addObject(_test_wall_b);
+    DynamicWorld::getInstance()->addCollidableObject(_test_wall_a);
+    DynamicWorld::getInstance()->addCollidableObject(_test_wall_b);
     _test_cube_a.setLinearVelocity(glm::vec3(0.8f, 0.0f, 0.0f));
     // _test_cube_b.setLinearVelocity(glm::vec3(-0.2f, 0.0f, 0.0f));
     DynamicWorld::getInstance()->setIntegrationMode(DynamicWorld::IntegrationMode::EULER);

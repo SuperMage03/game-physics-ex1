@@ -1,10 +1,18 @@
 #include "RigidBody.hpp"
 
-RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction, const glm::vec3& center_of_mass): 
-    _transform{position, orientation, scale}, _mass{mass}, _elasticity{elasticity}, _friction{friction}, _center_of_mass{center_of_mass} {}
+RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction, const bool& is_dynamic, const glm::vec3& center_of_mass): 
+    _transform{position, orientation, scale}, _mass{mass}, _elasticity{elasticity}, _friction{friction}, _is_dynamic{is_dynamic}, _center_of_mass{center_of_mass} {}
 
 Transform &RigidBody::getTransform() {
     return _transform;
+}
+
+float RigidBody::getMass() const {
+    return _mass;
+}
+
+float RigidBody::getInverseMass() const {
+    return _mass == std::numeric_limits<float>::infinity() ? 0.0f : 1.0f / _mass;
 }
 
 float RigidBody::getElasticity() const {
@@ -15,8 +23,8 @@ float RigidBody::getFriction() const {
     return _friction;
 }
 
-float RigidBody::getMass() const {
-    return _mass;
+bool RigidBody::isDynamic() const {
+    return _is_dynamic;
 }
 
 glm::vec3 RigidBody::getCenterOfMassWorld() const {
@@ -32,6 +40,7 @@ glm::vec3 RigidBody::getLinearVelocity() const {
 }
 
 void RigidBody::setLinearVelocity(const glm::vec3 &linear_velocity) {
+    if (!_is_dynamic) return;
     _linear_velocity = linear_velocity;
 }
 
@@ -40,6 +49,7 @@ glm::vec3 RigidBody::getLinearAcceleration() const {
 }
 
 void RigidBody::setLinearAcceleration(const glm::vec3 &linear_acceleration) {
+    if (!_is_dynamic) return;
     _force = _mass * linear_acceleration;
 }
 
@@ -48,11 +58,12 @@ glm::vec3 RigidBody::getForce() const {
 }
 
 void RigidBody::setForce(const glm::vec3 &force) {
+    if (!_is_dynamic) return;
     _force = force;
 }
 
 glm::vec3 RigidBody::getAngularVelocity() const {
-    return localToWorldBasisChange(glm::inverse(_inertia_tensor)) * _angular_momentum;
+    return getInverseInertiaTensorWorld() * _angular_momentum;
 }
 
 glm::quat RigidBody::getAngularVelocityQuat() const {
@@ -60,7 +71,8 @@ glm::quat RigidBody::getAngularVelocityQuat() const {
 }
 
 void RigidBody::setAngularVelocity(const glm::vec3 &angular_velocity) {
-    _angular_momentum = localToWorldBasisChange(_inertia_tensor) * angular_velocity;
+    if (!_is_dynamic) return;
+    _angular_momentum = getInertiaTensorWorld() * angular_velocity;
 }
 
 glm::vec3 RigidBody::getAngularMomentum() const {
@@ -68,6 +80,7 @@ glm::vec3 RigidBody::getAngularMomentum() const {
 }
 
 void RigidBody::setAngularMomentum(const glm::vec3& angular_momentum) {
+    if (!_is_dynamic) return;
     _angular_momentum = angular_momentum;
 }
 
@@ -76,15 +89,24 @@ glm::vec3 RigidBody::getTorque() const {
 }
 
 void RigidBody::setTorque(const glm::vec3 &torque) {
+    if (!_is_dynamic) return;
     _torque = torque;
 }
 
+glm::mat3 RigidBody::getInertiaTensorLocal() const {
+    return _inertia_tensor;
+}
+
+glm::mat3 RigidBody::getInertiaTensorWorld() const {
+    return localToWorldBasisChange(getInertiaTensorLocal());
+}
+
 glm::mat3 RigidBody::getInverseInertiaTensorLocal() const {
-    return glm::inverse(_inertia_tensor);
+    return _inverse_inertia_tensor;
 }
 
 glm::mat3 RigidBody::getInverseInertiaTensorWorld() const {
-    return localToWorldBasisChange(glm::inverse(_inertia_tensor));
+    return localToWorldBasisChange(getInverseInertiaTensorLocal());
 }
 
 void RigidBody::addForce(const glm::vec3 &force) {
