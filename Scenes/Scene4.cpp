@@ -1,7 +1,7 @@
 #include "Scene4.h"
 #include <imgui.h>
-#include "DynamicWorld.h"
-#include "ForceRegistry.h"
+#include "DynamicWorld.hpp"
+#include "ForceRegistry.hpp"
 
 // File scope helper function for drawing the axis along the origin
 static void drawWorldAxis(Renderer& renderer) {

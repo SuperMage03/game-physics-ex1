@@ -1,4 +1,4 @@
-#include "CollisionSolver.h"
+#include "CollisionSolver.hpp"
 #include <iostream>
 
 void ImpulseSolver::resolveContacts(std::vector<CollisionContact> &contacts, float duration) {

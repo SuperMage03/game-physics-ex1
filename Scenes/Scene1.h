@@ -1,8 +1,8 @@
 #include "Scene.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "ForceGenerator.h"
-#include "CuboidRigidBody.h"
+#include "ForceGenerator.hpp"
+#include "CuboidRigidBody.hpp"
 
 class Scene1 : public Scene {
 public:

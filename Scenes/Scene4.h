@@ -1,9 +1,9 @@
 #include "Scene.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "ForceGenerator.h"
-#include "CuboidRigidBody.h"
-#include "CollisionSolver.h"
+#include "ForceGenerator.hpp"
+#include "CuboidRigidBody.hpp"
+#include "CollisionSolver.hpp"
 
 class Scene4 : public Scene {
 public:
