@@ -1,5 +1,5 @@
 #pragma once
-#include "RigidBody.h"
+#include "RigidBody.hpp"
 
 class CuboidRigidBody : public RigidBody {
 public:

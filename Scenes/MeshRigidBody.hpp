@@ -1,5 +1,5 @@
 #pragma once
-#include "RigidBody.h"
+#include "RigidBody.hpp"
 #include <vector>
 
 class MeshRigidBody : public RigidBody {

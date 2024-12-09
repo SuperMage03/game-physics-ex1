@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "CollisionContact.h"
+#include "CollisionContact.hpp"
 
 class CollisionSolver {
 public:

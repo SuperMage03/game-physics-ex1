@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
-#include "RigidBody.h"
-#include "ForceGenerator.h"
+#include "RigidBody.hpp"
+#include "ForceGenerator.hpp"
 
 // Singleton class for managing force generators
 class ForceRegistry {

@@ -1,6 +1,6 @@
-#include "DynamicWorld.h"
+#include "DynamicWorld.hpp"
 #include <util/CollisionDetection.h>
-#include "ForceRegistry.h"
+#include "ForceRegistry.hpp"
 
 DynamicWorld::DynamicWorld(): _integration_mode{IntegrationMode::EULER} {}
 

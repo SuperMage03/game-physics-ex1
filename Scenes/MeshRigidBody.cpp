@@ -1,4 +1,4 @@
-#include "MeshRigidBody.h"
+#include "MeshRigidBody.hpp"
 #include <cmath>
 
 MeshRigidBody::MeshRigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const std::vector<MeshPoint>& mesh_points): 

@@ -1,4 +1,4 @@
-#include "CuboidRigidBody.h"
+#include "CuboidRigidBody.hpp"
 #include <cmath>
 
 CuboidRigidBody::CuboidRigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction):

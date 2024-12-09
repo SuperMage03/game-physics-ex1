@@ -1,9 +1,9 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "RigidBody.h"
-#include "CollisionSolver.h"
-#include "CollisionContact.h"
+#include "RigidBody.hpp"
+#include "CollisionSolver.hpp"
+#include "CollisionContact.hpp"
 
 class DynamicWorld {
 public:

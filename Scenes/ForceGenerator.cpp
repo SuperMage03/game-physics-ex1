@@ -1,4 +1,4 @@
-#include "ForceGenerator.h"
+#include "ForceGenerator.hpp"
 
 ForceGenerator::~ForceGenerator() {}
 
@@ -16,4 +16,10 @@ void ExternalForceGenerator::updateForce(RigidBody &rb, float duration) {
     rb.addForce(_force);
     glm::vec3 resulting_torque = glm::cross(rb.getWorldToBodyPosition(_world_position), _force);
     rb.addTorque(resulting_torque);
+}
+
+GravityForceGenerator::GravityForceGenerator(const glm::vec3 &gravity_acceleration): _gravity_acceleration{gravity_acceleration} {}
+
+void GravityForceGenerator::updateForce(RigidBody& rb, float duration) {
+    rb.addForce(rb.getMass() * _gravity_acceleration);
 }

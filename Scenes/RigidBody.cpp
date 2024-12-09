@@ -1,4 +1,4 @@
-#include "RigidBody.h"
+#include "RigidBody.hpp"
 
 RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction, const glm::vec3& center_of_mass): 
     _transform{position, orientation, scale}, _mass{mass}, _elasticity{elasticity}, _friction{friction}, _center_of_mass{center_of_mass} {}

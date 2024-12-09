@@ -1,4 +1,4 @@
-#include "ForceRegistry.h"
+#include "ForceRegistry.hpp"
 #include <memory>
 
 ForceRegistry::ForceRegistration::ForceRegistration(RigidBody*const& rb, ForceGenerator*const& force_generator):

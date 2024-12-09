@@ -1,6 +1,6 @@
 #pragma once
 #include <util/CollisionInfo.h>
-#include "RigidBody.h"
+#include "RigidBody.hpp"
 
 struct CollisionContact {
     RigidBody* a;
