@@ -114,6 +114,7 @@ public:
         ROPE.addWall(std::move(Zm));
         ROPE.addWall(std::move(Zp));
 
+        std::cout << "+++++++++++ SCENE COMPLEX SIMULATION +++++++++++" << std::endl;
         std::cout << "======== Initial system state ========" << std::endl
         << ROPE << std::endl << std::endl;
     }
