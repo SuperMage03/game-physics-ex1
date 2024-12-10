@@ -29,6 +29,11 @@ void Scene2::simulateStep() {
 }
 
 void Scene2::onDraw(Renderer &renderer) {
+    cameraMatrix = renderer.camera.viewMatrix;
+    fwd = inverse(cameraMatrix) * glm::vec4(0, 0, 1, 0);
+    right = inverse(cameraMatrix) * glm::vec4(1, 0, 0, 0);
+    up = inverse(cameraMatrix) * glm::vec4(0, 1, 0, 0);
+    
     renderer.drawCube(_test_cube.getTransform().getPosition(), _test_cube.getTransform().getOrientation(), _test_cube.getTransform().getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
     renderer.drawSphere(glm::vec3(1.0f, 1.0f, 0.0f), 0.03f);
     renderer.drawLine(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f) + glm::vec3(0.3f, 0.5f, 0.25f), glm::vec3(1.0f, 0.0f, 0.0f));
