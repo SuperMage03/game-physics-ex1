@@ -28,6 +28,11 @@ void ImpulseSolver::resolveContact(const CollisionContact &contact, float durati
     // std::cout << relative_velocity.x << ", " << relative_velocity.y << ", " << relative_velocity.z << std::endl;
     // std::cout << tangential_direction.x << ", " << tangential_direction.y << ", " << tangential_direction.z << std::endl;
 
+    glm::mat3 gamer_a = a.getInverseInertiaTensorWorld();
+    glm::mat3 gamer_b = b.getInverseInertiaTensorWorld();
+    float pog_a = glm::dot(glm::cross(a.getInverseInertiaTensorWorld() * glm::cross(contact_position_body_a, collision_info.normalWorld), contact_position_body_a), collision_info.normalWorld);
+    float pog_b = glm::dot(glm::cross(b.getInverseInertiaTensorWorld() * glm::cross(contact_position_body_b, collision_info.normalWorld), contact_position_body_b), collision_info.normalWorld);
+
     float j = glm::dot(-(1.0f + 0.5f * (a.getElasticity() + b.getElasticity())) * relative_velocity, collision_info.normalWorld) / 
             (a.getInverseMass() + b.getInverseMass() + 
             glm::dot(glm::cross(a.getInverseInertiaTensorWorld() * glm::cross(contact_position_body_a, collision_info.normalWorld), contact_position_body_a), collision_info.normalWorld) + 

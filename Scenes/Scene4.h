@@ -21,6 +21,6 @@ private:
     CuboidRigidBody _ground_cube{glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f, 100.0f, 0.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), std::numeric_limits<float>::infinity(), 1.0f, 100.0f, false};
     // CuboidRigidBody _test_cube_a{glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.6f, 0.5f), glm::quat(0.7071068f, 0.0f, 0.0f, 0.7071068f), 2.0f};
     // CuboidRigidBody _test_cube_b{glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.6f, 0.5f), glm::quat(0.7071068f, 0.0f, 0.0f, 0.7071068f), 2.0f};
-    CuboidRigidBody _test_cube_a{glm::vec3(-1.0f, 0.0f, 2.0f), glm::vec3(1.0f), glm::quat(0.4619398f, 0.1913417f, 0.4619398f, 0.7325378f), 1.0f, 1.0f, 0.0f};
-    CuboidRigidBody _test_cube_b{glm::vec3(1.0f, 0.0f, 2.0f), glm::vec3(1.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0.5f, 0.0f};
+    CuboidRigidBody _test_cube_a{glm::vec3(-1.0f, 0.0f, 2.0f), glm::vec3(1.0f), glm::quat(0.4619398f, 0.1913417f, 0.4619398f, 0.7325378f), 1.0f, 1.0f, 100.0f};
+    CuboidRigidBody _test_cube_b{glm::vec3(1.0f, 0.0f, 2.0f), glm::vec3(1.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0.5f, 100.0f};
 };
