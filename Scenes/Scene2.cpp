@@ -20,6 +20,7 @@ static void drawLocalAxis(Renderer& renderer, RigidBody& rb) {
 void Scene2::init() {
     DynamicWorld::getInstance()->addDynamicObject(_test_cube);
     ForceRegistry::getInstance()->add(_test_cube, _test_external_force);
+    ForceRegistry::getInstance()->add(_test_cube, _interaction_external_force);
     DynamicWorld::getInstance()->setIntegrationMode(DynamicWorld::IntegrationMode::EULER);
 }
 
@@ -29,15 +30,27 @@ void Scene2::simulateStep() {
 
 void Scene2::onDraw(Renderer &renderer) {
     renderer.drawCube(_test_cube.getTransform().getPosition(), _test_cube.getTransform().getOrientation(), _test_cube.getTransform().getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
-    // renderer.drawLine(_test_cube.getPosition(), _test_cube.getPosition() + _test_cube.getTorque(), glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
-    // std::cout << _test_cube.getPosition().x << ", " << _test_cube.getPosition().y << ", " << _test_cube.getPosition().z << std::endl;
-    // drawWorldAxis(renderer);
-    // drawLocalAxis(renderer, _test_cube);
-    // renderer.drawSphere(glm::vec3(0.3f, 0.5f, 0.25f), 0.05f);
+    renderer.drawSphere(glm::vec3(1.0f, 1.0f, 0.0f), 0.03f);
+    renderer.drawLine(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f) + glm::vec3(0.3f, 0.5f, 0.25f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void Scene2::onGUI() {
     ImGui::SliderFloat("Time Step", &_step, 0.001f, 2.0f);
+
+    if(ImGui::IsMouseDown(ImGuiMouseButton_Right)){   
+        auto drag = ImGui::GetMouseDragDelta(1);
+        if(drag.x != 0 || drag.y != 0) {
+            glm::vec3 dx = drag.x * right;
+            glm::vec3 dy = -drag.y * up;
+            _interaction_external_force.setForce((dx + dy), _test_cube.getCenterOfMassWorld());
+        }
+        else {
+            _interaction_external_force.setForce(glm::vec3(0.0f), glm::vec3(0.0f));
+        }
+    }
+    else {
+        _interaction_external_force.setForce(glm::vec3(0.0f), glm::vec3(0.0f));
+    }
 }
 
 Scene2::~Scene2() {
