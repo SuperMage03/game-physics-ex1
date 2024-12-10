@@ -92,7 +92,7 @@ public:
                 ROPE.applyForceToObject(
                     0,
                     Force (
-                        (dx + dy) / 50.,
+                        (dx + dy) / 25.,
                         ROPE.getObject(0).f_transform.f_position
                     )
                 );

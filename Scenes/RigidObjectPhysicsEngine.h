@@ -114,13 +114,13 @@ public:
                 auto collisionInfo = collisionTools::checkCollisionSAT(transformA, transformB);
 
                 if (!collisionInfo.isColliding) continue;
-                
                 // Create collision
                 Collision collision(
                     boxA,
                     boxB,
                     collisionInfo.collisionPointWorld,
-                    collisionInfo.normalWorld
+                    collisionInfo.normalWorld,
+                    collisionInfo.depth
                 );
                 collisions.emplace_back(std::move(collision));
             }
@@ -208,6 +208,10 @@ public:
         collision.f_objB->f_angularMomentum -= glm::cross(collision.f_collisionPointBLocal, collision.f_impulse * collision.f_normal);
         // Recalculate angular velocity
         collision.f_objB->calculateAngularVelocity();
+
+        //Push boxes out of eachother
+        collision.f_objA->f_transform.f_position += collision.f_depth * collision.f_normal / 2.;
+        collision.f_objB->f_transform.f_position -= collision.f_depth * collision.f_normal / 2.;
 	}
 
     friend std::ostream& operator<<(std::ostream& os, const RigidObjectPhysicsEngine& ROPE) {

@@ -9,6 +9,7 @@ private:
     RigidObjectPhysicsEngine ROPE;
     float delta = 0.01;
     bool pause = true;
+    bool gravity = false;
 
     glm::dmat4 cameraMatrix = glm::dmat4(1);
     glm::dvec3 fwd = glm::dvec3(1, 0, 0);
@@ -119,6 +120,14 @@ public:
 
     void simulateStep() override {
         if (!pause) {
+            if (gravity) {
+                ROPE.applyForceToObject(0, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getObject(0).f_transform.f_position));
+                ROPE.applyForceToObject(1, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getObject(1).f_transform.f_position));
+                ROPE.applyForceToObject(2, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getObject(2).f_transform.f_position));
+                ROPE.applyForceToObject(3, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getObject(3).f_transform.f_position));
+                ROPE.applyForceToObject(4, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getObject(4).f_transform.f_position));
+                ROPE.applyForceToObject(5, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getObject(5).f_transform.f_position));
+            }
             ROPE.simulateStep(delta);
         }
     }
@@ -136,6 +145,7 @@ public:
     void onGUI() override {
         ImGui::SliderFloat("Delta", &this->delta, 0.f, 0.1);
         ImGui::Checkbox("Pause", &this->pause);
+        ImGui::Checkbox("Gravity", &this->gravity);
 
         if(ImGui::IsMouseDown(ImGuiMouseButton_Right)){   
             auto drag = ImGui::GetMouseDragDelta(1);
@@ -145,7 +155,7 @@ public:
                 ROPE.applyForceToObject(
                     0,
                     Force (
-                        (dx + dy) / 50.,
+                        (dx + dy) / 25.,
                         ROPE.getObject(0).f_transform.f_position
                     )
                 );

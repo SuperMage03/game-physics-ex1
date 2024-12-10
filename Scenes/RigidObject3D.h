@@ -724,6 +724,7 @@ struct Collision {
 	glm::dvec3 f_relativeVelocity;
 	glm::dvec3 f_normal;
 	glm::dvec3 f_tangent;
+	double f_depth;
 
 	double f_impulse;
 
@@ -736,19 +737,22 @@ struct Collision {
 	f_relativeVelocity(0.),
 	f_normal(0.),
 	f_tangent(0.),
-	f_impulse(0.)
+	f_impulse(0.),
+	f_depth(0.)
     {}
 
 	Collision(
 		std::shared_ptr<RigidObject3D> objA, 
 		std::shared_ptr<RigidObject3D> objB,
 		glm::dvec3 collisionPoint,
-		glm::dvec3 normal
+		glm::dvec3 normal,
+		double depth
 	):
     f_objA(objA),
     f_objB(objB),
 	f_collisionPoint(collisionPoint),
-	f_normal(normal)
+	f_normal(normal),
+	f_depth(depth)
     {
 		calculateRelativeVelocity();
 		calculateTangent();
@@ -759,12 +763,14 @@ struct Collision {
 		RigidObject3D* objA, 
 		RigidObject3D* objB,
 		glm::dvec3 collisionPoint,
-		glm::dvec3 normal
+		glm::dvec3 normal,
+		double depth
 	):
     f_objA(objA),
     f_objB(objB),
 	f_collisionPoint(collisionPoint),
-	f_normal(normal)
+	f_normal(normal),
+	f_depth(depth)
     {
 		calculateRelativeVelocity();
 		calculateTangent();
