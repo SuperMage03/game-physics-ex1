@@ -84,7 +84,11 @@ public:
     void onGUI() override {
         ImGui::SliderFloat("Delta", &this->delta, 0.f, 0.1);
         ImGui::Checkbox("Pause", &this->pause);
-
+        ImGui::Text("RMB + drag : apply force to one of the objects.");
+        ImGui::Text("Space : pause/unpause");
+        if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
+            this->pause = !this->pause;
+        }
         if(ImGui::IsMouseDown(ImGuiMouseButton_Right)){   
             auto drag = ImGui::GetMouseDragDelta(1);
             if(drag.x != 0 || drag.y != 0) {
