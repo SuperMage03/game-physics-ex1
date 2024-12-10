@@ -51,6 +51,7 @@ public:
         double delta = 2.;
         ROPE.euIntegrate(delta);
 
+        std::cout << "+++++++++++ SCENE SINGLE STEP +++++++++++" << std::endl;
         std::cout << "======== Final system state ========" << std::endl
         << ROPE << std::endl << std::endl;
     }
