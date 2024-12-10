@@ -4,6 +4,7 @@
 #include "RigidBody.hpp"
 #include "CollisionSolver.hpp"
 #include "CollisionContact.hpp"
+#include "WorldBound.hpp"
 
 class DynamicWorld {
 public:
@@ -25,6 +26,9 @@ public:
     void setIntegrationMode(const IntegrationMode& integration_mode);
 
     // Methods
+    void addWorldBound(WorldBound& bound);
+    void removeWorldBound(WorldBound& bound);
+
     void addCollidableObject(RigidBody& rb);
     void removeCollidableObject(RigidBody& rb);
     void addCollisionSolver(CollisionSolver& collision_solver);
@@ -38,6 +42,7 @@ public:
 protected:
     static std::unique_ptr<DynamicWorld> _singleton;
     
+    std::vector<WorldBound*> _world_bounds;
     std::vector<RigidBody*> _collidable_objects;
     std::vector<RigidBody*> _dynamic_objects;
     
@@ -52,4 +57,5 @@ protected:
     void simulateStepMidpoint(const float& step);
     void detectCollisions();
     void resolveCollisions();
+    void applyBoundCollisions();
 };

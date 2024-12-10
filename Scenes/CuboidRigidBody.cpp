@@ -1,8 +1,8 @@
 #include "CuboidRigidBody.hpp"
 #include <cmath>
 
-CuboidRigidBody::CuboidRigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction, const bool& is_dynamic):
-    RigidBody{position, scale, orientation, mass, elasticity, friction, is_dynamic, glm::vec3(0.0f)} {
+CuboidRigidBody::CuboidRigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction):
+    RigidBody{position, scale, orientation, mass, elasticity, friction, glm::vec3(0.0f)} {
     calculateInertiaTensorCuboid();
 }
 
@@ -16,6 +16,19 @@ bool CuboidRigidBody::containsPositionInBody(const glm::vec3 &world_position) co
     if (fabs(local_position.y) > 0.5f) return false;
     if (fabs(local_position.z) > 0.5f) return false;
     return true;
+}
+
+std::vector<glm::vec3> CuboidRigidBody::getVerticesWorldPositions() const
+{
+    return std::vector<glm::vec3>{_transform.getScaledLocalToWorldPosition(glm::vec3( 0.5f,  0.5f,  0.5f)),
+                                  _transform.getScaledLocalToWorldPosition(glm::vec3(-0.5f,  0.5f,  0.5f)),
+                                  _transform.getScaledLocalToWorldPosition(glm::vec3(-0.5f, -0.5f,  0.5f)),
+                                  _transform.getScaledLocalToWorldPosition(glm::vec3(-0.5f, -0.5f, -0.5f)),
+                                  _transform.getScaledLocalToWorldPosition(glm::vec3( 0.5f, -0.5f,  0.5f)),
+                                  _transform.getScaledLocalToWorldPosition(glm::vec3( 0.5f, -0.5f, -0.5f)),
+                                  _transform.getScaledLocalToWorldPosition(glm::vec3( 0.5f,  0.5f, -0.5f)),
+                                  _transform.getScaledLocalToWorldPosition(glm::vec3(-0.5f,  0.5f, -0.5f)),
+                                 };
 }
 
 void CuboidRigidBody::calculateInertiaTensorCuboid() {

@@ -20,6 +20,7 @@ private:
 class ExternalForceGenerator : public ForceGenerator {
 public:
     ExternalForceGenerator(const glm::vec3& force, const glm::vec3& world_position);
+    void setForce(const glm::vec3& force, const glm::vec3& world_position);
     void updateForce(RigidBody& rb, float duration) override;
 private:
     glm::vec3 _force;

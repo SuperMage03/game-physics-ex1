@@ -1,7 +1,7 @@
 #include "RigidBody.hpp"
 
-RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction, const bool& is_dynamic, const glm::vec3& center_of_mass): 
-    _transform{position, orientation, scale}, _mass{mass}, _elasticity{elasticity}, _friction{friction}, _is_dynamic{is_dynamic}, _center_of_mass{center_of_mass} {}
+RigidBody::RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass, const float& elasticity, const float& friction, const glm::vec3& center_of_mass): 
+    _transform{position, orientation, scale}, _mass{mass}, _elasticity{elasticity}, _friction{friction}, _center_of_mass{center_of_mass} {}
 
 Transform &RigidBody::getTransform() {
     return _transform;
@@ -23,10 +23,6 @@ float RigidBody::getFriction() const {
     return _friction;
 }
 
-bool RigidBody::isDynamic() const {
-    return _is_dynamic;
-}
-
 glm::vec3 RigidBody::getCenterOfMassWorld() const {
     return _transform.getUnscaledLocalToWorldPosition(_center_of_mass);
 }
@@ -40,7 +36,6 @@ glm::vec3 RigidBody::getLinearVelocity() const {
 }
 
 void RigidBody::setLinearVelocity(const glm::vec3 &linear_velocity) {
-    if (!_is_dynamic) return;
     _linear_velocity = linear_velocity;
 }
 
@@ -49,7 +44,6 @@ glm::vec3 RigidBody::getLinearAcceleration() const {
 }
 
 void RigidBody::setLinearAcceleration(const glm::vec3 &linear_acceleration) {
-    if (!_is_dynamic) return;
     _force = _mass * linear_acceleration;
 }
 
@@ -58,7 +52,6 @@ glm::vec3 RigidBody::getForce() const {
 }
 
 void RigidBody::setForce(const glm::vec3 &force) {
-    if (!_is_dynamic) return;
     _force = force;
 }
 
@@ -71,7 +64,6 @@ glm::quat RigidBody::getAngularVelocityQuat() const {
 }
 
 void RigidBody::setAngularVelocity(const glm::vec3 &angular_velocity) {
-    if (!_is_dynamic) return;
     _angular_momentum = getInertiaTensorWorld() * angular_velocity;
 }
 
@@ -80,7 +72,6 @@ glm::vec3 RigidBody::getAngularMomentum() const {
 }
 
 void RigidBody::setAngularMomentum(const glm::vec3& angular_momentum) {
-    if (!_is_dynamic) return;
     _angular_momentum = angular_momentum;
 }
 
@@ -89,7 +80,6 @@ glm::vec3 RigidBody::getTorque() const {
 }
 
 void RigidBody::setTorque(const glm::vec3 &torque) {
-    if (!_is_dynamic) return;
     _torque = torque;
 }
 

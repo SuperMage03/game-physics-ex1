@@ -33,6 +33,18 @@ void DynamicWorld::removeDynamicObject(RigidBody& rb) {
     }
 }
 
+void DynamicWorld::addWorldBound(WorldBound &bound) {
+    _world_bounds.emplace_back(&bound);
+}
+
+void DynamicWorld::removeWorldBound(WorldBound &bound) {
+    for (auto i = _world_bounds.begin(); i != _world_bounds.end(); i++) {
+        if (*i != &bound) continue;
+        _world_bounds.erase(i);
+        break;
+    }
+}
+
 void DynamicWorld::addCollidableObject(RigidBody &rb) {
     _collidable_objects.emplace_back(&rb);
 }
@@ -58,6 +70,7 @@ void DynamicWorld::removeCollisionSolver(CollisionSolver& collision_solver) {
 }
 
 void DynamicWorld::clear() {
+    _world_bounds.clear();
     _collidable_objects.clear();
     _dynamic_objects.clear();
     _collision_contacts.clear();
@@ -120,16 +133,14 @@ void DynamicWorld::simulateStepMidpoint(const float& step) {
         result_body_transform.setOrientation(result_body_transform.getOrientation() + 0.5f * result_body.getAngularVelocityQuat() * result_body_transform.getOrientation() * step);
     }
 
-    // Check Collision
-    // CollisionRegistry::getInstance()->applyCollisions();
+    _collision_contacts.clear();
+    detectCollisions();
+    resolveCollisions();
+    applyBoundCollisions();
     
     // Let the forces and torques to be recalculated
     clearAccumulators();
     ForceRegistry::getInstance()->updateForces();
-    
-    _collision_contacts.clear();
-    detectCollisions();
-    resolveCollisions();
 
     // Calculate derived data (can be implemented if needed)
     // for (auto& rb : _objects) {
@@ -155,15 +166,9 @@ void DynamicWorld::simulateStepMidpoint(const float& step) {
 }
 
 void DynamicWorld::simulateStep(const float& step) {
-    // Check Collision
-    // CollisionRegistry::getInstance()->applyCollisions();
     // Calculate the forces and torques
     clearAccumulators();
     ForceRegistry::getInstance()->updateForces();
-
-    _collision_contacts.clear();
-    detectCollisions();
-    resolveCollisions();
 
     // Calculate derived data (can be implemented if needed)
     // for (auto& rb : _objects) {
@@ -180,6 +185,11 @@ void DynamicWorld::simulateStep(const float& step) {
     default:
         break;
     }
+
+    _collision_contacts.clear();
+    detectCollisions();
+    resolveCollisions();
+    applyBoundCollisions();
 }
 
 void DynamicWorld::detectCollisions() {
@@ -196,5 +206,45 @@ void DynamicWorld::detectCollisions() {
 void DynamicWorld::resolveCollisions() {
     for (auto& collision_solver : _collision_solvers) {
         collision_solver->resolveContacts(_collision_contacts, 0.0f);
+    }
+}
+void DynamicWorld::applyBoundCollisions() {
+    for (auto& object : _collidable_objects) {
+        for (auto& bound : _world_bounds) {
+            std::vector<glm::vec3> vertices_positions = object->getVerticesWorldPositions();
+            float max_out_of_bound_distance = -1.0f;
+            glm::vec3 max_out_of_bound_vertex_position = glm::vec3(0.0f);
+            for (const auto& vertices_position : vertices_positions) {
+                float dist_out_of_bound = bound->distanceOutOfBound(vertices_position);
+                if (max_out_of_bound_distance < dist_out_of_bound) {
+                    max_out_of_bound_distance = dist_out_of_bound;
+                    max_out_of_bound_vertex_position = vertices_position;
+                }
+            }
+
+            if (max_out_of_bound_distance < 0.0f) continue;
+
+            glm::vec3 relative_velocity = object->getVelocityOfPoint(max_out_of_bound_vertex_position);
+            glm::vec3 contact_position_body = object->getWorldToBodyPosition(max_out_of_bound_vertex_position);
+
+            // Bodies are separating
+            if (glm::dot(relative_velocity, bound->getNormal()) > 0.0f) return;
+
+            float j = glm::dot(-(1.0f + object->getElasticity()) * relative_velocity, bound->getNormal()) / 
+                    (object->getInverseMass() + 
+                     glm::dot(glm::cross(object->getInverseInertiaTensorWorld() * glm::cross(contact_position_body, bound->getNormal()), contact_position_body), bound->getNormal()));
+
+            glm::vec3 tangential_direction = glm::cross(glm::cross(bound->getNormal(), relative_velocity), bound->getNormal());
+            float tangential_direction_magnitude = glm::length(tangential_direction);
+            if (tangential_direction_magnitude > 0.0f) {
+                tangential_direction /= tangential_direction_magnitude;
+            }
+
+            object->setLinearVelocity(object->getLinearVelocity() + (j * object->getInverseMass()) * (bound->getNormal() - object->getFriction() * tangential_direction));
+            object->setAngularMomentum(object->getAngularMomentum() + glm::cross(contact_position_body, j * bound->getNormal()));
+
+            glm::vec3 fixing_vector = bound->getNormal() * max_out_of_bound_distance;
+            object->getTransform().setPosition(object->getTransform().getPosition() + fixing_vector);
+        }
     }
 };

@@ -20,7 +20,8 @@ static void drawLocalAxis(Renderer& renderer, RigidBody& rb) {
 void Scene4::init() {
     DynamicWorld::getInstance()->setIntegrationMode(DynamicWorld::IntegrationMode::EULER);
     DynamicWorld::getInstance()->addCollisionSolver(_impulse_solver);
-    DynamicWorld::getInstance()->addCollidableObject(_ground_cube);
+    DynamicWorld::getInstance()->addWorldBound(_bound);
+
     DynamicWorld::getInstance()->addCollidableObject(_test_cube_a);
     DynamicWorld::getInstance()->addDynamicObject(_test_cube_a);
     DynamicWorld::getInstance()->addCollidableObject(_test_cube_b);
@@ -29,6 +30,7 @@ void Scene4::init() {
     // _test_cube_b.setLinearVelocity(glm::vec3(-0.2f, 0.0f, 0.0f));
     ForceRegistry::getInstance()->add(_test_cube_a, gravity_force_generator);
     ForceRegistry::getInstance()->add(_test_cube_b, gravity_force_generator);
+    ForceRegistry::getInstance()->add(_test_cube_a, _interaction_external_force);
 }
 
 void Scene4::simulateStep() {
@@ -36,13 +38,33 @@ void Scene4::simulateStep() {
 }
 
 void Scene4::onDraw(Renderer &renderer) {
+    cameraMatrix = renderer.camera.viewMatrix;
+    fwd = inverse(cameraMatrix) * glm::vec4(0, 0, 1, 0);
+    right = inverse(cameraMatrix) * glm::vec4(1, 0, 0, 0);
+    up = inverse(cameraMatrix) * glm::vec4(0, 1, 0, 0);
+    
     renderer.drawCube(_test_cube_a.getTransform().getPosition(), _test_cube_a.getTransform().getOrientation(), _test_cube_a.getTransform().getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
     renderer.drawCube(_test_cube_b.getTransform().getPosition(), _test_cube_b.getTransform().getOrientation(), _test_cube_b.getTransform().getScale(), glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
-    renderer.drawCube(_ground_cube.getTransform().getPosition(), _ground_cube.getTransform().getOrientation(), _ground_cube.getTransform().getScale(), glm::vec4(1.0f));
+    renderer.drawQuad(glm::vec3(0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec2(20.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 }
 
 void Scene4::onGUI() {
     ImGui::SliderFloat("Time Step", &_step, 0.001f, 2.0f);
+
+    if(ImGui::IsMouseDown(ImGuiMouseButton_Right)){   
+        auto drag = ImGui::GetMouseDragDelta(1);
+        if(drag.x != 0 || drag.y != 0) {
+            glm::vec3 dx = drag.x * right;
+            glm::vec3 dy = -drag.y * up;
+            _interaction_external_force.setForce((dx + dy), _test_cube_a.getCenterOfMassWorld());
+        }
+        else {
+            _interaction_external_force.setForce(glm::vec3(0.0f), glm::vec3(0.0f));
+        }
+    }
+    else {
+        _interaction_external_force.setForce(glm::vec3(0.0f), glm::vec3(0.0f));
+    }
 }
 
 Scene4::~Scene4() {

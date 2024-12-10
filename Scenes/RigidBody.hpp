@@ -1,5 +1,6 @@
 #pragma once
 #include <ostream>
+#include <vector>
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -11,7 +12,7 @@ Body Space = World Space - Center of Mass in World Space
 
 class RigidBody {
 public:
-    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f, const float& elasticity = 1.0f, const float& friction = 0.0f, const bool& is_dynamic = true, const glm::vec3& center_of_mass = glm::vec3(0.0f));
+    RigidBody(const glm::vec3& position, const glm::vec3& scale, const glm::quat& orientation, const float& mass = 1.0f, const float& elasticity = 1.0f, const float& friction = 0.0f, const glm::vec3& center_of_mass = glm::vec3(0.0f));
     
     // Getters and Setters
     Transform& getTransform();
@@ -20,7 +21,6 @@ public:
     float getInverseMass() const;
     float getElasticity() const;
     float getFriction() const;
-    bool isDynamic() const;
 
     glm::vec3 getCenterOfMassWorld() const;
     glm::vec3 getWorldToBodyPosition(const glm::vec3& world_position) const;
@@ -65,6 +65,7 @@ public:
     virtual ~RigidBody();
     virtual std::unique_ptr<RigidBody> clone() = 0;
     virtual bool containsPositionInBody(const glm::vec3& world_position) const = 0;
+    virtual std::vector<glm::vec3> getVerticesWorldPositions() const = 0;
 protected:
     // Private Member Values
     Transform _transform;
@@ -72,7 +73,6 @@ protected:
     float _mass{1.0f};
     float _elasticity{1.0f}; // 0 (Inelastic) to 1 (Elastic)
     float _friction{0.0f};
-    bool _is_dynamic{true};
 
     glm::vec3 _center_of_mass{0.0f}; // In unscaled local space
     
