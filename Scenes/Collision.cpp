@@ -172,8 +172,8 @@ void Collision::handleCollisions() {
                 glm::vec3 cCollisionPointWorld = info.collisionPointWorld;
                 glm::vec3 distanceAtoC = cCollisionPointWorld - a.XCMpositionCentreOfMass;
                 glm::vec3 distanceBtoC = cCollisionPointWorld - b.XCMpositionCentreOfMass;
-                glm::vec3 velocityDifferenceA = a.vLinearVelocity + glm::cross(distanceAtoC, a.wAngularVelocity);
-                glm::vec3 velocityDifferenceB = b.vLinearVelocity + glm::cross(distanceBtoC, b.wAngularVelocity);
+                glm::vec3 velocityDifferenceA = a.vLinearVelocity + glm::cross(a.wAngularVelocity, distanceAtoC);
+                glm::vec3 velocityDifferenceB = b.vLinearVelocity + glm::cross(b.wAngularVelocity, distanceBtoC);
                 glm::vec3 vRel = velocityDifferenceA - velocityDifferenceB;
 
                 // check if bodies are separating
