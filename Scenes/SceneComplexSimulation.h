@@ -22,7 +22,7 @@ public:
     {}
 
     void init() override {
-        ROPE.f_integrationType = IntegrationType::EULER;
+        ROPE.f_integrationType = IntegrationType::MIDPOINT;
 
         std::shared_ptr<Box> box1 (new Box(
             2., // mass
