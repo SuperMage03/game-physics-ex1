@@ -26,7 +26,7 @@ public:
         std::shared_ptr<Box> box1 (new Box(
             8., // mass
             0.5, // c
-            1., // mu
+            0.25, // mu
             std::move(glm::dvec3(0.)), // pos
             std::move(glm::dvec3(2., 1.2, 0.3)), // scale
             std::move(glm::dvec3(0., 0., 0.)), // angles

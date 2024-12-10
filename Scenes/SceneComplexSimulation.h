@@ -27,7 +27,7 @@ public:
         std::shared_ptr<Box> box1 (new Box(
             2., // mass
             0.5, // c
-            1., // mu
+            0.25, // mu
             std::move(glm::dvec3(-1., 0., 0.)), // pos
             std::move(glm::dvec3(0.6, 0.6, 0.6)), // scale
             std::move(glm::dvec3(0., 0., 0.)), // angles
@@ -37,7 +37,7 @@ public:
         std::shared_ptr<Box> box2 (new Box(
             2., // mass
             0.5, // c
-            1., // mu
+            0.25, // mu
             std::move(glm::dvec3(1., 0., 0.)), // pos
             std::move(glm::dvec3(0.6, 0.6, 0.6)), // scale
             std::move(glm::dvec3(0., 0., 0.)), // angles
@@ -47,7 +47,7 @@ public:
         std::shared_ptr<Box> box3 (new Box(
             2., // mass
             0.5, // c
-            1., // mu
+            0.25, // mu
             std::move(glm::dvec3(0., -1., 0.)), // pos
             std::move(glm::dvec3(0.6, 0.6, 0.6)), // scale
             std::move(glm::dvec3(0., 0., 0.)), // angles
@@ -57,7 +57,7 @@ public:
         std::shared_ptr<Box> box4 (new Box(
             2., // mass
             0.5, // c
-            1., // mu
+            0.25, // mu
             std::move(glm::dvec3(0., 1., 0.)), // pos
             std::move(glm::dvec3(0.6, 0.6, 0.6)), // scale
             std::move(glm::dvec3(0., 0., 0.)), // angles
@@ -67,7 +67,7 @@ public:
         std::shared_ptr<Box> box5 (new Box(
             2., // mass
             0.5, // c
-            1., // mu
+            0.25, // mu
             std::move(glm::dvec3(0., 0., -1.)), // pos
             std::move(glm::dvec3(0.6, 0.6, 0.6)), // scale
             std::move(glm::dvec3(0., 0., 0.)), // angles
@@ -77,7 +77,7 @@ public:
         std::shared_ptr<Box> box6 (new Box(
             2., // mass
             0.5, // c
-            1., // mu
+            0.25, // mu
             std::move(glm::dvec3(0., 0., 1.)), // pos
             std::move(glm::dvec3(0.6, 0.6, 0.6)), // scale
             std::move(glm::dvec3(0., 0., 0.)), // angles

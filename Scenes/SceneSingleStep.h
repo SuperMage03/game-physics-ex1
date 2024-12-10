@@ -23,7 +23,7 @@ public:
         std::shared_ptr<Box> box1 (new Box(
             2.,
             0.,
-            0.5,
+            0.25,
             std::move(glm::dvec3(0.)),
             std::move(glm::dvec3(1., 0.6, 0.5)),
             std::move(glm::dvec3(0., 0., glm::pi<double>() / 2.)),
