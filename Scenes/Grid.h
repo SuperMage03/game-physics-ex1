@@ -21,6 +21,7 @@ namespace Grid {
         glm::dvec2 f_steps;
     
     public:
+    
         #pragma region Constructors
 
         Grid2D():
@@ -126,6 +127,27 @@ namespace Grid {
                 f_origin.x + f_steps.x * i,
                 f_origin.y + f_steps.y * j
             );
+        }
+
+        glm::dvec3 getPoint3D(unsigned i, unsigned j) const {
+            // Check if invalid indices
+            if (i >= f_n || j >= f_m) return glm::dvec3(f_origin.x, f_origin.y, -2.5);
+
+            // Otherwise calculate point coordinates
+            return glm::dvec3(
+                f_origin.x + f_steps.x * i,
+                f_origin.y + f_steps.y * j,
+                -2.5
+            );
+        }
+
+        void onDraw(Renderer &renderer) {
+            for(unsigned i = 0; i < f_n; i++) {
+                renderer.drawLine(getPoint3D(i, 0), getPoint3D(i, f_m - 1), glm::vec3(0.5, 0.5, 0.5));
+            }
+            for(unsigned j = 0; j < f_m; j++) {
+                renderer.drawLine(getPoint3D(0, j), getPoint3D(f_n - 1, j), glm::vec3(0.5, 0.5, 0.5));
+            }
         }
     };
 

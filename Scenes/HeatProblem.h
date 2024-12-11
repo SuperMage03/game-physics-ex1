@@ -26,6 +26,17 @@ namespace HeatProblem {
         ScalarFunction1D f_boundaryConditionY0;
         ScalarFunction1D f_boundaryConditionY1;
 
+        HeatProblemRectDBC2D():
+        f_domainOrigin(0.),
+        f_domainSize(0.),
+        f_mu(0.),
+        f_initialCondition(nullptr),
+        f_boundaryConditionX0(nullptr),
+        f_boundaryConditionX1(nullptr),
+        f_boundaryConditionY0(nullptr),
+        f_boundaryConditionY1(nullptr)
+        {}
+
         HeatProblemRectDBC2D(
             const glm::dvec2& domainOrigin,
             const glm::dvec2& domainSize,

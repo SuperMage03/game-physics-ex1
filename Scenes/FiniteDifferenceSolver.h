@@ -2,14 +2,20 @@
 
 #include "HeatProblem.h"
 #include "GridFunction.h"
-#include "pcgsolver.h"
+#include "util/pcgsolver.h"
 
 namespace FiniteDifferenceSolver {
     class FD_HPRDBC2D_Solver {
+    private:
         // Problem
         HeatProblem::HeatProblemRectDBC2D f_problem;
+    
+    public:
 
         #pragma region Constructors
+        FD_HPRDBC2D_Solver():
+        f_problem()
+        {}
 
         FD_HPRDBC2D_Solver(
             const HeatProblem::HeatProblemRectDBC2D& problem
@@ -99,13 +105,13 @@ namespace FiniteDifferenceSolver {
             return initialState;
         }
 
-        void propagateStateExplicitSelf(GridFunction::ScalarGridFunction2D& state, double delta) {
+        void propagateStateExplicitOn(GridFunction::ScalarGridFunction2D& state, double delta) {
             // Make currect state values copy
             GridFunction::IntegerGridScalarFunction2D stCp = state.getIntegerGridScalarFunction();
 
-            // Update values
-            for (unsigned i = 0; i < state.getN(); i++) {
-                for (unsigned j = 0; j < state.getM(); j++) {
+            // Update interior values
+            for (unsigned i = 1; i < state.getN() - 1; i++) {
+                for (unsigned j = 1; j < state.getM() - 1; j++) {
                     double value = stCp.getValue(i, j)
                         + f_problem.f_mu * delta * (
                             (stCp.getValue(i + 1, j) - 2 * stCp.getValue(i, j) + stCp.getValue(i - 1, j)) / (state.getStepX() * state.getStepX())
@@ -114,18 +120,22 @@ namespace FiniteDifferenceSolver {
                     state.setValue(i, j, value);
                 }
             }
+
+            // Enforce boundary conditions
+            enforceBoundaryConditionsOn(state);
         }
 
-        void propagateStateImplicitSelf(GridFunction::ScalarGridFunction2D& state, double delta) {
+        void propagateStateImplicitOn(GridFunction::ScalarGridFunction2D& state, double delta) {
             // Make currect state values copy
             GridFunction::IntegerGridScalarFunction2D stCp = state.getIntegerGridScalarFunction();
 
             // Fill system matrix and RHS vector
-            SparseMatrix<double> A(0, 5);
-            std::vector<double> rhs(state.getN() * state.getM());
-            for (unsigned i = 0; i < state.getN(); i++) {
-                for (unsigned j = 0; j < state.getM(); j++) {
-                    unsigned id = i * state.getM() + j;
+            SparseMatrix<double> A((state.getN() - 2) * (state.getM() - 2), 5);
+            A.zero();
+            std::vector<double> rhs((state.getN() - 2) * (state.getM() - 2));
+            for (unsigned i = 1; i < state.getN() - 1; i++) {
+                for (unsigned j = 1; j < state.getM() - 1; j++) {
+                    unsigned id = (i - 1) * (state.getM() - 2) + (j - 1);
                     // Set matrix value for id, (i,j)
                     double majorValue = - 1. / delta
                         - f_problem.f_mu * 2 * (
@@ -137,19 +147,24 @@ namespace FiniteDifferenceSolver {
                     // Set matrix values for (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)
                     double minorValueX = f_problem.f_mu / (state.getStepX() * state.getStepX());
                     double minorValueY = f_problem.f_mu / (state.getStepY() * state.getStepY());
-                    A.set_element(id, (i - 1) * state.getM() + j, minorValueX);
-                    A.set_element(id, (i + 1) * state.getM() + j, minorValueX);
-                    A.set_element(id, i * state.getM() + j - 1, minorValueY);
-                    A.set_element(id, i * state.getM() + j + 1, minorValueY);
+                    if (i != 1) A.set_element(id, (i - 2) * (state.getM() - 2) + (j - 1), minorValueX);
+                    if (i != state.getN() - 2) A.set_element(id, (i) * (state.getM() - 2) + (j - 1), minorValueX);
+                    if (j != 1) A.set_element(id, (i - 1) * (state.getM() - 2) + (j - 2), minorValueY);
+                    if (j != state.getM() - 2) A.set_element(id, (i - 1) * (state.getM() - 2) + (j), minorValueY);
 
                     // Set RHS vector values
-                    rhs[id] = -stCp.getValue(i, j) / delta;
+                    double rhsValue = -stCp.getValue(i, j) / delta;
+                    if (i == 1) rhsValue += -f_problem.f_mu * stCp.getValue(i - 1, j) / (state.getStepX() * state.getStepX());
+                    if (i == state.getN() - 2) rhsValue += -f_problem.f_mu * stCp.getValue(i + 1, j) / (state.getStepX() * state.getStepX());
+                    if (j == 1) rhsValue += -f_problem.f_mu * stCp.getValue(i, j - 1) / (state.getStepY() * state.getStepY());
+                    if (j == state.getM() - 2) rhsValue += -f_problem.f_mu * stCp.getValue(i, j + 1) / (state.getStepY() * state.getStepY());
+                    rhs[id] = rhsValue;
                 }
             }
 
             // Solve system
             SparsePCGSolver<double> SPCGS;
-            std::vector<double> result(state.getN() * state.getM());
+            std::vector<double> result((state.getN() - 2) * (state.getM() - 2));
             double residual;
             int iterations;
             SPCGS.solve(A, rhs, result, residual, iterations);
@@ -160,7 +175,10 @@ namespace FiniteDifferenceSolver {
                     unsigned id = i * state.getM() + j;
                     state.setValue(i, j, result[id]);
                 }
-            }     
+            }
+
+            // Enforce boundary conditions
+            enforceBoundaryConditionsOn(state);
         }
     };
 }

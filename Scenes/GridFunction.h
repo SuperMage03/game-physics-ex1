@@ -7,34 +7,13 @@ namespace GridFunction {
     class IntegerGridScalarFunction2D {
     private:
         // Grid dimensions
-        // Number of rows
+        // Dimension wrt X
         unsigned f_n; 
-        // Number of columns
+        // Dimension wrt Y
         unsigned f_m;
 
         // Function values
-        double** f_values;
-    
-    private:
-
-        void deleteValues() {
-            // Clear rows
-            for (unsigned row = 0; row < f_n; row++) {
-                delete f_values[row];
-            }
-            // Clear row pointers
-            delete f_values;
-        }
-
-        void allocateValues() {
-            if (f_n == 0 || f_m == 0) return;
-            // Allocate row pointers
-            f_values = new double*[f_n];
-            // Allocate rows
-            for (unsigned row = 0; row < f_n; row++) {
-                f_values[row] = new double[f_m];
-            }
-        }
+        std::vector<std::vector<double>> f_values;
 
     public:
 
@@ -43,19 +22,20 @@ namespace GridFunction {
         IntegerGridScalarFunction2D():
         f_n(0),
         f_m(0),
-        f_values(nullptr)
+        f_values(0.)
         {}
 
         IntegerGridScalarFunction2D(const IntegerGridScalarFunction2D& other):
         f_n(other.f_n),
-        f_m(other.f_m)
-        {
-            for (unsigned row = 0; row < other.f_n; row++) {
-                for (unsigned col = 0; col < other.f_m; col++) {
-                    f_values[row][col] = other.f_values[row][col];
-                }
-            }
-        }
+        f_m(other.f_m),
+        f_values(other.f_values)
+        {}
+
+        IntegerGridScalarFunction2D(IntegerGridScalarFunction2D&& other):
+        f_n(other.f_n),
+        f_m(other.f_m),
+        f_values(std::move(other.f_values))
+        {}
 
         IntegerGridScalarFunction2D(
             unsigned n,
@@ -64,7 +44,7 @@ namespace GridFunction {
         f_n(n),
         f_m(m)
         {
-            allocateValues();
+            resize();
         }
 
         IntegerGridScalarFunction2D(
@@ -75,12 +55,21 @@ namespace GridFunction {
         f_n(n),
         f_m(m)
         {
-            allocateValues();
-            setAllValues(value);
+            f_values.resize(n);
+            for (unsigned i = 0; i < n; i++) {
+                f_values[i].resize(m);
+                for (unsigned j = 0; j < m; j++) {
+                    f_values[i][j] = value;
+                }
+            }
         }
 
-        ~IntegerGridScalarFunction2D() {
-            deleteValues();
+        private:
+        void resize() {
+            f_values.resize(f_n);
+            for (unsigned i = 0; i < f_n; i++) {
+                f_values[i].resize(f_m);
+            }
         }
 
         #pragma endregion
@@ -93,24 +82,24 @@ namespace GridFunction {
 
         unsigned getM() const {return f_m;}
 
-        double getValue(unsigned row, unsigned col) {
+        double getValue(unsigned i, unsigned j) {
             // Check if invalid indices
-            if (row >= f_n || col >= f_m) return 0.;
-
-            return f_values[row][col];
+            if (i >= f_n || j >= f_m) return 0.;
+            return f_values[i][j];
         }
 
-        bool setValue(unsigned row, unsigned col, double value) {
+        bool setValue(unsigned i, unsigned j, double value) {
             // Check if invalid indices
-            if (row >= f_n || col >= f_m) return false;
+            if (i >= f_n || j >= f_m) return false;
 
-            f_values[row][col] = value;
+            f_values[i][j] = value;
+            return true;
         }
 
         void setAllValues(double value) {
-            for (unsigned row = 0; row < f_n; row++) {
-                for (unsigned col = 0; col < f_m; col++) {
-                    f_values[row][col] = 0;
+            for (unsigned i = 0; i < f_n; i++) {
+                for (unsigned j = 0; j < f_m; j++) {
+                    f_values[i][j] = 0;
                 }
             }
         }
@@ -119,18 +108,49 @@ namespace GridFunction {
             f_n = 0;
             f_m = 0;
 
-            deleteValues();
+            for (unsigned i = 0; i < f_n; i++) {
+                f_values[i].clear();
+            }
+            f_values.clear();
         }
 
         void reallocate(unsigned n, unsigned m) {
-            deleteValues();
+            clear();
             f_n = n;
             f_m = m;
-
-            allocateValues();
+            resize();
         }
 
         #pragma endregion
+
+        IntegerGridScalarFunction2D& operator=(const IntegerGridScalarFunction2D& other) {
+            if (this == &other) return *this;
+            clear();
+
+            f_n = other.f_n;
+            f_m = other.f_m;
+
+            resize();
+
+            for (unsigned i = 0; i < other.f_n; i++) {
+                for (unsigned j = 0; j < other.f_m; j++) {
+                    f_values[i][j] = other.f_values[i][j];
+                }
+            }
+
+            return *this;
+        }
+
+        IntegerGridScalarFunction2D& operator=(IntegerGridScalarFunction2D&& other) {
+            if (this == &other) return *this;
+            clear();
+
+            f_n = other.f_n;
+            f_m = other.f_m;
+            f_values = std::move(other.f_values);
+
+            return *this;
+        }
     };
 
     class ScalarGridFunction2D {
@@ -195,8 +215,8 @@ namespace GridFunction {
 
         #pragma region Getters and Setters
         
-        glm::dvec2 getPoint(unsigned row, unsigned col) const {
-            f_grid.getPoint(row, col);
+        glm::dvec2 getPoint(unsigned i, unsigned j) const {
+            return f_grid.getPoint(i, j);
         }
 
         unsigned getN() const {return f_function.getN();}
@@ -207,8 +227,8 @@ namespace GridFunction {
 
         GridFunction::IntegerGridScalarFunction2D getIntegerGridScalarFunction() const {return f_function;}
 
-        double getValue(unsigned row, unsigned col) {
-            return f_function.getValue(row, col);
+        double getValue(unsigned i, unsigned j) {
+            return f_function.getValue(i, j);
         }
 
         glm::dvec2 getSteps() const {return f_grid.getSteps();}
@@ -225,8 +245,8 @@ namespace GridFunction {
             f_grid.setSize(size);
         }
 
-        bool setValue(unsigned row, unsigned col, double value) {
-            return f_function.setValue(row, col, value);
+        bool setValue(unsigned i, unsigned j, double value) {
+            return f_function.setValue(i, j, value);
         }
 
         void setAllValues(double value) {
@@ -256,6 +276,55 @@ namespace GridFunction {
         }
 
         #pragma endregion
+
+        void onDraw(Renderer &renderer) {
+            //f_grid.onDraw(renderer);
+            for (unsigned i = 0; i < f_function.getN(); i++) {
+                for (unsigned j = 0; j < f_function.getM(); j++) {
+                    renderer.drawSphere(
+                        f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
+                        0.03,
+                        glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 1.)
+                    );
+                }
+            }
+            for (unsigned i = 0; i < f_function.getN() - 1; i++) {
+                for (unsigned j = 0; j < f_function.getM() - 1; j++) {
+                    renderer.drawLine(
+                        f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
+                        f_grid.getPoint3D(i + 1, j) + glm::dvec3(0., 0., f_function.getValue(i + 1, j)),
+                        glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 0.5),
+                        glm::vec4(f_function.getValue(i + 1, j) / 5., 0., (1 - f_function.getValue(i + 1, j) / 5.), 0.5)
+                    );
+                    renderer.drawLine(
+                        f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
+                        f_grid.getPoint3D(i, j + 1) + glm::dvec3(0., 0., f_function.getValue(i, j + 1)),
+                        glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 0.5),
+                        glm::vec4(f_function.getValue(i, j + 1) / 5., 0., (1 - f_function.getValue(i, j + 1) / 5.), 0.5)
+                    );
+                }
+            }
+            // Draw remaining lines
+            for (unsigned i = 0; i < f_function.getN() - 1; i++) {
+                unsigned j = f_function.getM() - 1;
+                renderer.drawLine(
+                    f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
+                    f_grid.getPoint3D(i + 1, j) + glm::dvec3(0., 0., f_function.getValue(i + 1, j)),
+                    glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 0.5),
+                    glm::vec4(f_function.getValue(i + 1, j) / 5., 0., (1 - f_function.getValue(i + 1, j) / 5.), 0.5)
+                );
+            }
+
+            for (unsigned j = 0; j < f_function.getM() - 1; j++) {
+                unsigned i = f_function.getN() - 1;
+                renderer.drawLine(
+                        f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
+                        f_grid.getPoint3D(i, j + 1) + glm::dvec3(0., 0., f_function.getValue(i, j + 1)),
+                        glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 0.5),
+                        glm::vec4(f_function.getValue(i, j + 1) / 5., 0., (1 - f_function.getValue(i, j + 1) / 5.), 0.5)
+                    );
+            }
+        }
     };
 
 }
