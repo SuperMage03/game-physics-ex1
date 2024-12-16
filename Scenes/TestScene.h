@@ -19,7 +19,7 @@ public:
             HeatProblem::HeatProblemRectDBC2D(
                 glm::dvec2(-2., -2.),
                 glm::dvec2(4., 4.),
-                1.,
+                0.1,
                 [](glm::dvec2 point) {
                     return (point.x + 2) * (point.x - 2) * (point.y + 2) * (point.y - 2) / 3.5;
                 },

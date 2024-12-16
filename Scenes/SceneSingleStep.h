@@ -16,7 +16,7 @@ class SceneSingleStep : public Scene {
             HeatProblem::HeatProblemRectDBC2D(
                 glm::dvec2(0., 0.),
                 glm::dvec2(2., 4.),
-                1.,
+                0.1,
                 [](glm::dvec2 point) {
                     return 0.;
                 },
@@ -79,29 +79,3 @@ class SceneSingleStep : public Scene {
         ImGui::Checkbox("Pause", &this->f_pause);
     }
 };
-
-/*
-void onGUI() override {
-    ImGui::SliderFloat("Delta", &this->f_delta, 0.f, 0.1);
-    ImGui::Checkbox("Pause", &this->f_pause);
-    ImGui::Checkbox("Gravity", &this->gravity);
-    ImGui::Text("RMB + drag : apply force to one of the objects.");
-    ImGui::Text("Space : f_pause/unpause");
-    if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
-        this->f_pause = !this->f_pause;
-    }
-    if(ImGui::IsMouseDown(ImGuiMouseButton_Right)){   
-        auto drag = ImGui::GetMouseDragDelta(1);
-        if(drag.x != 0 || drag.y != 0) {
-            glm::dvec3 dx = (double)(drag.x) * right;
-            glm::dvec3 dy = (double)(-drag.y) * up;
-            ROPE.applyForceToObject(
-                0,
-                Force (
-                    (dx + dy) / 25.,
-                    ROPE.getObject(0).f_transform.f_position
-                )
-            );
-        }
-    }
-}*/

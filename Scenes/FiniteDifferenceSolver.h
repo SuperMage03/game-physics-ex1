@@ -108,7 +108,7 @@ namespace FiniteDifferenceSolver {
         void propagateStateExplicitOn(GridFunction::ScalarGridFunction2D& state, double delta) {
             // Make currect state values copy
             GridFunction::IntegerGridScalarFunction2D stCp = state.getIntegerGridScalarFunction();
-
+            
             // Update interior values
             for (unsigned i = 1; i < state.getN() - 1; i++) {
                 for (unsigned j = 1; j < state.getM() - 1; j++) {
