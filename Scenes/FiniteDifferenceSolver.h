@@ -142,23 +142,23 @@ namespace FiniteDifferenceSolver {
                     unsigned id = getId(i, j, state.getM());
                     // Set matrix value for id, (i,j)
                     double majorValue = 
-                        1. / delta
-                        + f_problem.f_mu * 2 * (
+                        1.
+                        + delta * f_problem.f_mu * 2 * (
                             1. / (state.getStepX() * state.getStepX())
                             + 1. / (state.getStepY() * state.getStepY())
                         );
                     A.set_element(id, id, majorValue);
 
                     // Set matrix values for (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)
-                    double minorValueX = -f_problem.f_mu / (state.getStepX() * state.getStepX());
-                    double minorValueY = -f_problem.f_mu / (state.getStepY() * state.getStepY());
+                    double minorValueX = -delta * f_problem.f_mu / (state.getStepX() * state.getStepX());
+                    double minorValueY = -delta * f_problem.f_mu / (state.getStepY() * state.getStepY());
                     if (i != 1)                A.set_element(id, getId(i - 1, j, state.getM()), minorValueX);
                     if (i != state.getN() - 2) A.set_element(id, getId(i + 1, j, state.getM()), minorValueX);
                     if (j != 1)                A.set_element(id, getId(i, j - 1, state.getM()), minorValueY);
                     if (j != state.getM() - 2) A.set_element(id, getId(i, j + 1, state.getM()), minorValueY);
 
                     // Set RHS vector values
-                    double rhsValue = stCp.getValue(i, j) / delta;
+                    double rhsValue = stCp.getValue(i, j);
                     if (i == 1)                rhsValue += -minorValueX * stCp.getValue(i - 1, j);
                     if (i == state.getN() - 2) rhsValue += -minorValueX * stCp.getValue(i + 1, j);
                     if (j == 1)                rhsValue += -minorValueY * stCp.getValue(i, j - 1);
@@ -200,27 +200,27 @@ namespace FiniteDifferenceSolver {
         //             unsigned id = getId(i, j, state.getM());
         //             // Set matrix value for id, (i,j)
         //             double majorValue = 
-        //                 1. / delta
-        //                 + f_problem.f_mu * 2 * (
+        //                 1.
+        //                 + delta * f_problem.f_mu * 2 * (
         //                     1. / (state.getStepX() * state.getStepX())
         //                     + 1. / (state.getStepY() * state.getStepY())
         //                 );
-        //             majorValue *= -1.;
+        //             majorValue *= -1;
         //             A.set_element(id, id, majorValue);
 
         //             // Set matrix values for (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)
-        //             double minorValueX = -f_problem.f_mu / (state.getStepX() * state.getStepX());
-        //             double minorValueY = -f_problem.f_mu / (state.getStepY() * state.getStepY());
-        //             minorValueX *= -1.;
-        //             minorValueY *= -1.;
+        //             double minorValueX = -delta * f_problem.f_mu / (state.getStepX() * state.getStepX());
+        //             double minorValueY = -delta * f_problem.f_mu / (state.getStepY() * state.getStepY());
+        //             minorValueX *= -1;
+        //             minorValueY *= -1;
         //             if (i != 1)                A.set_element(id, getId(i - 1, j, state.getM()), minorValueX);
         //             if (i != state.getN() - 2) A.set_element(id, getId(i + 1, j, state.getM()), minorValueX);
         //             if (j != 1)                A.set_element(id, getId(i, j - 1, state.getM()), minorValueY);
         //             if (j != state.getM() - 2) A.set_element(id, getId(i, j + 1, state.getM()), minorValueY);
 
         //             // Set RHS vector values
-        //             double rhsValue = stCp.getValue(i, j) / delta;
-        //             rhsValue *= -1.;
+        //             double rhsValue = stCp.getValue(i, j);
+        //             rhsValue *= -1;
         //             if (i == 1)                rhsValue += -minorValueX * stCp.getValue(i - 1, j);
         //             if (i == state.getN() - 2) rhsValue += -minorValueX * stCp.getValue(i + 1, j);
         //             if (j == 1)                rhsValue += -minorValueY * stCp.getValue(i, j - 1);
