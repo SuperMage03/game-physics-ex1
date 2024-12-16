@@ -5,7 +5,7 @@
 #include <imgui.h>
 
 class SceneSingleStep : public Scene {
-    float f_delta = 0.01;
+    float f_delta = 0.1;
     bool f_pause = true;
     FiniteDifferenceSolver::FD_HPRDBC2D_Solver f_solver;
     GridFunction::ScalarGridFunction2D f_heatField;
