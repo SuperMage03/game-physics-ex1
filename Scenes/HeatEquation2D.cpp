@@ -44,8 +44,8 @@ void HeatEquation2D::simulateStep(float deltaTime) {
         discretizationCopy[i] = m_discretization[i];
     }
 
-    float deltaX = (m_xBoundaryMax - m_xBoundaryMin) / (m_discretizationColSize-1);
-    float deltaY = (m_yBoundaryMax - m_yBoundaryMin) / (m_discretizationRowSize-1);
+    float deltaX = (m_xBoundaryMax - m_xBoundaryMin) / (m_discretizationColSize+1);
+    float deltaY = (m_yBoundaryMax - m_yBoundaryMin) / (m_discretizationRowSize+1);
 
     for (unsigned int row = 0; row < m_discretizationRowSize; row++) {
         for (unsigned int col = 0; col < m_discretizationColSize; col++) {
