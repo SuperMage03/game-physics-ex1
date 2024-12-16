@@ -1,23 +1,18 @@
 #pragma once
-#include <memory>
+#include "Grid2D.hpp"
 
 class HeatEquation2D {
-private:
-    float m_xBoundaryMin;
-    float m_xBoundaryMax;
-    float m_yBoundaryMin;
-    float m_yBoundaryMax;
-    float m_time;
-    float m_v;
-    unsigned int m_discretizationRowSize;
-    unsigned int m_discretizationColSize;
-    std::unique_ptr<float[]> m_discretization;
-
-    static float getDiscretization(const float*const& discretization, const int& rowSize, const int& colSize, const int& row, const int& col);
-    static void setDiscretization(float*const& discretization, const int& rowSize, const int& colSize, const int& row, const int& col, const float& value);
 public:
-    HeatEquation2D(const float& xBoundaryMin, const float& xBoundaryMax, const float& yBoundaryMin, const float& yBoundaryMax, const float& v, const unsigned int& discretizationRowSize, const unsigned int& discretizationColSize, float*const& initialDiscretization);
-    float getDiscretizationAtPosition(const int& row, const int& col) const;
-    // float getValue(const float& x, const float& y) const;
+    enum class IntegrationMode {
+        EULER_EXPLICIT,
+        EULER_IMPLICIT,
+    };
+private:
+    Grid2D& m_grid;
+    float m_v;
+    IntegrationMode m_integrationMode;
+    void simulateStepEulerExplicit(float deltaTime);
+public:
+    HeatEquation2D(Grid2D& grid, const float& v, const IntegrationMode& integrationMode=IntegrationMode::EULER_EXPLICIT);
     void simulateStep(float deltaTime);
 };
