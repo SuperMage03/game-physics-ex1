@@ -8,8 +8,8 @@ void Scene1::init() {
 
     HeatEquation2D heatEquation2D{0.0f, 2.0f, 0.0f, 4.0f, 0.1f, 3, 6, initialState};
 
-    for (int i = 0; i < 10; i++) {
-        heatEquation2D.simulateStep(0.1f);
-    }
+    heatEquation2D.simulateStep(0.1f);
     std::cout << heatEquation2D.getDiscretizationAtPosition(1, 3) << std::endl;
+    std::cout << heatEquation2D.getDiscretizationAtPosition(0, 3) << std::endl;
+    std::cout << heatEquation2D.getDiscretizationAtPosition(0, 5) << std::endl;
 }
