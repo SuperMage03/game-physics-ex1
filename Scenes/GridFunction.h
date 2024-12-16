@@ -65,6 +65,7 @@ namespace GridFunction {
         }
 
         private:
+        
         void resize() {
             f_values.resize(f_n);
             for (unsigned i = 0; i < f_n; i++) {

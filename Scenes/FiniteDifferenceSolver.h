@@ -125,6 +125,10 @@ namespace FiniteDifferenceSolver {
             enforceBoundaryConditionsOn(state);
         }
 
+        unsigned getId(unsigned i, unsigned j, unsigned m) {
+            return (i - 1) * (m - 2) + (j - 1);
+        }
+
         void propagateStateImplicitOn(GridFunction::ScalarGridFunction2D& state, double delta) {
             // Make currect state values copy
             GridFunction::IntegerGridScalarFunction2D stCp = state.getIntegerGridScalarFunction();
@@ -135,33 +139,34 @@ namespace FiniteDifferenceSolver {
             std::vector<double> rhs((state.getN() - 2) * (state.getM() - 2));
             for (unsigned i = 1; i < state.getN() - 1; i++) {
                 for (unsigned j = 1; j < state.getM() - 1; j++) {
-                    unsigned id = (i - 1) * (state.getM() - 2) + (j - 1);
+                    unsigned id = getId(i, j, state.getM());
                     // Set matrix value for id, (i,j)
-                    double majorValue = - 1. / delta
-                        - f_problem.f_mu * 2 * (
+                    double majorValue = 
+                        1. / delta
+                        + f_problem.f_mu * 2 * (
                             1. / (state.getStepX() * state.getStepX())
                             + 1. / (state.getStepY() * state.getStepY())
                         );
                     A.set_element(id, id, majorValue);
 
                     // Set matrix values for (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)
-                    double minorValueX = f_problem.f_mu / (state.getStepX() * state.getStepX());
-                    double minorValueY = f_problem.f_mu / (state.getStepY() * state.getStepY());
-                    if (i != 1) A.set_element(id, (i - 2) * (state.getM() - 2) + (j - 1), minorValueX);
-                    if (i != state.getN() - 2) A.set_element(id, (i) * (state.getM() - 2) + (j - 1), minorValueX);
-                    if (j != 1) A.set_element(id, (i - 1) * (state.getM() - 2) + (j - 2), minorValueY);
-                    if (j != state.getM() - 2) A.set_element(id, (i - 1) * (state.getM() - 2) + (j), minorValueY);
+                    double minorValueX = -f_problem.f_mu / (state.getStepX() * state.getStepX());
+                    double minorValueY = -f_problem.f_mu / (state.getStepY() * state.getStepY());
+                    if (i != 1)                A.set_element(id, getId(i - 1, j, state.getM()), minorValueX);
+                    if (i != state.getN() - 2) A.set_element(id, getId(i + 1, j, state.getM()), minorValueX);
+                    if (j != 1)                A.set_element(id, getId(i, j - 1, state.getM()), minorValueY);
+                    if (j != state.getM() - 2) A.set_element(id, getId(i, j + 1, state.getM()), minorValueY);
 
                     // Set RHS vector values
-                    double rhsValue = -stCp.getValue(i, j) / delta;
-                    if (i == 1) rhsValue += -f_problem.f_mu * stCp.getValue(i - 1, j) / (state.getStepX() * state.getStepX());
-                    if (i == state.getN() - 2) rhsValue += -f_problem.f_mu * stCp.getValue(i + 1, j) / (state.getStepX() * state.getStepX());
-                    if (j == 1) rhsValue += -f_problem.f_mu * stCp.getValue(i, j - 1) / (state.getStepY() * state.getStepY());
-                    if (j == state.getM() - 2) rhsValue += -f_problem.f_mu * stCp.getValue(i, j + 1) / (state.getStepY() * state.getStepY());
+                    double rhsValue = stCp.getValue(i, j) / delta;
+                    if (i == 1)                rhsValue += -minorValueX * stCp.getValue(i - 1, j);
+                    if (i == state.getN() - 2) rhsValue += -minorValueX * stCp.getValue(i + 1, j);
+                    if (j == 1)                rhsValue += -minorValueY * stCp.getValue(i, j - 1);
+                    if (j == state.getM() - 2) rhsValue += -minorValueY * stCp.getValue(i, j + 1);
                     rhs[id] = rhsValue;
                 }
             }
-
+            
             // Solve system
             SparsePCGSolver<double> SPCGS;
             std::vector<double> result((state.getN() - 2) * (state.getM() - 2));
@@ -169,10 +174,10 @@ namespace FiniteDifferenceSolver {
             int iterations;
             SPCGS.solve(A, rhs, result, residual, iterations);
 
-            // Update values
-            for (unsigned i = 0; i < state.getN(); i++) {
-                for (unsigned j = 0; j < state.getM(); j++) {
-                    unsigned id = i * state.getM() + j;
+            // Update values for internal points
+            for (unsigned i = 1; i < state.getN() - 1; i++) {
+                for (unsigned j = 1; j < state.getM() - 1; j++) {
+                    unsigned id = getId(i, j, state.getM());
                     state.setValue(i, j, result[id]);
                 }
             }
@@ -180,5 +185,67 @@ namespace FiniteDifferenceSolver {
             // Enforce boundary conditions
             enforceBoundaryConditionsOn(state);
         }
+
+        // // TEST, NEGATED EQUATION
+        // void propagateStateImplicitOn(GridFunction::ScalarGridFunction2D& state, double delta) {
+        //     // Make currect state values copy
+        //     GridFunction::IntegerGridScalarFunction2D stCp = state.getIntegerGridScalarFunction();
+
+        //     // Fill system matrix and RHS vector
+        //     SparseMatrix<double> A((state.getN() - 2) * (state.getM() - 2), 5);
+        //     A.zero();
+        //     std::vector<double> rhs((state.getN() - 2) * (state.getM() - 2));
+        //     for (unsigned i = 1; i < state.getN() - 1; i++) {
+        //         for (unsigned j = 1; j < state.getM() - 1; j++) {
+        //             unsigned id = getId(i, j, state.getM());
+        //             // Set matrix value for id, (i,j)
+        //             double majorValue = 
+        //                 1. / delta
+        //                 + f_problem.f_mu * 2 * (
+        //                     1. / (state.getStepX() * state.getStepX())
+        //                     + 1. / (state.getStepY() * state.getStepY())
+        //                 );
+        //             majorValue *= -1.;
+        //             A.set_element(id, id, majorValue);
+
+        //             // Set matrix values for (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)
+        //             double minorValueX = -f_problem.f_mu / (state.getStepX() * state.getStepX());
+        //             double minorValueY = -f_problem.f_mu / (state.getStepY() * state.getStepY());
+        //             minorValueX *= -1.;
+        //             minorValueY *= -1.;
+        //             if (i != 1)                A.set_element(id, getId(i - 1, j, state.getM()), minorValueX);
+        //             if (i != state.getN() - 2) A.set_element(id, getId(i + 1, j, state.getM()), minorValueX);
+        //             if (j != 1)                A.set_element(id, getId(i, j - 1, state.getM()), minorValueY);
+        //             if (j != state.getM() - 2) A.set_element(id, getId(i, j + 1, state.getM()), minorValueY);
+
+        //             // Set RHS vector values
+        //             double rhsValue = stCp.getValue(i, j) / delta;
+        //             rhsValue *= -1.;
+        //             if (i == 1)                rhsValue += -minorValueX * stCp.getValue(i - 1, j);
+        //             if (i == state.getN() - 2) rhsValue += -minorValueX * stCp.getValue(i + 1, j);
+        //             if (j == 1)                rhsValue += -minorValueY * stCp.getValue(i, j - 1);
+        //             if (j == state.getM() - 2) rhsValue += -minorValueY * stCp.getValue(i, j + 1);
+        //             rhs[id] = rhsValue;
+        //         }
+        //     }
+            
+        //     // Solve system
+        //     SparsePCGSolver<double> SPCGS;
+        //     std::vector<double> result((state.getN() - 2) * (state.getM() - 2));
+        //     double residual;
+        //     int iterations;
+        //     SPCGS.solve(A, rhs, result, residual, iterations);
+
+        //     // Update values for internal points
+        //     for (unsigned i = 1; i < state.getN() - 1; i++) {
+        //         for (unsigned j = 1; j < state.getM() - 1; j++) {
+        //             unsigned id = getId(i, j, state.getM());
+        //             state.setValue(i, j, result[id]);
+        //         }
+        //     }
+
+        //     // Enforce boundary conditions
+        //     enforceBoundaryConditionsOn(state);
+        // }
     };
 }
