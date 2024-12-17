@@ -9,11 +9,12 @@ public:
     };
 private:
     Grid2D& m_grid;
-    float m_v;
+    float m_diffusivity;
     IntegrationMode m_integrationMode;
     void simulateStepEulerExplicit(const float& deltaTime);
     void simulateStepEulerImplicit(const float& deltaTime);
 public:
-    HeatEquation2D(Grid2D& grid, const float& v, const IntegrationMode& integrationMode=IntegrationMode::EULER_EXPLICIT);
+    HeatEquation2D(Grid2D& grid, const float& diffusivity, const IntegrationMode& integrationMode=IntegrationMode::EULER_EXPLICIT);
+    void setDiffusivity(const float& diffusivity);
     void simulateStep(const float& deltaTime);
 };

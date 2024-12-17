@@ -1,6 +1,22 @@
 #include "Grid2D.hpp"
 #include <random>
 
+float Grid2D::getXBoundaryMin() const {
+    return m_xBoundaryMin;
+}
+
+float Grid2D::getXBoundaryMax() const {
+    return m_xBoundaryMax;
+}
+
+float Grid2D::getYBoundaryMin() const {
+    return m_yBoundaryMin;
+}
+
+float Grid2D::getYBoundaryMax() const {
+    return m_yBoundaryMax;
+}
+
 float Grid2D::getGridRowSize() const {
     return m_gridRowSize;
 }
@@ -63,7 +79,7 @@ void Grid2D::setPlotValueAtPosition(const int& row, const int& col, const float&
 void Grid2D::randomizePlotValues() {
     // Initialize random number generator
     std::default_random_engine generator;
-    std::normal_distribution<float> distribution(0.0f, 5.0f);
+    std::normal_distribution<float> distribution(0.0f, 0.5f);
 
     for (unsigned int i = 0; i < m_gridRowSize * m_gridColSize; i++) {
         // Generate Gaussian noise
@@ -78,7 +94,6 @@ void Grid2D::drawGrid(Renderer& renderer, const glm::vec3& origin, const float& 
 
     for (int row = -1; row < static_cast<int>(m_gridRowSize)+1; row++) {
         for (int col = -1; col < static_cast<int>(m_gridColSize)+1; col++) {
-
             renderer.drawSphere(scale * (origin + glm::vec3((row-center_row_idx) * m_deltaX, (col-center_col_idx) * m_deltaY, getPlotValueAtPosition(row, col))), 0.05f);
         }
     }

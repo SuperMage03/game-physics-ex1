@@ -17,6 +17,11 @@ private:
     float m_time;
     std::unique_ptr<float[]> m_plotValues;
 public:
+    float getXBoundaryMin() const;
+    float getXBoundaryMax() const;
+    float getYBoundaryMin() const;
+    float getYBoundaryMax() const;
+
     float getGridRowSize() const;
     float getGridColSize() const;
 
