@@ -278,30 +278,42 @@ namespace GridFunction {
 
         #pragma endregion
 
-        void onDraw(Renderer &renderer) {
-            //f_grid.onDraw(renderer);
+        glm::dvec3 getColorForValue(double value) {
+            float base = 3.;
+            if (value <= 0.) {
+                double t = (value + base) / base;
+                return (1. - t) * glm::dvec3(0., 0., 1.) + t * glm::dvec3(1., 0., 0.);
+            } 
+            else {
+                double t = value / base;
+                return (1. - t) * glm::dvec3(1., 0., 0.) + t * glm::dvec3(1., 0.8, 0.);
+            }
+        }
+
+        void onDraw(Renderer &renderer, glm::dvec3 shift = glm::dvec3(0.), double scale = 1.) {
+            f_grid.onDraw(renderer, shift, scale);
             for (unsigned i = 0; i < f_function.getN(); i++) {
                 for (unsigned j = 0; j < f_function.getM(); j++) {
                     renderer.drawSphere(
-                        f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
-                        0.03,
-                        glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 1.)
+                        shift + scale * (f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j))),
+                        0.015,
+                        glm::vec4(getColorForValue(f_function.getValue(i, j)), 1.)
                     );
                 }
             }
             for (unsigned i = 0; i < f_function.getN() - 1; i++) {
                 for (unsigned j = 0; j < f_function.getM() - 1; j++) {
                     renderer.drawLine(
-                        f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
-                        f_grid.getPoint3D(i + 1, j) + glm::dvec3(0., 0., f_function.getValue(i + 1, j)),
-                        glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 0.5),
-                        glm::vec4(f_function.getValue(i + 1, j) / 5., 0., (1 - f_function.getValue(i + 1, j) / 5.), 0.5)
+                        shift + scale * (f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j))),
+                        shift + scale * (f_grid.getPoint3D(i + 1, j) + glm::dvec3(0., 0., f_function.getValue(i + 1, j))),
+                        getColorForValue(f_function.getValue(i, j)),
+                        getColorForValue(f_function.getValue(i + 1, j))
                     );
                     renderer.drawLine(
-                        f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
-                        f_grid.getPoint3D(i, j + 1) + glm::dvec3(0., 0., f_function.getValue(i, j + 1)),
-                        glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 0.5),
-                        glm::vec4(f_function.getValue(i, j + 1) / 5., 0., (1 - f_function.getValue(i, j + 1) / 5.), 0.5)
+                        shift + scale * (f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j))),
+                        shift + scale * (f_grid.getPoint3D(i, j + 1) + glm::dvec3(0., 0., f_function.getValue(i, j + 1))),
+                        getColorForValue(f_function.getValue(i, j)),
+                        getColorForValue(f_function.getValue(i, j + 1))
                     );
                 }
             }
@@ -309,21 +321,21 @@ namespace GridFunction {
             for (unsigned i = 0; i < f_function.getN() - 1; i++) {
                 unsigned j = f_function.getM() - 1;
                 renderer.drawLine(
-                    f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
-                    f_grid.getPoint3D(i + 1, j) + glm::dvec3(0., 0., f_function.getValue(i + 1, j)),
-                    glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 0.5),
-                    glm::vec4(f_function.getValue(i + 1, j) / 5., 0., (1 - f_function.getValue(i + 1, j) / 5.), 0.5)
+                    shift + scale * (f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j))),
+                    shift + scale * (f_grid.getPoint3D(i + 1, j) + glm::dvec3(0., 0., f_function.getValue(i + 1, j))),
+                    getColorForValue(f_function.getValue(i, j)),
+                    getColorForValue(f_function.getValue(i + 1, j))
                 );
             }
 
             for (unsigned j = 0; j < f_function.getM() - 1; j++) {
                 unsigned i = f_function.getN() - 1;
                 renderer.drawLine(
-                        f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j)),
-                        f_grid.getPoint3D(i, j + 1) + glm::dvec3(0., 0., f_function.getValue(i, j + 1)),
-                        glm::vec4(f_function.getValue(i, j) / 5., 0., (1 - f_function.getValue(i, j) / 5.), 0.5),
-                        glm::vec4(f_function.getValue(i, j + 1) / 5., 0., (1 - f_function.getValue(i, j + 1) / 5.), 0.5)
-                    );
+                    shift + scale * (f_grid.getPoint3D(i, j) + glm::dvec3(0., 0., f_function.getValue(i, j))),
+                    shift + scale * (f_grid.getPoint3D(i, j + 1) + glm::dvec3(0., 0., f_function.getValue(i, j + 1))),
+                    getColorForValue(f_function.getValue(i, j)),
+                    getColorForValue(f_function.getValue(i, j + 1))
+                );
             }
         }
     };

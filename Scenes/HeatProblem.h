@@ -16,6 +16,9 @@ namespace HeatProblem {
 
         // Thermal diffusivity
         double f_mu;
+
+        // Heat sources function
+        ScalarFunction2D f_sources;
         
         // Initial condition
         ScalarFunction2D f_initialCondition;
@@ -30,6 +33,7 @@ namespace HeatProblem {
         f_domainOrigin(0.),
         f_domainSize(0.),
         f_mu(0.),
+        f_sources(nullptr),
         f_initialCondition(nullptr),
         f_boundaryConditionX0(nullptr),
         f_boundaryConditionX1(nullptr),
@@ -41,6 +45,7 @@ namespace HeatProblem {
             const glm::dvec2& domainOrigin,
             const glm::dvec2& domainSize,
             double mu,
+            const ScalarFunction2D& sources,
             const ScalarFunction2D& initialCondition,
             const ScalarFunction1D& boundaryConditionX0,
             const ScalarFunction1D& boundaryConditionX1,
@@ -50,6 +55,7 @@ namespace HeatProblem {
         f_domainOrigin(domainOrigin),
         f_domainSize(domainSize),
         f_mu(mu),
+        f_sources(sources),
         f_initialCondition(initialCondition),
         f_boundaryConditionX0(boundaryConditionX0),
         f_boundaryConditionX1(boundaryConditionX1),
@@ -61,6 +67,7 @@ namespace HeatProblem {
             glm::dvec2&& domainOrigin,
             glm::dvec2&& domainSize,
             double mu,
+            ScalarFunction2D&& sources,
             ScalarFunction2D&& initialCondition,
             ScalarFunction1D&& boundaryConditionX0,
             ScalarFunction1D&& boundaryConditionX1,
@@ -70,11 +77,20 @@ namespace HeatProblem {
         f_domainOrigin(std::move(domainOrigin)),
         f_domainSize(std::move(domainSize)),
         f_mu(mu),
+        f_sources(std::move(sources)),
         f_initialCondition(initialCondition),
         f_boundaryConditionX0(std::move(boundaryConditionX0)),
         f_boundaryConditionX1(std::move(boundaryConditionX1)),
         f_boundaryConditionY0(std::move(boundaryConditionY0)),
         f_boundaryConditionY1(std::move(boundaryConditionY1))
         {}
+
+        void setSources(const ScalarFunction2D& sources) {
+            f_sources = sources;
+        }
+
+        void setSources(ScalarFunction2D&& sources) {
+            f_sources = std::move(sources);
+        }
     };
 }

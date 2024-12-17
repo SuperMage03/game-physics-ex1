@@ -4,16 +4,24 @@
 #include "FiniteDifferenceSolver.h"
 #include <imgui.h>
 
-class SceneExplicitSimulation : public Scene {
+class SceneInteractiveSimulation : public Scene {
     float f_delta = 0.01;
     bool f_pause = true;
     bool f_singleStep = false;
     float f_diffusivity = 0.1;
-    unsigned f_n = 18;
-    unsigned f_m = 18;
+    int f_n = 10;
+    int f_m = 10;
+    float f_X = 1.;
+    float f_Y = 1.;
+    bool f_changedProblem = false;
     glm::dvec3 f_shift = glm::dvec3(0.);
+    enum Scheme {EXPLICIT, IMPLICIT};
+    int f_scheme = Scheme::EXPLICIT;
     FiniteDifferenceSolver::FD_HPRDBC2D_Solver f_solver;
     GridFunction::ScalarGridFunction2D f_heatField;
+    bool f_toggleSources = false;
+    bool f_sources = false;
+    bool f_restart = false;
 
     glm::dmat4 f_cameraMatrix = glm::dmat4(1);
     glm::dvec3 f_fwd = glm::dvec3(1, 0, 0);
@@ -21,11 +29,11 @@ class SceneExplicitSimulation : public Scene {
     glm::dvec3 f_up = glm::dvec3(0, 0, 1);
 
 public:
-    void init() override {
+    void initializeSolverAndState() {
         f_solver = std::move(FiniteDifferenceSolver::FD_HPRDBC2D_Solver(
             HeatProblem::HeatProblemRectDBC2D(
                 glm::dvec2(0., 0.),
-                glm::dvec2(1., 1.),
+                glm::dvec2(f_X, f_Y),
                 0.1,
                 [](glm::dvec2 point) {
                     return 0.;
@@ -50,6 +58,10 @@ public:
         f_heatField = f_solver.getInitialState(f_n, f_m);
     }
 
+    void init() override {
+        initializeSolverAndState();
+    }
+
     void onDraw(Renderer &renderer) override {
         f_cameraMatrix = renderer.camera.viewMatrix;
         f_fwd = inverse(f_cameraMatrix) * glm::dvec4(0, 0, 1, 0);
@@ -59,14 +71,51 @@ public:
         f_heatField.onDraw(renderer, f_shift);
     }
 
+    void propagateState() {
+        switch (f_scheme)
+        {
+        case Scheme::EXPLICIT:
+            f_solver.propagateStateExplicitOn(f_heatField, f_delta);
+            break;
+        case Scheme::IMPLICIT:
+            f_solver.propagateStateImplicitOn(f_heatField, f_delta);
+            break;
+        default:
+            break;
+        }
+    }
+
     void simulateStep() override {
+        if (f_changedProblem || f_restart) {
+            f_pause = true;
+            initializeSolverAndState();
+            f_changedProblem = false;
+            f_restart = false;
+        }
+        if (f_toggleSources) {
+            if (!f_sources) {
+                f_solver.setSources(
+                    [](glm::dvec2 point) {
+                        return 0.;
+                    }
+                );
+            }
+            else {
+                f_solver.setSources(
+                    [](glm::dvec2 point) {
+                        return 0.05 * (sin(6.28 * point.x) * sin(6.28 * point.y) + 1.);
+                    }
+                );
+            }
+            f_toggleSources = false;
+        }
         f_solver.setDiffusivity(f_diffusivity);
         if (!f_pause) {
-            f_solver.propagateStateExplicitOn(f_heatField, f_delta);
+            propagateState();
         }
         else {
             if (f_singleStep) {
-                f_solver.propagateStateExplicitOn(f_heatField, f_delta);
+                propagateState();
                 f_singleStep = false;
             }
         }
@@ -74,8 +123,20 @@ public:
 
     void onGUI() override {
         ImGui::SliderFloat("Diffusivity", &this->f_diffusivity, 0.001f, 0.2);
+        f_changedProblem = f_changedProblem || ImGui::SliderFloat("Domain size X", &this->f_X, 0.1, 10.);
+        f_changedProblem = f_changedProblem || ImGui::SliderFloat("Domain size Y", &this->f_Y, 0.1, 10.);
+        f_toggleSources = ImGui::Checkbox("Heat sources", &this->f_sources);
+        const char* schemeNames[] = {"Explicit", "Implicit"};
+        ImGui::Combo("Scheme", &this->f_scheme, schemeNames, 2);
+        ImGui::Text("N and M denote the overall amount");
+        ImGui::Text("of vertices along Ox and Oy respectively,");
+        ImGui::Text("including the boundary vertices");
+        f_changedProblem = f_changedProblem || ImGui::SliderInt("N", &this->f_n, 3, 100);
+        f_changedProblem = f_changedProblem || ImGui::SliderInt("M", &this->f_m, 3, 100);
         ImGui::SliderFloat("Delta", &this->f_delta, 0.f, 0.1);
         ImGui::Checkbox("Pause", &this->f_pause);
+        f_restart = ImGui::Button("Restart");
+
         ImGui::Text("Space : pause/unpause");
         if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
             this->f_pause = !this->f_pause;
@@ -83,6 +144,15 @@ public:
         ImGui::Text("S : while paused perform a single time step");
         if (ImGui::IsKeyPressed(ImGuiKey_S)) {
             this->f_singleStep = true;
+        }
+        ImGui::Text("W : Toggle heat source");
+        if (ImGui::IsKeyPressed(ImGuiKey_W)) {
+            this->f_sources = !f_sources;
+            f_toggleSources = true;
+        }
+        ImGui::Text("R : Restart");
+        if (ImGui::IsKeyPressed(ImGuiKey_R)) {
+            f_restart = true;
         }
         ImGui::Text("RMB + drag : to move the graph");
         if(ImGui::IsMouseDown(ImGuiMouseButton_Right)) {

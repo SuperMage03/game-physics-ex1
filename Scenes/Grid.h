@@ -141,12 +141,12 @@ namespace Grid {
             );
         }
 
-        void onDraw(Renderer &renderer) {
+        void onDraw(Renderer &renderer, glm::dvec3 shift = glm::dvec3(0.), double scale = 1.) {
             for(unsigned i = 0; i < f_n; i++) {
-                renderer.drawLine(getPoint3D(i, 0), getPoint3D(i, f_m - 1), glm::vec3(0.5, 0.5, 0.5));
+                renderer.drawLine(shift + scale * getPoint3D(i, 0), shift + scale * getPoint3D(i, f_m - 1), glm::vec3(0.25, 0.25, 0.25));
             }
             for(unsigned j = 0; j < f_m; j++) {
-                renderer.drawLine(getPoint3D(0, j), getPoint3D(f_n - 1, j), glm::vec3(0.5, 0.5, 0.5));
+                renderer.drawLine(shift + scale * getPoint3D(0, j), shift + scale * getPoint3D(f_n - 1, j), glm::vec3(0.25, 0.25, 0.25));
             }
         }
     };

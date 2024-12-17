@@ -4,7 +4,7 @@
 #include "FiniteDifferenceSolver.h"
 #include <imgui.h>
 
-class SceneExplicitSimulation : public Scene {
+class SceneImplicitSimulation : public Scene {
     float f_delta = 0.01;
     bool f_pause = true;
     bool f_singleStep = false;
@@ -62,11 +62,11 @@ public:
     void simulateStep() override {
         f_solver.setDiffusivity(f_diffusivity);
         if (!f_pause) {
-            f_solver.propagateStateExplicitOn(f_heatField, f_delta);
+            f_solver.propagateStateImplicitOn(f_heatField, f_delta);
         }
         else {
             if (f_singleStep) {
-                f_solver.propagateStateExplicitOn(f_heatField, f_delta);
+                f_solver.propagateStateImplicitOn(f_heatField, f_delta);
                 f_singleStep = false;
             }
         }
