@@ -11,8 +11,9 @@ private:
     Grid2D& m_grid;
     float m_v;
     IntegrationMode m_integrationMode;
-    void simulateStepEulerExplicit(float deltaTime);
+    void simulateStepEulerExplicit(const float& deltaTime);
+    void simulateStepEulerImplicit(const float& deltaTime);
 public:
     HeatEquation2D(Grid2D& grid, const float& v, const IntegrationMode& integrationMode=IntegrationMode::EULER_EXPLICIT);
-    void simulateStep(float deltaTime);
+    void simulateStep(const float& deltaTime);
 };
