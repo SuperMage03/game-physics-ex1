@@ -2,7 +2,7 @@
 #include "HeatEquation2D.hpp"
 #include "Grid2D.hpp"
 
-class Scene2 : public Scene {
+class Scene3 : public Scene {
 private:
     bool m_isPaused = true;
     float m_step = 0.01f;
@@ -13,7 +13,7 @@ private:
                                3.0f,  2.0f, -1.0f, -2.0f, -4.0f, -2.0f};
 
     Grid2D grid{0.0f, 1.0f, 0.0f, 1.0f, 16, 16, initialState};
-    HeatEquation2D heatEquation2D{grid, m_diffusivity, HeatEquation2D::IntegrationMode::EULER_EXPLICIT};
+    HeatEquation2D heatEquation2D{grid, m_diffusivity, HeatEquation2D::IntegrationMode::EULER_IMPLICIT};
 public:
     void init() override;
     void simulateStep() override;

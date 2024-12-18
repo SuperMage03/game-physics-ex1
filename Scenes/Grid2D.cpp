@@ -17,11 +17,11 @@ float Grid2D::getYBoundaryMax() const {
     return m_yBoundaryMax;
 }
 
-float Grid2D::getGridRowSize() const {
+unsigned int Grid2D::getGridRowSize() const {
     return m_gridRowSize;
 }
 
-float Grid2D::getGridColSize() const {
+unsigned int Grid2D::getGridColSize() const {
     return m_gridColSize;
 }
 

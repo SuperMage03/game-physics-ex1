@@ -22,8 +22,8 @@ public:
     float getYBoundaryMin() const;
     float getYBoundaryMax() const;
 
-    float getGridRowSize() const;
-    float getGridColSize() const;
+    unsigned int getGridRowSize() const;
+    unsigned int getGridColSize() const;
 
     float getDeltaX() const;
     float getDeltaY() const;
