@@ -23,7 +23,10 @@ if (USE_HIGH_PERFORMANCE_GPU)
 endif()
 
 add_executable(Template
+
 	src/implementations.cpp
+	Scenes/Grid.cpp
+	Scenes/HeatEquation.cpp
 	Scenes/SingleStepScene.cpp
 	Scenes/SceneExplicitSimulation.cpp
 	Scenes/SceneImplicitSimulation.cpp

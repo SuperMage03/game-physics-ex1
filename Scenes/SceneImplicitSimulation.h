@@ -1,27 +1,22 @@
-#pragma once
 #include "Scene.h"
-#include <vector>
+#include "HeatEquation.h"
+#include "Grid.h"
 
 class SceneImplicitSimulation : public Scene {
-public:
-    void init() override;           
-    void simulateStep() override;   
-    void onDraw(Renderer &renderer) override; 
-    void onGUI() override;         
-
 private:
-    int m, n;              
-    double dx, dy;         
-    double nu;             
-    double dt_sim;         
+    bool m_isPaused = true;
+    float m_step = 0.01f;
+    float m_diffusivity = 0.1f;
 
-    std::vector<std::vector<double>> T_curr; 
-    std::vector<std::vector<double>> T_next; 
+    float initialState[18] = { 6.0f,  5.0f,  1.0f, -1.0f, -2.0f, -1.0f,
+                               4.0f,  3.0f,  0.0f, -1.0f, -3.0f, -1.0f,
+                               3.0f,  2.0f, -1.0f, -2.0f, -4.0f, -2.0f};
 
-    std::vector<std::vector<double>> A;  
-    std::vector<double> b;             
-
-    void initializeGrid();   
-    void assembleSystem();  
-    void solveLinearSystem();
+    Grid grid{0.0f, 1.0f, 0.0f, 1.0f, 16, 16, initialState};
+    HeatEquation HeatEquation{grid, m_diffusivity, HeatEquation::IntegrationMode::EULER_IMPLICIT};
+public:
+    void init() override;
+    void simulateStep() override;
+    void onDraw(Renderer& renderer) override;
+    void onGUI() override;
 };
