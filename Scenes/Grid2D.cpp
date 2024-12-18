@@ -51,16 +51,15 @@ Grid2D::Grid2D(const Grid2D &copy):
     }
 }
 
-Grid2D::Grid2D(const float &xBoundaryMin, const float &xBoundaryMax, const float &yBoundaryMin, const float &yBoundaryMax,
-               const unsigned int &discretizationRowSize, const unsigned int &discretizationColSize, const float *const &initialDiscretization): 
+Grid2D::Grid2D(const float& xBoundaryMin, const float& xBoundaryMax, const float& yBoundaryMin, const float& yBoundaryMax, 
+               const unsigned int& gridRowSize, const unsigned int& gridColSize, const float*const& initialPlotValues): 
                m_xBoundaryMin{xBoundaryMin}, m_xBoundaryMax{xBoundaryMax}, m_yBoundaryMin{yBoundaryMin}, m_yBoundaryMax{yBoundaryMax},
-               m_deltaX{(xBoundaryMax - xBoundaryMin) / (discretizationRowSize + 1)},
-               m_deltaY{(yBoundaryMax - yBoundaryMin) / (discretizationColSize + 1)},
-               m_time{0.0f}, m_gridRowSize{discretizationRowSize}, m_gridColSize{discretizationColSize} {
+               m_time{0.0f}, m_gridRowSize{gridRowSize}, m_gridColSize{gridColSize} {
+    calculateDirectionalDelta();
     // Creating the state 2D array
     m_plotValues = std::make_unique<float[]>(m_gridRowSize * m_gridColSize);
     for (unsigned int i = 0; i < m_gridRowSize * m_gridColSize; i++) {
-        m_plotValues[i] = initialDiscretization[i];
+        m_plotValues[i] = initialPlotValues[i];
     }
 }
 
@@ -76,10 +75,36 @@ void Grid2D::setPlotValueAtPosition(const int& row, const int& col, const float&
     m_plotValues[row * m_gridColSize + col] = value;
 }
 
-void Grid2D::randomizePlotValues() {
+void Grid2D::calculateDirectionalDelta() {
+    m_deltaX = (m_xBoundaryMax - m_xBoundaryMin) / (m_gridRowSize + 1);
+    m_deltaY = (m_yBoundaryMax - m_yBoundaryMin) / (m_gridColSize + 1);
+}
+
+void Grid2D::resizeDomain(const float &xBoundaryMin, const float &xBoundaryMax, const float &yBoundaryMin, const float &yBoundaryMax) {
+    m_xBoundaryMin = xBoundaryMin;
+    m_xBoundaryMax = xBoundaryMax;
+    m_yBoundaryMin = yBoundaryMin;
+    m_yBoundaryMax = yBoundaryMax;
+    calculateDirectionalDelta();
+
+    gaussianRandomizePlotValues();
+}
+
+void Grid2D::resizeGrid(const unsigned int &rowSize, const unsigned int &colSize) {
+    m_gridRowSize = rowSize;
+    m_gridColSize = colSize;
+    calculateDirectionalDelta();
+
+    m_plotValues = std::make_unique<float[]>(m_gridRowSize * m_gridColSize);
+    gaussianRandomizePlotValues();
+}
+
+void Grid2D::gaussianRandomizePlotValues() {
+    const float mean = 0.0f;
+    const float standardDeviation = 0.2f * (((m_xBoundaryMax-m_xBoundaryMin)+(m_yBoundaryMax-m_yBoundaryMin)) / 2.0f);
     // Initialize random number generator
     std::default_random_engine generator;
-    std::normal_distribution<float> distribution(0.0f, 0.5f);
+    std::normal_distribution<float> distribution(mean, standardDeviation);
 
     for (unsigned int i = 0; i < m_gridRowSize * m_gridColSize; i++) {
         // Generate Gaussian noise

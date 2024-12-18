@@ -2,7 +2,7 @@
 #include <imgui.h>
 
 void Scene2::init() {
-    grid.randomizePlotValues();
+    grid.gaussianRandomizePlotValues();
 }
 
 void Scene2::simulateStep() {
