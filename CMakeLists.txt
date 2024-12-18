@@ -24,6 +24,12 @@ endif()
 
 add_executable(Template
 	src/implementations.cpp
+	Scenes/SingleStepScene.cpp
+	Scenes/SceneExplicitSimulation.cpp
+	Scenes/SceneImplicitSimulation.cpp
+	Scenes/SceneInteractiveSimulation.cpp
+	Scenes/Scene3DSimulation.cpp
+	Scenes/Scene1.cpp
 	src/main.cpp
 	src/Renderer.h
 	src/Renderer.cpp
