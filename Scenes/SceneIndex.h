@@ -6,6 +6,7 @@
 #include "SceneExplicitSimulation.h"
 #include "SceneImplicitSimulation.h"
 #include "SceneInteractiveSimulation.h"
+#include "SceneFullDemo.h"
 
 using SceneCreator = std::function<std::unique_ptr<Scene>()>;
 
@@ -21,6 +22,7 @@ std::map<std::string, SceneCreator> scenesCreators = {
     {"Single Step", creator<SceneSingleStep>()},
     {"Explicit Simulation", creator<SceneExplicitSimulation>()},
     {"Implicit Simulation", creator<SceneImplicitSimulation>()},
-    {"Interactive Simulation", creator<SceneInteractiveSimulation>()}
+    {"Interactive Simulation", creator<SceneInteractiveSimulation>()},
+    {"Full Additional Features Demo", creator<SceneFullDemo>()}
     // add more Scene types here
 };

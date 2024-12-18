@@ -27,22 +27,22 @@ public:
                 glm::dvec2(0., 0.),
                 glm::dvec2(1., 1.),
                 0.1,
-                [](glm::dvec2 point) {
+                [](glm::dvec2 point, double t) {
                     return 0.;
                 },
-                [](glm::dvec2 point) {
+                [](glm::dvec2 point, double t) {
                     return 2 * sin(4. * point.x) * sin(4. * point.y) + 0.5 * ((double)(rand()) / (double)(RAND_MAX));
                 },
-                [](double y) {
+                [](double y, double t) {
                     return 0.;
                 },
-                [](double y) {
+                [](double y, double t) {
                     return 0.;
                 },
-                [](double x) {
+                [](double x, double t) {
                     return 0.;
                 },
-                [](double x) {
+                [](double x, double t) {
                     return 0.;
                 }
             )
@@ -73,7 +73,7 @@ public:
     }
 
     void onGUI() override {
-        ImGui::SliderFloat("Diffusivity", &this->f_diffusivity, 0.001f, 0.2);
+        ImGui::SliderFloat("Diffusivity", &this->f_diffusivity, 0.001f, 1.);
         ImGui::SliderFloat("Delta", &this->f_delta, 0.f, 0.1);
         ImGui::Checkbox("Pause", &this->f_pause);
         ImGui::Text("Space : pause/unpause");

@@ -4,15 +4,15 @@
 #include "FiniteDifferenceSolver.h"
 #include <imgui.h>
 
-class SceneInteractiveSimulation : public Scene {
+class SceneFullDemo : public Scene {
     float f_delta = 0.01;
     bool f_pause = true;
     bool f_singleStep = false;
     float f_diffusivity = 0.1;
-    int f_n = 10;
-    int f_m = 10;
-    float f_X = 1.;
-    float f_Y = 1.;
+    int f_n = 50;
+    int f_m = 50;
+    float f_X = 5.;
+    float f_Y = 5.;
     bool f_changedProblem = false;
     glm::dvec3 f_shift = glm::dvec3(0.);
     enum Scheme {EXPLICIT, IMPLICIT};
@@ -42,16 +42,16 @@ public:
                     return 2 * sin(2. * point.x) * sin(2. * point.y) + 0.5 * ((double)(rand()) / (double)(RAND_MAX));
                 },
                 [](double y, double t) {
-                    return 0.;
+                    return 2. * (sin(y - t) + 1.) + 0.5 * (sin(5. * (y + t)) + 1.);
                 },
                 [](double y, double t) {
-                    return 0.;
+                    return sin(t) * y;
                 },
                 [](double x, double t) {
-                    return 0.;
+                    return 2. * (sin(x - t) + 1.) + 0.5 * (sin(5. * (x + t)) + 1.);
                 },
                 [](double x, double t) {
-                    return 0.;
+                    return sin(t) * x;
                 }
             )
         ));

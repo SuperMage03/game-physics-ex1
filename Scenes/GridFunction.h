@@ -97,6 +97,13 @@ namespace GridFunction {
             return true;
         }
 
+        bool addToValue(unsigned i, unsigned j, double value) {
+            if (i >= f_n || j >= f_m) return false;
+
+            f_values[i][j] += value;
+            return true;
+        }
+
         void setAllValues(double value) {
             for (unsigned i = 0; i < f_n; i++) {
                 for (unsigned j = 0; j < f_m; j++) {
@@ -248,6 +255,10 @@ namespace GridFunction {
 
         bool setValue(unsigned i, unsigned j, double value) {
             return f_function.setValue(i, j, value);
+        }
+
+        bool addToValue(unsigned i, unsigned j, double value) {
+            return f_function.addToValue(i, j, value);
         }
 
         void setAllValues(double value) {

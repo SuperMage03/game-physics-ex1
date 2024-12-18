@@ -25,22 +25,22 @@ public:
                 glm::dvec2(0., 0.),
                 glm::dvec2(2., 4.),
                 0.1,
-                [](glm::dvec2 point) {
+                [](glm::dvec2 point, double t) {
                     return 0.;
                 },
-                [](glm::dvec2 point) {
+                [](glm::dvec2 point, double t) {
                     return 0.;
                 },
-                [](double y) {
+                [](double y, double t) {
                     return 0.;
                 },
-                [](double y) {
+                [](double y, double t) {
                     return 0.;
                 },
-                [](double x) {
+                [](double x, double t) {
                     return 0.;
                 },
-                [](double x) {
+                [](double x, double t) {
                     return 0.;
                 }
             )

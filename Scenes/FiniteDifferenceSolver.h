@@ -9,25 +9,30 @@ namespace FiniteDifferenceSolver {
     private:
         // Problem
         HeatProblem::HeatProblemRectDBC2D f_problem;
+        // State time
+        double f_time;
     
     public:
 
         #pragma region Constructors
 
         FD_HPRDBC2D_Solver():
-        f_problem()
+        f_problem(),
+        f_time(0.)
         {}
 
         FD_HPRDBC2D_Solver(
             const HeatProblem::HeatProblemRectDBC2D& problem
         ):
-        f_problem(problem)
+        f_problem(problem),
+        f_time(0.)
         {}
 
         FD_HPRDBC2D_Solver(
             HeatProblem::HeatProblemRectDBC2D&& problem
         ):
-        f_problem(std::move(problem))
+        f_problem(std::move(problem)),
+        f_time(0.)
         {}
 
         #pragma endregion
@@ -36,11 +41,11 @@ namespace FiniteDifferenceSolver {
             f_problem.f_mu = mu;
         }
 
-        void setSources(const HeatProblem::ScalarFunction2D& sources) {
+        void setSources(const HeatProblem::ScalarTimeFunction2D& sources) {
             f_problem.setSources(sources);
         }
 
-        void setSources(HeatProblem::ScalarFunction2D&& sources) {
+        void setSources(HeatProblem::ScalarTimeFunction2D&& sources) {
             f_problem.setSources(sources);
         }
 
@@ -51,7 +56,8 @@ namespace FiniteDifferenceSolver {
                         i,
                         j,
                         f_problem.f_initialCondition(
-                            state.getPoint(i, j)
+                            state.getPoint(i, j),
+                            0.
                         )
                     );
                 }
@@ -65,7 +71,8 @@ namespace FiniteDifferenceSolver {
                     0,
                     j,
                     f_problem.f_boundaryConditionX0(
-                        state.getPoint(0, j).y
+                        state.getPoint(0, j).y,
+                        f_time
                     )
                 );
             }
@@ -76,7 +83,8 @@ namespace FiniteDifferenceSolver {
                     state.getN() - 1,
                     j,
                     f_problem.f_boundaryConditionX1(
-                        state.getPoint(state.getN() - 1, j).y
+                        state.getPoint(state.getN() - 1, j).y,
+                        f_time
                     )
                 );
             }
@@ -87,7 +95,8 @@ namespace FiniteDifferenceSolver {
                     i,
                     0,
                     f_problem.f_boundaryConditionY0(
-                        state.getPoint(i, 0).x
+                        state.getPoint(i, 0).x,
+                        f_time
                     )
                 );
             }
@@ -98,7 +107,8 @@ namespace FiniteDifferenceSolver {
                     i,
                     state.getM() - 1,
                     f_problem.f_boundaryConditionY1(
-                        state.getPoint(i, state.getM() - 1).x
+                        state.getPoint(i, state.getM() - 1).x,
+                        f_time
                     )
                 );
             }
@@ -119,6 +129,8 @@ namespace FiniteDifferenceSolver {
         }
 
         void propagateStateExplicitOn(GridFunction::ScalarGridFunction2D& state, double delta) {
+            // Update state time
+            f_time += delta;
             // Make currect state values copy
             GridFunction::IntegerGridScalarFunction2D stCp = state.getIntegerGridScalarFunction();
             
@@ -126,7 +138,7 @@ namespace FiniteDifferenceSolver {
             for (unsigned i = 1; i < state.getN() - 1; i++) {
                 for (unsigned j = 1; j < state.getM() - 1; j++) {
                     double value = stCp.getValue(i, j)
-                        + f_problem.f_sources(state.getPoint(i, j))
+                        + f_problem.f_sources(state.getPoint(i, j), f_time)
                         + f_problem.f_mu * delta * (
                             (stCp.getValue(i + 1, j) - 2 * stCp.getValue(i, j) + stCp.getValue(i - 1, j)) / (state.getStepX() * state.getStepX())
                             + (stCp.getValue(i, j + 1) - 2 * stCp.getValue(i, j) + stCp.getValue(i, j - 1)) / (state.getStepY() * state.getStepY())
@@ -144,6 +156,8 @@ namespace FiniteDifferenceSolver {
         }
 
         void propagateStateImplicitOn(GridFunction::ScalarGridFunction2D& state, double delta) {
+            // Update state time
+            f_time += delta;
             // Make currect state values copy
             GridFunction::IntegerGridScalarFunction2D stCp = state.getIntegerGridScalarFunction();
 
@@ -172,7 +186,7 @@ namespace FiniteDifferenceSolver {
                     if (j != state.getM() - 2) A.set_element(id, getId(i, j + 1, state.getM()), minorValueY);
 
                     // Set RHS vector values
-                    double rhsValue = stCp.getValue(i, j) + f_problem.f_sources(state.getPoint(i, j));
+                    double rhsValue = stCp.getValue(i, j) + f_problem.f_sources(state.getPoint(i, j), f_time);
                     if (i == 1)                rhsValue += -minorValueX * stCp.getValue(i - 1, j);
                     if (i == state.getN() - 2) rhsValue += -minorValueX * stCp.getValue(i + 1, j);
                     if (j == 1)                rhsValue += -minorValueY * stCp.getValue(i, j - 1);

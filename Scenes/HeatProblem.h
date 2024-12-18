@@ -4,8 +4,8 @@
 #include "Renderer.h"
 
 namespace HeatProblem {
-    typedef std::function<double(glm::dvec2)> ScalarFunction2D;
-    typedef std::function<double(double)> ScalarFunction1D;
+    typedef std::function<double(glm::dvec2, double)> ScalarTimeFunction2D;
+    typedef std::function<double(double, double)> ScalarTimeFunction1D;
 
     struct HeatProblemRectDBC2D {
         // Domain
@@ -18,16 +18,16 @@ namespace HeatProblem {
         double f_mu;
 
         // Heat sources function
-        ScalarFunction2D f_sources;
+        ScalarTimeFunction2D f_sources;
         
         // Initial condition
-        ScalarFunction2D f_initialCondition;
+        ScalarTimeFunction2D f_initialCondition;
 
         // Boundary conditions
-        ScalarFunction1D f_boundaryConditionX0;
-        ScalarFunction1D f_boundaryConditionX1;
-        ScalarFunction1D f_boundaryConditionY0;
-        ScalarFunction1D f_boundaryConditionY1;
+        ScalarTimeFunction1D f_boundaryConditionX0;
+        ScalarTimeFunction1D f_boundaryConditionX1;
+        ScalarTimeFunction1D f_boundaryConditionY0;
+        ScalarTimeFunction1D f_boundaryConditionY1;
 
         HeatProblemRectDBC2D():
         f_domainOrigin(0.),
@@ -45,12 +45,12 @@ namespace HeatProblem {
             const glm::dvec2& domainOrigin,
             const glm::dvec2& domainSize,
             double mu,
-            const ScalarFunction2D& sources,
-            const ScalarFunction2D& initialCondition,
-            const ScalarFunction1D& boundaryConditionX0,
-            const ScalarFunction1D& boundaryConditionX1,
-            const ScalarFunction1D& boundaryConditionY0,
-            const ScalarFunction1D& boundaryConditionY1
+            const ScalarTimeFunction2D& sources,
+            const ScalarTimeFunction2D& initialCondition,
+            const ScalarTimeFunction1D& boundaryConditionX0,
+            const ScalarTimeFunction1D& boundaryConditionX1,
+            const ScalarTimeFunction1D& boundaryConditionY0,
+            const ScalarTimeFunction1D& boundaryConditionY1
         ):
         f_domainOrigin(domainOrigin),
         f_domainSize(domainSize),
@@ -67,12 +67,12 @@ namespace HeatProblem {
             glm::dvec2&& domainOrigin,
             glm::dvec2&& domainSize,
             double mu,
-            ScalarFunction2D&& sources,
-            ScalarFunction2D&& initialCondition,
-            ScalarFunction1D&& boundaryConditionX0,
-            ScalarFunction1D&& boundaryConditionX1,
-            ScalarFunction1D&& boundaryConditionY0,
-            ScalarFunction1D&& boundaryConditionY1
+            ScalarTimeFunction2D&& sources,
+            ScalarTimeFunction2D&& initialCondition,
+            ScalarTimeFunction1D&& boundaryConditionX0,
+            ScalarTimeFunction1D&& boundaryConditionX1,
+            ScalarTimeFunction1D&& boundaryConditionY0,
+            ScalarTimeFunction1D&& boundaryConditionY1
         ):
         f_domainOrigin(std::move(domainOrigin)),
         f_domainSize(std::move(domainSize)),
@@ -85,11 +85,11 @@ namespace HeatProblem {
         f_boundaryConditionY1(std::move(boundaryConditionY1))
         {}
 
-        void setSources(const ScalarFunction2D& sources) {
+        void setSources(const ScalarTimeFunction2D& sources) {
             f_sources = sources;
         }
 
-        void setSources(ScalarFunction2D&& sources) {
+        void setSources(ScalarTimeFunction2D&& sources) {
             f_sources = std::move(sources);
         }
     };
