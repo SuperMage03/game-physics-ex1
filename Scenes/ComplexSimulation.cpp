@@ -7,7 +7,7 @@ void ComplexSimulation::init() {
     // create walls
     // back one
     glm::vec3 XCMbw = glm::vec3(-2.5f,0.0f,0.0f);
-    float xbw = 0.1f;
+    float xbw = 0.5f;
     float ybw = 5.0f;
     float zbw = 5.0f;
     float Mbw = 2.0f;
@@ -20,7 +20,7 @@ void ComplexSimulation::init() {
     // right one
     glm::vec3 XCMrw = glm::vec3(0.0f,2.5,0.0f);
     float xrw = 5.0f;
-    float yrw = 0.1f;
+    float yrw = 0.5f;
     float zrw = 5.0f;
     float Mrw = 2.0f;
     glm::quat rrw = glm::normalize(glm::quat(0.0f, 0.0f, 0.0f, 0.0f));
@@ -32,7 +32,7 @@ void ComplexSimulation::init() {
     // left one
     glm::vec3 XCMlw = glm::vec3(0.0f,-2.5,0.0f);
     float xlw = 5.0f;
-    float ylw = 0.1f;
+    float ylw = 0.5f;
     float zlw = 5.0f;
     float Mlw = 1.0f/2.0f;
     glm::quat rlw = glm::normalize(glm::quat(0.0f, 0.0f, 0.0f, 0.0f));
@@ -45,7 +45,7 @@ void ComplexSimulation::init() {
     glm::vec3 XCMtw = glm::vec3(0.0f,0.0,2.5f);
     float xtw = 5.0f;
     float ytw = 5.0f;
-    float ztw = 0.1f;
+    float ztw = 0.5f;
     float Mtw = 2.0f;
     glm::quat rtw = glm::normalize(glm::quat(0.0f, 0.0f, 0.0f, 0.0f));
     glm::vec3 vtw = glm::vec3(0.0f,0.0f,0.0f);
@@ -57,7 +57,7 @@ void ComplexSimulation::init() {
     glm::vec3 XCMfw = glm::vec3(0.0f,0.0,-2.5f);
     float xfw = 5.0f;
     float yfw = 5.0f;
-    float zfw = 0.1f;
+    float zfw = 0.5f;
     float Mfw = 2.0f;
     glm::quat rfw = glm::normalize(glm::quat(0.0f, 0.0f, 0.0f, 0.0f));
     glm::vec3 vfw = glm::vec3(0.0f,0.0f,0.0f);
