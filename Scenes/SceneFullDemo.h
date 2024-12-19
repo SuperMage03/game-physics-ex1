@@ -152,35 +152,35 @@ public:
             f_toggleSources = true;
         }
         ImGui::Text("Hold E : Heat up depending on mouse cursor position");
-        ImGui::Text("(top left corner)");
         if (ImGui::IsKeyDown(ImGuiKey_E)) {
             if (!f_pause) {
                 auto mousePosition = ImGui::GetMousePos();
-                std::cout << ImGui::GetCursorScreenPos().x << std::endl;
-                glm::dvec2 tp(1. - mousePosition.x / ImGui::GetWindowWidth(), mousePosition.y / ImGui::GetWindowHeight());
+                double tx = (mousePosition.x / ImGui::GetWindowWidth() - (int)(mousePosition.x / ImGui::GetWindowWidth()));
+                double ty = 1 - (mousePosition.y / ImGui::GetWindowHeight() - (int)(mousePosition.y / ImGui::GetWindowHeight()));
+                glm::dvec2 tp(tx, ty);
                 unsigned i = (unsigned)(f_heatField.getN() * tp.x);
                 unsigned j = (unsigned)(f_heatField.getM() * tp.y);
-                f_heatField.addToValue(i, j, 0.5);
-                f_heatField.addToValue(i + 1, j, 0.25);
-                f_heatField.addToValue(i - 1, j, 0.25);
-                f_heatField.addToValue(i, j + 1, 0.25);
-                f_heatField.addToValue(i, j - 1, 0.25);
+                f_heatField.addToValue(i, j, 1.);
+                f_heatField.addToValue(i + 1, j, 0.5);
+                f_heatField.addToValue(i - 1, j, 0.5);
+                f_heatField.addToValue(i, j + 1, 0.5);
+                f_heatField.addToValue(i, j - 1, 0.5);
             }
         }
         ImGui::Text("Hold Q : Cool down depending on mouse cursor position");
-        ImGui::Text("(top left corner)");
         if (ImGui::IsKeyDown(ImGuiKey_Q)) {
             if (!f_pause) {
                 auto mousePosition = ImGui::GetMousePos();
-                std::cout << ImGui::GetCursorScreenPos().x << std::endl;
-                glm::dvec2 tp(1. - mousePosition.x / ImGui::GetWindowWidth(), mousePosition.y / ImGui::GetWindowHeight());
+                double tx = (mousePosition.x / ImGui::GetWindowWidth() - (int)(mousePosition.x / ImGui::GetWindowWidth()));
+                double ty = 1 - (mousePosition.y / ImGui::GetWindowHeight() - (int)(mousePosition.y / ImGui::GetWindowHeight()));
+                glm::dvec2 tp(tx, ty);
                 unsigned i = (unsigned)(f_heatField.getN() * tp.x);
                 unsigned j = (unsigned)(f_heatField.getM() * tp.y);
-                f_heatField.addToValue(i, j, -0.5);
-                f_heatField.addToValue(i + 1, j, -0.25);
-                f_heatField.addToValue(i - 1, j, -0.25);
-                f_heatField.addToValue(i, j + 1, -0.25);
-                f_heatField.addToValue(i, j - 1, -0.25);
+                f_heatField.addToValue(i, j, -1.);
+                f_heatField.addToValue(i + 1, j, -0.5);
+                f_heatField.addToValue(i - 1, j, -0.5);
+                f_heatField.addToValue(i, j + 1, -0.5);
+                f_heatField.addToValue(i, j - 1, -0.5);
             }
         }
         ImGui::Text("R : Restart");
