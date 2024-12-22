@@ -1,14 +1,15 @@
 #include "Scene.h"
 #include <random>
 
-class ExplicitSimulation: public Scene 
+class ImplicitSimulation: public Scene 
 {
     virtual void init() override;
     virtual void onGUI() override;
     virtual void onDraw(Renderer &renderer) override;
     // void ExplicitSimulation::initializeExampleGrid();
-    void ExplicitSimulation::initializeRandomNoise(glm::vec2 domainExtent, int mDegreesOfFreedom, int nDegreesOfFreedom);
-    void ExplicitSimulation::explicitEulerSchemeStep();
+    void ImplicitSimulation::initializeRandomNoise(glm::vec2 domainExtent, int mDegreesOfFreedom, int nDegreesOfFreedom);
+    void ImplicitSimulation::explicitEulerSchemeStep();
+    void ImplicitSimulation::implicitBTCSSchemeStep();
 
     struct TemperatureGrid {
         glm::vec2 domainExtent;
@@ -29,5 +30,5 @@ class ExplicitSimulation: public Scene
     std::uniform_real_distribution<float> dis;
 
     public:
-        ExplicitSimulation() : gen(rd()), dis(0.f, 1.f) {}
+        ImplicitSimulation() : gen(rd()), dis(0.f, 1.f) {}
 };

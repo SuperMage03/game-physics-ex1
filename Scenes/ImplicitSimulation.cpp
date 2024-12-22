@@ -1,14 +1,14 @@
-#include "ExplicitSimulation.h"
+#include "ImplicitSimulation.h"
 #include <glm/gtx/quaternion.hpp>
 #include <imgui.h>
 
-void ExplicitSimulation::init() {
+void ImplicitSimulation::init() {
     initializeRandomNoise(glm::vec2(1.0f, 1.0f), 16, 16);
 }
 
-void ExplicitSimulation::onGUI() {
-    if(ImGui::Button("Do explicit Euler scheme time step (or press space)") || ImGui::IsKeyDown(ImGuiKey_Space)) {
-        explicitEulerSchemeStep();
+void ImplicitSimulation::onGUI() {
+    if(ImGui::Button("Do implicit BTCS scheme time step (or press space)") || ImGui::IsKeyDown(ImGuiKey_Space)) {
+        implicitBTCSSchemeStep();
     }
 
     ImGui::SliderFloat("Size of time step", &deltaTTimeStepSize, 0.001f, 0.2f);
@@ -16,7 +16,7 @@ void ExplicitSimulation::onGUI() {
 
 }
 
-void ExplicitSimulation::onDraw(Renderer& renderer) {
+void ImplicitSimulation::onDraw(Renderer& renderer) {
     // draw the edges (heat value = 0.0f)
     glm::vec4 edgeColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
     renderer.drawCube(glm::vec3(0.0f, -0.5f + 0.25f * tempGrid.deltaX, 0.0f), glm::highp_quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f * tempGrid.deltaX, 0.0f), edgeColor);
@@ -34,7 +34,7 @@ void ExplicitSimulation::onDraw(Renderer& renderer) {
     }
 }
 
-void ExplicitSimulation::initializeRandomNoise(glm::vec2 domainExtent, 
+void ImplicitSimulation::initializeRandomNoise(glm::vec2 domainExtent, 
     int mDegreesOfFreedom, int nDegreesOfFreedom) {
 
     // initializing basic properties of the grid
@@ -56,7 +56,7 @@ void ExplicitSimulation::initializeRandomNoise(glm::vec2 domainExtent,
     }
 }
 
-void ExplicitSimulation::explicitEulerSchemeStep() {
+void ImplicitSimulation::explicitEulerSchemeStep() {
     std::vector<std::vector<float>> oldGrid = tempGrid.grid;
     // iterate over temperature grid and update every value
     for(int i = 0; i < tempGrid.mDegreesOfFreedom; i++) {
@@ -76,6 +76,16 @@ void ExplicitSimulation::explicitEulerSchemeStep() {
                 (((valueBelow - (2 * valueAtIJ) + valueAbove)/(tempGrid.deltaX * tempGrid.deltaX)) +
                 ((valueRight - (2 * valueAtIJ) + valueLeft)/(tempGrid.deltaY * tempGrid.deltaY))) +
                 valueAtIJ;
+        }
+    }
+}
+
+void ImplicitSimulation::implicitBTCSSchemeStep() {
+    std::vector<std::vector<float>> oldGrid = tempGrid.grid;
+    // iterate over temperature grid and update every value
+    for(int i = 0; i < tempGrid.mDegreesOfFreedom; i++) {
+        for(int j = 0; j < tempGrid.nDegreesOfFreedom; j++) {
+            
         }
     }
 }
