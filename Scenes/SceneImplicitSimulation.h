@@ -14,6 +14,7 @@ class SceneImplicitSimulation : public Scene {
     glm::dvec3 f_shift = glm::dvec3(0.);
     FiniteDifferenceSolver::FD_HPRDBC2D_Solver f_solver;
     GridFunction::ScalarGridFunction2D f_heatField;
+    bool f_restart = false;
 
     glm::dmat4 f_cameraMatrix = glm::dmat4(1);
     glm::dvec3 f_fwd = glm::dvec3(1, 0, 0);
@@ -21,7 +22,7 @@ class SceneImplicitSimulation : public Scene {
     glm::dvec3 f_up = glm::dvec3(0, 0, 1);
 
 public:
-    void init() override {
+    void initializeSolverAndState() {
         f_solver = std::move(FiniteDifferenceSolver::FD_HPRDBC2D_Solver(
             HeatProblem::HeatProblemRectDBC2D(
                 glm::dvec2(0., 0.),
@@ -50,6 +51,10 @@ public:
         f_heatField = f_solver.getInitialState(f_n, f_m);
     }
 
+    void init() override {
+        initializeSolverAndState();
+    }
+
     void onDraw(Renderer &renderer) override {
         f_cameraMatrix = renderer.camera.viewMatrix;
         f_fwd = inverse(f_cameraMatrix) * glm::dvec4(0, 0, 1, 0);
@@ -60,6 +65,11 @@ public:
     }
 
     void simulateStep() override {
+        if (f_restart) {
+            f_pause = true;
+            initializeSolverAndState();
+            f_restart = false;
+        }
         f_solver.setDiffusivity(f_diffusivity);
         if (!f_pause) {
             f_solver.propagateStateImplicitOn(f_heatField, f_delta);
@@ -77,12 +87,17 @@ public:
         ImGui::SliderFloat("Delta", &this->f_delta, 0.f, 0.1);
         ImGui::Checkbox("Pause", &this->f_pause);
         ImGui::Text("Space : pause/unpause");
+        f_restart = ImGui::Button("Restart");
         if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
             this->f_pause = !this->f_pause;
         }
         ImGui::Text("S : while paused perform a single time step");
         if (ImGui::IsKeyPressed(ImGuiKey_S)) {
             this->f_singleStep = true;
+        }
+        ImGui::Text("R : Restart");
+        if (ImGui::IsKeyPressed(ImGuiKey_R)) {
+            f_restart = true;
         }
         ImGui::Text("RMB + drag : to move the graph");
         if(ImGui::IsMouseDown(ImGuiMouseButton_Right)) {

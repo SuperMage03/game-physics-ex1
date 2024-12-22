@@ -22,6 +22,7 @@ class SceneInteractiveSimulation : public Scene {
     bool f_toggleSources = false;
     bool f_sources = false;
     bool f_restart = false;
+    int f_effectRadius = 2;
 
     glm::dmat4 f_cameraMatrix = glm::dmat4(1);
     glm::dvec3 f_fwd = glm::dvec3(1, 0, 0);
@@ -136,12 +137,11 @@ public:
         f_changedProblem = f_changedProblem || ImGui::SliderInt("M", &this->f_m, 3, 100);
         ImGui::SliderFloat("Delta", &this->f_delta, 0.f, 0.1);
         ImGui::Checkbox("Pause", &this->f_pause);
-        f_restart = ImGui::Button("Restart");
-
         ImGui::Text("Space : pause/unpause");
         if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
             this->f_pause = !this->f_pause;
         }
+        f_restart = ImGui::Button("Restart");
         ImGui::Text("S : while paused perform a single time step");
         if (ImGui::IsKeyPressed(ImGuiKey_S)) {
             this->f_singleStep = true;
@@ -151,36 +151,39 @@ public:
             this->f_sources = !f_sources;
             f_toggleSources = true;
         }
+        ImGui::SliderInt("Manual effect radius", &this->f_effectRadius, 1, 5);
         ImGui::Text("Hold E : Heat up depending on mouse cursor position");
         if (ImGui::IsKeyDown(ImGuiKey_E)) {
             if (!f_pause) {
                 auto mousePosition = ImGui::GetMousePos();
-                double tx = (mousePosition.x / ImGui::GetWindowWidth() - (int)(mousePosition.x / ImGui::GetWindowWidth()));
-                double ty = 1 - (mousePosition.y / ImGui::GetWindowHeight() - (int)(mousePosition.y / ImGui::GetWindowHeight()));
+                auto windowSize = ImGui::GetIO().DisplaySize;
+                double tx = (double)(mousePosition.x) / (double)(windowSize.x);
+                double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
                 glm::dvec2 tp(tx, ty);
                 unsigned i = (unsigned)(f_heatField.getN() * tp.x);
                 unsigned j = (unsigned)(f_heatField.getM() * tp.y);
-                f_heatField.addToValue(i, j, 1.);
-                f_heatField.addToValue(i + 1, j, 0.5);
-                f_heatField.addToValue(i - 1, j, 0.5);
-                f_heatField.addToValue(i, j + 1, 0.5);
-                f_heatField.addToValue(i, j - 1, 0.5);
+                for (int io = i - f_effectRadius; io <= i + f_effectRadius; io++) {
+                    for (int jo = j - f_effectRadius; jo <= j + f_effectRadius; jo++) {
+                        f_heatField.addToValue(io, jo, 0.5);
+                    }
+                }
             }
         }
         ImGui::Text("Hold Q : Cool down depending on mouse cursor position");
         if (ImGui::IsKeyDown(ImGuiKey_Q)) {
             if (!f_pause) {
                 auto mousePosition = ImGui::GetMousePos();
-                double tx = (mousePosition.x / ImGui::GetWindowWidth() - (int)(mousePosition.x / ImGui::GetWindowWidth()));
-                double ty = 1 - (mousePosition.y / ImGui::GetWindowHeight() - (int)(mousePosition.y / ImGui::GetWindowHeight()));
+                auto windowSize = ImGui::GetIO().DisplaySize;
+                double tx = (double)(mousePosition.x) / (double)(windowSize.x);
+                double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
                 glm::dvec2 tp(tx, ty);
                 unsigned i = (unsigned)(f_heatField.getN() * tp.x);
                 unsigned j = (unsigned)(f_heatField.getM() * tp.y);
-                f_heatField.addToValue(i, j, -1.);
-                f_heatField.addToValue(i + 1, j, -0.5);
-                f_heatField.addToValue(i - 1, j, -0.5);
-                f_heatField.addToValue(i, j + 1, -0.5);
-                f_heatField.addToValue(i, j - 1, -0.5);
+                for (int io = i - f_effectRadius; io <= i + f_effectRadius; io++) {
+                    for (int jo = j - f_effectRadius; jo <= j + f_effectRadius; jo++) {
+                        f_heatField.addToValue(io, jo, -0.5);
+                    }
+                }
             }
         }
         ImGui::Text("R : Restart");
