@@ -162,6 +162,7 @@ public:
             f_toggleSources = true;
         }
         ImGui::SliderInt("Manual effect radius", &this->f_effectRadius, 0, 5);
+        ImGui::Text("While unpaused:");
         ImGui::Text("Hold E : Heat up depending on mouse cursor position");
         if (ImGui::IsKeyDown(ImGuiKey_E)) {
             if (!f_pause) {
