@@ -5,6 +5,7 @@
 #include "SingleStep.h"
 #include "ExplicitSimulation.h"
 #include "ImplicitSimulation.h"
+#include "InteractiveSimulation.h"
 
 using SceneCreator = std::function<std::unique_ptr<Scene>()>;
 
@@ -21,4 +22,5 @@ std::map<std::string, SceneCreator> scenesCreators = {
     {"Single Step", creator<SingleStep>()},
     {"Explicit Simulation", creator<ExplicitSimulation>()},
     {"Implicit Simulation", creator<ImplicitSimulation>()},
+    {"Interactive Simulation", creator<InteractiveSimulation>()},
 };
