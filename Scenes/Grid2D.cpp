@@ -1,6 +1,24 @@
 #include "Grid2D.hpp"
 #include <random>
 
+glm::vec2 Grid2D::gridToCoordinate(const int &row, const int &col) const {
+    // +1 for the fact that row and col doesn't count the boundary points whilst the deltaX and deltaY do
+    return glm::vec2((row+1) * m_deltaX, (col+1) * m_deltaY);
+}
+
+void Grid2D::calculateDirectionalDelta() {
+    m_deltaX = (m_xBoundaryMax - m_xBoundaryMin) / (m_gridRowSize + 1);
+    m_deltaY = (m_yBoundaryMax - m_yBoundaryMin) / (m_gridColSize + 1);
+}
+
+int Grid2D::flattenFunction(const int &row, const int &col) const {
+    return row * m_gridColSize + col;
+}
+
+glm::vec2 Grid2D::unflattenFunction(const int &flattenedValue) const {
+    return glm::vec2(flattenedValue / getGridColSize(), flattenedValue % getGridColSize());
+}
+
 float Grid2D::getXBoundaryMin() const {
     return m_xBoundaryMin;
 }
@@ -43,6 +61,7 @@ void Grid2D::setTime(const float& time) {
 
 Grid2D::Grid2D(const Grid2D &copy): 
     m_xBoundaryMin{copy.m_xBoundaryMin}, m_xBoundaryMax{copy.m_xBoundaryMax}, m_yBoundaryMin{copy.m_yBoundaryMin}, m_yBoundaryMax{copy.m_yBoundaryMax},
+    m_xBoundaryCondition{copy.m_xBoundaryCondition}, m_yBoundaryCondition{copy.m_yBoundaryCondition},
     m_gridRowSize{copy.m_gridRowSize}, m_gridColSize{copy.m_gridColSize},
     m_deltaX{copy.m_deltaX}, m_deltaY{copy.m_deltaY}, m_time{copy.m_time} {
     m_plotValues = std::make_unique<float[]>(m_gridRowSize * m_gridColSize);
@@ -52,9 +71,10 @@ Grid2D::Grid2D(const Grid2D &copy):
 }
 
 Grid2D::Grid2D(const float& xBoundaryMin, const float& xBoundaryMax, const float& yBoundaryMin, const float& yBoundaryMax, 
-               const unsigned int& gridRowSize, const unsigned int& gridColSize, const float*const& initialPlotValues): 
+               const unsigned int& gridRowSize, const unsigned int& gridColSize, 
+               float (*const&xBoundaryCondition)(const float& x, const float& t), float (*const&yBoundaryCondition)(const float& y, const float& t), const float*const& initialPlotValues): 
                m_xBoundaryMin{xBoundaryMin}, m_xBoundaryMax{xBoundaryMax}, m_yBoundaryMin{yBoundaryMin}, m_yBoundaryMax{yBoundaryMax},
-               m_time{0.0f}, m_gridRowSize{gridRowSize}, m_gridColSize{gridColSize} {
+               m_xBoundaryCondition{xBoundaryCondition}, m_yBoundaryCondition{yBoundaryCondition}, m_time{0.0f}, m_gridRowSize{gridRowSize}, m_gridColSize{gridColSize} {
     calculateDirectionalDelta();
     // Creating the state 2D array
     m_plotValues = std::make_unique<float[]>(m_gridRowSize * m_gridColSize);
@@ -64,20 +84,18 @@ Grid2D::Grid2D(const float& xBoundaryMin, const float& xBoundaryMax, const float
 }
 
 float Grid2D::getPlotValueAtPosition(const int& row, const int& col) const {
-    if ((row < 0) || (row >= m_gridRowSize) || (col < 0) || (col >= m_gridColSize)) 
-        return 0.0f;
-    return m_plotValues[row * m_gridColSize + col];
+    glm::vec2 coordinationPosition = gridToCoordinate(row, col);
+    if ((coordinationPosition.x <= m_xBoundaryMin) || (coordinationPosition.x >= m_xBoundaryMax)) 
+        return m_xBoundaryCondition(coordinationPosition.x, m_time);
+    if ((coordinationPosition.y <= m_yBoundaryMin) || (coordinationPosition.y >= m_yBoundaryMax))
+        return m_yBoundaryCondition(coordinationPosition.y, m_time);
+    return m_plotValues[flattenFunction(row, col)];
 }
 
 void Grid2D::setPlotValueAtPosition(const int& row, const int& col, const float& value) {
     if ((row < 0) || (row >= m_gridRowSize) || (col < 0) || (col >= m_gridColSize)) 
         return;
-    m_plotValues[row * m_gridColSize + col] = value;
-}
-
-void Grid2D::calculateDirectionalDelta() {
-    m_deltaX = (m_xBoundaryMax - m_xBoundaryMin) / (m_gridRowSize + 1);
-    m_deltaY = (m_yBoundaryMax - m_yBoundaryMin) / (m_gridColSize + 1);
+    m_plotValues[flattenFunction(row, col)] = value;
 }
 
 void Grid2D::resizeDomain(const float &xBoundaryMin, const float &xBoundaryMax, const float &yBoundaryMin, const float &yBoundaryMax) {

@@ -23,42 +23,55 @@ void HeatEquation2D::simulateStepEulerImplicit(const float& deltaTime) {
     float residual;
     int iterations;
 
-    // Setting up the matrix
+    // Setting up the matrix and rhs
     SparseMatrix<float> matrix(matrixDimension, 5);
+    std::vector<float> rhs(matrixDimension);
+
     const float lambdaX = m_diffusivity * deltaTime / powf(m_grid.getDeltaX(), 2.0f);
     const float lambdaY = m_diffusivity * deltaTime / powf(m_grid.getDeltaY(), 2.0f);
+
     for (unsigned int matrixRow = 0; matrixRow < matrixDimension; matrixRow++) {
-        int gridRow = matrixRow / m_grid.getGridColSize();
-        int gridCol = matrixRow % m_grid.getGridColSize();
+        glm::vec2 gridPosition = m_grid.unflattenFunction(matrixRow);
+        int gridRow = gridPosition.x;
+        int gridCol = gridPosition.y;
 
-        int matrixCol_ImJ = (gridRow-1) * m_grid.getGridColSize() + gridCol;
-        int matrixCol_IJm = gridRow * m_grid.getGridColSize() + (gridCol-1);
+        // Populate RHS
+        rhs[matrixRow] = m_grid.getPlotValueAtPosition(gridRow, gridCol);
+
+        int matrixCol_ImJ = m_grid.flattenFunction(gridRow-1, gridCol);
+        int matrixCol_IJm = m_grid.flattenFunction(gridRow, gridCol-1);
         int matrixCol_IJ = matrixRow;
-        int matrixCol_IJp = gridRow * m_grid.getGridColSize() + (gridCol+1);
-        int matrixCol_IpJ = (gridRow+1) * m_grid.getGridColSize() + gridCol;
+        int matrixCol_IJp = m_grid.flattenFunction(gridRow, gridCol+1);
+        int matrixCol_IpJ = m_grid.flattenFunction(gridRow+1, gridCol);
 
-        if ((0 <= matrixCol_ImJ) && (matrixCol_ImJ < matrixDimension)) {
+        if (gridRow-1 < 0) {
+            rhs[matrixRow] += lambdaX * m_grid.getPlotValueAtPosition(gridRow-1, gridCol);
+        }
+        else {
             matrix.set_element(matrixRow, matrixCol_ImJ, -lambdaX);
         }
-        if ((0 <= matrixCol_IJm) && (matrixCol_IJm < matrixDimension)) {
+
+        if (gridCol-1 < 0) {
+            rhs[matrixRow] += lambdaY * m_grid.getPlotValueAtPosition(gridRow, gridCol-1);
+        }
+        else {
             matrix.set_element(matrixRow, matrixCol_IJm, -lambdaY);
         }
 
         matrix.set_element(matrixRow, matrixCol_IJ, 1 + 2*lambdaX + 2*lambdaY);
 
-        if ((0 <= matrixCol_IJp) && (matrixCol_IJp < matrixDimension)) {
+        if (gridCol+1 >= m_grid.getGridColSize()) {
+            rhs[matrixRow] += lambdaY * m_grid.getPlotValueAtPosition(gridRow, gridCol+1);
+        }
+        else {
             matrix.set_element(matrixRow, matrixCol_IJp, -lambdaY);
         }
-        if ((0 <= matrixCol_IpJ) && (matrixCol_IpJ < matrixDimension)) {
-            matrix.set_element(matrixRow, matrixCol_IpJ, -lambdaX);
-        }
-    }
 
-    // Setting up the rhs
-    std::vector<float> rhs(matrixDimension);
-    for (unsigned int row = 0; row < m_grid.getGridRowSize(); row++) {
-        for (unsigned int col = 0; col < m_grid.getGridColSize(); col++) {
-            rhs[row * m_grid.getGridColSize() + col] = m_grid.getPlotValueAtPosition(row, col);
+        if (gridRow+1 >= m_grid.getGridRowSize()) {
+            rhs[matrixRow] += lambdaX * m_grid.getPlotValueAtPosition(gridRow+1, gridCol);
+        }
+        else {
+            matrix.set_element(matrixRow, matrixCol_IpJ, -lambdaX);
         }
     }
 
@@ -68,7 +81,7 @@ void HeatEquation2D::simulateStepEulerImplicit(const float& deltaTime) {
     // Write result to grid
     for (unsigned int row = 0; row < m_grid.getGridRowSize(); row++) {
         for (unsigned int col = 0; col < m_grid.getGridColSize(); col++) {
-            m_grid.setPlotValueAtPosition(row, col, result[row * m_grid.getGridColSize() + col]);
+            m_grid.setPlotValueAtPosition(row, col, result[m_grid.flattenFunction(row, col)]);
         }
     }
 }

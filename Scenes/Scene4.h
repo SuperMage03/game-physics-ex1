@@ -20,7 +20,7 @@ private:
                                4.0f,  3.0f,  0.0f, -1.0f, -3.0f, -1.0f,
                                3.0f,  2.0f, -1.0f, -2.0f, -4.0f, -2.0f};
 
-    Grid2D grid{m_xBoundaryMin, m_xBoundaryMax, m_yBoundaryMin, m_yBoundaryMax, static_cast<unsigned int>(m_rowSize), static_cast<unsigned int>(m_colSize), initialState};
+    Grid2D grid{m_xBoundaryMin, m_xBoundaryMax, m_yBoundaryMin, m_yBoundaryMax, static_cast<unsigned int>(m_rowSize), static_cast<unsigned int>(m_colSize), [](const float& x, const float& t)->float {return 0.0f;}, [](const float& y, const float& t)->float {return 0.0f;}, initialState};
     HeatEquation2D heatEquation2D{grid, m_diffusivity, HeatEquation2D::IntegrationMode::EULER_IMPLICIT};
 public:
     void init() override;

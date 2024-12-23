@@ -12,7 +12,7 @@ private:
                                4.0f,  3.0f,  0.0f, -1.0f, -3.0f, -1.0f,
                                3.0f,  2.0f, -1.0f, -2.0f, -4.0f, -2.0f};
 
-    Grid2D grid{0.0f, 1.0f, 0.0f, 1.0f, 16, 16, initialState};
+    Grid2D grid{0.0f, 1.0f, 0.0f, 1.0f, 16, 16, [](const float& x, const float& t)->float {return 0.0f;}, [](const float& y, const float& t)->float {return 0.0f;}, initialState};
     HeatEquation2D heatEquation2D{grid, m_diffusivity, HeatEquation2D::IntegrationMode::EULER_IMPLICIT};
 public:
     void init() override;

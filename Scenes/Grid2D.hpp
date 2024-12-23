@@ -18,8 +18,15 @@ private:
     float m_time;
     std::unique_ptr<float[]> m_plotValues;
 
+    float (*m_xBoundaryCondition)(const float& x, const float& t);
+    float (*m_yBoundaryCondition)(const float& y, const float& t);
+
+    glm::vec2 gridToCoordinate(const int& row, const int& col) const;
     void calculateDirectionalDelta();
 public:
+    int flattenFunction(const int& row, const int& col) const;
+    glm::vec2 unflattenFunction(const int& flattenedValue) const;
+
     float getXBoundaryMin() const;
     float getXBoundaryMax() const;
     float getYBoundaryMin() const;
@@ -35,7 +42,8 @@ public:
     void setTime(const float& time);
 
     Grid2D(const Grid2D& copy);
-    Grid2D(const float& xBoundaryMin, const float& xBoundaryMax, const float& yBoundaryMin, const float& yBoundaryMax, const unsigned int& gridRowSize, const unsigned int& gridColSize, const float*const& initialPlotValues);
+    Grid2D(const float& xBoundaryMin, const float& xBoundaryMax, const float& yBoundaryMin, const float& yBoundaryMax, const unsigned int& gridRowSize, const unsigned int& gridColSize, 
+           float (*const&xBoundaryCondition)(const float& x, const float& t), float (*const&yBoundaryCondition)(const float& y, const float& t), const float*const& initialPlotValues);
 
     float getPlotValueAtPosition(const int& row, const int& col) const;
     void setPlotValueAtPosition(const int& row, const int& col, const float& value);
