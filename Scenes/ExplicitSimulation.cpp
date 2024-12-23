@@ -11,8 +11,8 @@ void ExplicitSimulation::onGUI() {
         explicitEulerSchemeStep();
     }
 
-    ImGui::SliderFloat("Size of time step", &deltaTTimeStepSize, 0.001f, 0.2f);
-    ImGui::SliderFloat("Diffusivity v", &tempGrid.vThermalDiffusivity, 0.01f, 1.0f);
+    ImGui::SliderFloat("Size of time step", &deltaTTimeStepSize, 0.001f, 0.02f);
+    ImGui::SliderFloat("Diffusivity v", &tempGrid.vThermalDiffusivity, 0.01f, 0.2f);
 
 }
 
