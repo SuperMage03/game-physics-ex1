@@ -151,7 +151,7 @@ public:
             this->f_sources = !f_sources;
             f_toggleSources = true;
         }
-        ImGui::SliderInt("Manual effect radius", &this->f_effectRadius, 1, 5);
+        ImGui::SliderInt("Manual effect radius", &this->f_effectRadius, 0, 5);
         ImGui::Text("Hold E : Heat up depending on mouse cursor position");
         if (ImGui::IsKeyDown(ImGuiKey_E)) {
             if (!f_pause) {
@@ -160,10 +160,10 @@ public:
                 double tx = (double)(mousePosition.x) / (double)(windowSize.x);
                 double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
                 glm::dvec2 tp(tx, ty);
-                unsigned i = (unsigned)(f_heatField.getN() * tp.x);
-                unsigned j = (unsigned)(f_heatField.getM() * tp.y);
-                for (int io = i - f_effectRadius; io <= i + f_effectRadius; io++) {
-                    for (int jo = j - f_effectRadius; jo <= j + f_effectRadius; jo++) {
+                int i = (int)(f_heatField.getN() * tp.x);
+                int j = (int)(f_heatField.getM() * tp.y);
+                for (int io = std::max(0, i - f_effectRadius); io <= i + f_effectRadius; io++) {
+                    for (int jo = std::max(0, j - f_effectRadius); jo <= j + f_effectRadius; jo++) {
                         f_heatField.addToValue(io, jo, 0.5);
                     }
                 }
@@ -177,10 +177,10 @@ public:
                 double tx = (double)(mousePosition.x) / (double)(windowSize.x);
                 double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
                 glm::dvec2 tp(tx, ty);
-                unsigned i = (unsigned)(f_heatField.getN() * tp.x);
-                unsigned j = (unsigned)(f_heatField.getM() * tp.y);
-                for (int io = i - f_effectRadius; io <= i + f_effectRadius; io++) {
-                    for (int jo = j - f_effectRadius; jo <= j + f_effectRadius; jo++) {
+                int i = (int)(f_heatField.getN() * tp.x);
+                int j = (int)(f_heatField.getM() * tp.y);
+                for (int io = std::max(0, i - f_effectRadius); io <= i + f_effectRadius; io++) {
+                    for (int jo = std::max(0, j - f_effectRadius); jo <= j + f_effectRadius; jo++) {
                         f_heatField.addToValue(io, jo, -0.5);
                     }
                 }
