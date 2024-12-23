@@ -3,8 +3,8 @@
 class SingleStep : public Scene
 {
     virtual void init() override;
-    void SingleStep::initializeExampleGrid();
-    void SingleStep::implicitEulerSchemeStep();
+    void initializeExampleGrid();
+    void implicitEulerSchemeStep();
 
     struct TemperatureGrid {
         glm::vec2 domainExtent;

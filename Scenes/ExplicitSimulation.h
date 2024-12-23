@@ -7,8 +7,8 @@ class ExplicitSimulation: public Scene
     virtual void onGUI() override;
     virtual void onDraw(Renderer &renderer) override;
     // void ExplicitSimulation::initializeExampleGrid();
-    void ExplicitSimulation::initializeRandomNoise(glm::vec2 domainExtent, int mDegreesOfFreedom, int nDegreesOfFreedom);
-    void ExplicitSimulation::explicitEulerSchemeStep();
+    void initializeRandomNoise(glm::vec2 domainExtent, int mDegreesOfFreedom, int nDegreesOfFreedom);
+    void explicitEulerSchemeStep();
 
     struct TemperatureGrid {
         glm::vec2 domainExtent;

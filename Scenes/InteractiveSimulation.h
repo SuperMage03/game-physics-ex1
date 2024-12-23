@@ -7,9 +7,9 @@ class InteractiveSimulation: public Scene
     virtual void onGUI() override;
     virtual void onDraw(Renderer &renderer) override;
     // void ExplicitSimulation::initializeExampleGrid();
-    void InteractiveSimulation::initializeRandomNoise(glm::vec2 domainExtent, int mDegreesOfFreedom, int nDegreesOfFreedom);
-    void InteractiveSimulation::explicitEulerSchemeStep();
-    void InteractiveSimulation::implicitBTCSSchemeStep();
+    void initializeRandomNoise(glm::vec2 domainExtent, int mDegreesOfFreedom, int nDegreesOfFreedom);
+    void explicitEulerSchemeStep();
+    void implicitBTCSSchemeStep();
 
     struct TemperatureGrid {
         glm::vec2 domainExtent;
