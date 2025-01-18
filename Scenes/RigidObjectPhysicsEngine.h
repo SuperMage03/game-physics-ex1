@@ -133,7 +133,7 @@ namespace Physics {
 
             // TODO: Collision detection and handling
             std::vector<RigidObjectCollision> collisions;
-            // Check for collisions
+            // Check for collisions between balls
             for (int idA = 0; idA < f_rigidObjects.size(); idA++) {
                 for (int idB = idA + 1; idB < f_rigidObjects.size(); idB++) {
                     std::shared_ptr<RigidObject3D> objA = f_rigidObjects.at(idA);
@@ -142,23 +142,21 @@ namespace Physics {
                     // !!!!!!!!!!!!!! Cast to Ball !!!!!!!!!!!!!!
                     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     // Should be done by introducing collider classes
-                    std::shared_ptr<RigidBall> boxA = std::dynamic_pointer_cast<Box>(objA);
-                    std::shared_ptr<RigidBall> boxB = std::dynamic_pointer_cast<Box>(objB);
-                    // Get collision point of object A if exists
-                    glm::mat4 transformA = objA->f_transform.getTransform();
-                    glm::mat4 transformB = objB->f_transform.getTransform();
-                    auto collisionInfo = collisionTools::checkCollisionSAT(transformA, transformB);
-
-                    if (!collisionInfo.isColliding) continue;
-                    // Create collision
-                    Collision collision(
-                        boxA,
-                        boxB,
-                        collisionInfo.collisionPointWorld,
-                        collisionInfo.normalWorld,
-                        collisionInfo.depth
-                    );
-                    collisions.emplace_back(std::move(collision));
+                    std::shared_ptr<RigidBall> ballA = std::dynamic_pointer_cast<RigidBall>(objA);
+                    std::shared_ptr<RigidBall> ballB = std::dynamic_pointer_cast<RigidBall>(objB);
+                    // Check if ball collide
+                    CollisionInfo collInfo = ballA->collidesWithBallInfo(*ballB);
+                    if (collInfo.f_normal != glm::dvec3(0.)) {
+                        // Create collision
+                        RigidObjectCollision collision(
+                            ballA,
+                            ballB,
+                            collInfo.f_collisionPoint,
+                            collInfo.f_normal,
+                            collInfo.f_depth
+                        );
+                        collisions.emplace_back(std::move(collision));
+                    }
                 }
             }
             

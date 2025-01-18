@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "Transform.h"
+#include "Collision.h"
 
 /** @brief
  * 3D static object structure.
@@ -259,6 +260,118 @@ struct StaticCuboid : public StaticObject3D {
         return glm::vec3(0.);
     }
 
+    CollisionInfo collidesWithBallInfo(glm::dvec3 position, double radius) {
+        CollisionInfo collInfo;
+        glm::dvec3 positionLocal = f_transform.transformGlobalToLocal(position);
+        // Check if the center of the ball is contained in the cuboid
+        if (containsPoint(position)) {
+            // Calculate the minimum distance to X sides
+            double distX = std::min(positionLocal.x + f_transform.f_scale.x / 2., f_transform.f_scale.x / 2. - positionLocal.x);
+            double distY = std::min(positionLocal.y + f_transform.f_scale.y / 2., f_transform.f_scale.y / 2. - positionLocal.y);
+            double distZ = std::min(positionLocal.z + f_transform.f_scale.z / 2., f_transform.f_scale.z / 2. - positionLocal.z);
+            
+            if (distX <= distY && distX <= distZ) {
+                if (positionLocal.x < 0) {
+                    collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(-1., 0., 0.));
+                    collInfo.f_depth = distX + radius;
+                    collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * collInfo.f_depth);
+                    return collInfo;
+                }
+                else {
+                    collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(1., 0., 0.));
+                    collInfo.f_depth = distX + radius;
+                    collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * collInfo.f_depth);
+                    return collInfo;
+                }
+            }
+            else if (distY <= distX && distY <= distZ) {
+                if (positionLocal.y < 0) {
+                    collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(0., -1., 0.));
+                    collInfo.f_depth = distY + radius;
+                    collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * collInfo.f_depth);
+                    return collInfo;
+                }
+                else {
+                    collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(0., 1., 0.));
+                    collInfo.f_depth = distY + radius;
+                    collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * collInfo.f_depth);
+                    return collInfo;
+                }
+            }
+            else if (distZ <= distX && distZ <= distY) {
+                if (positionLocal.z < 0) {
+                    collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(0., 0., -1.));
+                    collInfo.f_depth = distZ + radius;
+                    collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * collInfo.f_depth);
+                    return collInfo;
+                }
+                else {
+                    collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(0., 0., 1.));
+                    collInfo.f_depth = distZ + radius;
+                    collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * collInfo.f_depth);
+                    return collInfo;
+                }
+            }
+        }
+        // Check if the center of the ball is contained in the cuboids that are extended by radius in every direction
+        if (containsPointExtendedX(position, radius)) {
+            if (positionLocal.x < 0) {
+                collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(-1., 0., 0.));
+                collInfo.f_depth = radius - (-f_transform.f_scale.x / 2 - positionLocal.x);
+                collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * (collInfo.f_depth - radius));
+                return collInfo;
+            }
+            else {
+                collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(1., 0., 0.));
+                collInfo.f_depth = radius - (-f_transform.f_scale.x / 2 + positionLocal.x);
+                collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * (collInfo.f_depth - radius));
+                return collInfo;
+            }
+        }
+        if (containsPointExtendedY(position, radius)) {
+            if (positionLocal.y < 0) {
+                collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(0., -1., 0.));
+                collInfo.f_depth = radius - (-f_transform.f_scale.y / 2 - positionLocal.y);
+                collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * (collInfo.f_depth - radius));
+                return collInfo;
+            }
+            else {
+                collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(0., 1., 0.));
+                collInfo.f_depth = radius - (-f_transform.f_scale.y / 2 + positionLocal.y);
+                collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * (collInfo.f_depth - radius));
+                return collInfo;
+            }
+        }
+        if (containsPointExtendedZ(position, radius)) {
+            if (positionLocal.z < 0) {
+                collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(0., 0., -1.));
+                collInfo.f_depth = radius - (-f_transform.f_scale.z / 2 - positionLocal.z);
+                collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * (collInfo.f_depth - radius));
+                return collInfo;
+            }
+            else {
+                collInfo.f_normal = f_transform.transformLocalToGlobalRotation(glm::dvec3(0., 0., 1.));
+                collInfo.f_depth = radius - (-f_transform.f_scale.z / 2 + positionLocal.z);
+                collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(positionLocal + collInfo.f_normal * (collInfo.f_depth - radius));
+                return collInfo;
+            }
+        }
+
+        // Check every vertex separately
+        for (unsigned i = 0; i < 8; i++) {
+            // Check if ball center is close enough to vertex
+            glm::dvec3 vertex = getCornerVertexLocal(i);
+            double distance = (positionLocal - vertex).length();
+            if (distance <= radius) {
+                collInfo.f_normal = f_transform.transformLocalToGlobalRotation((positionLocal - vertex) / distance);
+                collInfo.f_depth = radius - distance;
+                collInfo.f_collisionPoint = f_transform.transformLocalToGlobal(vertex);
+                return collInfo;
+            }
+        }
+
+        return collInfo;
+    }
 
     void onDraw(Renderer &renderer, bool wire = false) {
         if (!wire) {

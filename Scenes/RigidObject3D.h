@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "Transform.h"
+#include "Collision.h"
 
 /** @brief
  * 3D rigid object structure.
@@ -282,18 +283,23 @@ struct RigidBall : public RigidObject3D {
 	/// @brief Determines whether the ball collides with another ball.
 	/// @param other Ball to check collision with.
 	/// @return Returns true if the balls collide, returns false otherwise.
-	bool collidesWithBall(const RigidBall other) {
+	bool collidesWithBall(const RigidBall& other) {
 		return (other.f_transform.f_position - f_transform.f_position).length() <= (other.f_transform.f_scale.x + f_transform.f_scale.x);
 	}
 
-	/// @brief Determines whether the ball collides with another ball and returns a normal to this ball at intersection.
+	/// @brief Determines whether the ball collides with another ball and returns a collision info structure.
     /// @param other Ball to check collision with.
-    /// @return Returns the normal at intersection if the ball intersects the other ball (including single point intersections), returns zero vector otherwise.
-	glm::dvec3 collidesWithBallNormal(const RigidBall other) {
-		if (collidesWithBall(other)) {
-			return glm::normalize(other.f_transform.f_position - f_transform.f_position);
-		}
-		return glm::dvec3(0.);
+    /// @return Returns the collision info strucutre (empty if no collision).
+	CollisionInfo collidesWithBallInfo(const RigidBall& other) {
+		CollisionInfo collInfo;
+		float distance = (other.f_transform.f_position - f_transform.f_position).length();
+		if (distance <= (other.f_transform.f_scale.x + f_transform.f_scale.x)) return collInfo;
+
+		collInfo.f_normal = glm::normalize(other.f_transform.f_position - f_transform.f_position);
+		collInfo.f_depth = (other.f_transform.f_scale.x + f_transform.f_scale.x) - distance;
+		collInfo.f_collisionPoint = f_transform.f_position + collInfo.f_normal * (f_transform.f_scale.x + collInfo.f_depth / 2.);
+
+		return collInfo;
 	}
 	
 	void onDraw(Renderer &renderer) override {
