@@ -31,6 +31,9 @@ struct RigidObject3D {
 	/// @brief Torque applied to the object
 	glm::dvec3 f_torque;
 
+	/// @brief Object color
+	glm::vec4 f_color;
+
 	#pragma region Constructors
 
 	RigidObject3D():
@@ -45,7 +48,9 @@ struct RigidObject3D {
 	f_angularVelocity(0.),
 
 	f_centralForce(0.),
-	f_torque(0.)
+	f_torque(0.),
+
+	f_color(1.)
 	{}
 
 	RigidObject3D(
@@ -66,7 +71,9 @@ struct RigidObject3D {
 	f_angularVelocity(angularVelocity),
 
 	f_centralForce(0.),
-	f_torque(0.)
+	f_torque(0.),
+
+	f_color(1.)
 	{}
 
 	RigidObject3D(
@@ -87,7 +94,9 @@ struct RigidObject3D {
 	f_angularVelocity(std::move(angularVelocity)),
 
 	f_centralForce(0.),
-	f_torque(0.)
+	f_torque(0.),
+
+	f_color(1.)
 	{}
 
 	#pragma endregion Constructors
@@ -255,5 +264,43 @@ struct RigidObject3D {
  * Encompases kinematic properties and shape properties.
  */
 struct RigidBall : public RigidObject3D {
-	//TODO: Write a Ball class with methods specific to given shape.
+
+	/// @brief Determines whether the ball contains the point.
+	/// @param point Point to check.
+	/// @return Returns true if the point is inside the ball or on the surface, returns false otherwise.
+	bool containsPoint(const glm::dvec3& point) {
+		return (point - f_transform.f_position).length() <= f_transform.f_scale.x;
+	}
+	
+	/// @brief Determines whether the point is inside the ball.
+	/// @param point Point to check.
+	/// @return Returns double distance to the ball surface (negative if point is inside of the ball).
+	double contatinsPointD(const glm::dvec3& point) {
+		return (point - f_transform.f_position).length() - f_transform.f_scale.x;
+	}
+
+	/// @brief Determines whether the ball collides with another ball.
+	/// @param other Ball to check collision with.
+	/// @return Returns true if the balls collide, returns false otherwise.
+	bool collidesWithBall(const RigidBall other) {
+		return (other.f_transform.f_position - f_transform.f_position).length() <= (other.f_transform.f_scale.x + f_transform.f_scale.x);
+	}
+
+	/// @brief Determines whether the ball collides with another ball and returns a normal to this ball at intersection.
+    /// @param other Ball to check collision with.
+    /// @return Returns the normal at intersection if the ball intersects the other ball (including single point intersections), returns zero vector otherwise.
+	glm::dvec3 collidesWithBallNormal(const RigidBall other) {
+		if (collidesWithBall(other)) {
+			return glm::normalize(other.f_transform.f_position - f_transform.f_position);
+		}
+		return glm::dvec3(0.);
+	}
+	
+	void onDraw(Renderer &renderer) override {
+		renderer.drawSphere(
+			f_transform.f_position, 
+			f_transform.f_scale.x,
+			f_color
+		);
+	}
 };
