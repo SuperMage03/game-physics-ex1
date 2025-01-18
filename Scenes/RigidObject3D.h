@@ -3,32 +3,32 @@
 #include "Renderer.h"
 #include "Transform.h"
 
-/**
- * 3D Rigid object structure.
+/** @brief
+ * 3D rigid object structure.
  * Encompases kinematic properties of a 3D object.
  */
 struct RigidObject3D {
-	/// Object mass
+	/// @brief Object mass
 	double f_mass;
-	/// Current Inertia tensor
+	/// @brief Current Inertia tensor
 	glm::dmat3 f_inertiaTensorInv;
-	/// Elasticity/Plasticity
+	/// @brief Elasticity/Plasticity
 	double f_c;
-	/// Coefficient of friction
+	/// @brief Coefficient of friction
 	double f_mu;
 
-	/// Object transform
+	/// @brief Object transform
 	Transform3D f_transform;
-	/// Object velocity
+	/// @brief Object velocity
 	glm::dvec3 f_velocity;
-	/// Angular momentum
+	/// @brief Angular momentum
 	glm::dvec3 f_angularMomentum;
-	/// Angular velocity
+	/// @brief Angular velocity
 	glm::dvec3 f_angularVelocity;
 
-	/// Central force applied to the object
+	/// @brief Central force applied to the object
 	glm::dvec3 f_centralForce;
-	/// Torque applied to the object
+	/// @brief Torque applied to the object
 	glm::dvec3 f_torque;
 
 	#pragma region Constructors
@@ -52,9 +52,7 @@ struct RigidObject3D {
 		double mass,
 		double c,
 		double mu,
-		const glm::dvec3& position,
-		const glm::dvec3& scale,
-		const glm::dquat& quat,
+		const Transform3D& transform,
 		const glm::dvec3& velocity,
 		const glm::dvec3& angularVelocity
 	):
@@ -63,7 +61,7 @@ struct RigidObject3D {
 	f_c(c),
 	f_mu(mu),
 
-	f_transform(position, scale, quat),
+	f_transform(transform),
 	f_velocity(velocity),
 	f_angularVelocity(angularVelocity),
 
@@ -75,32 +73,7 @@ struct RigidObject3D {
 		double mass,
 		double c,
 		double mu,
-		const glm::dvec3& position,
-		const glm::dvec3& scale,
-		const glm::dvec3& angles,
-		const glm::dvec3& velocity,
-		const glm::dvec3& angularVelocity
-	):
-	f_mass(mass),
-	f_inertiaTensorInv(0.),
-	f_c(c),
-	f_mu(mu),
-
-	f_transform(position, scale, angles),
-	f_velocity(velocity),
-	f_angularVelocity(angularVelocity),
-
-	f_centralForce(0.),
-	f_torque(0.)
-	{}
-
-	RigidObject3D(
-		double mass,
-		double c,
-		double mu,
-		glm::dvec3&& position,
-		glm::dvec3&& scale,
-		glm::dquat&& quat,
+		Transform3D&& transform,
 		glm::dvec3&& velocity,
 		glm::dvec3&& angularVelocity
 	):
@@ -109,7 +82,7 @@ struct RigidObject3D {
 	f_c(c),
 	f_mu(mu),
 
-	f_transform(std::move(position), std::move(scale), std::move(quat)),
+	f_transform(std::move(transform)),
 	f_velocity(std::move(velocity)),
 	f_angularVelocity(std::move(angularVelocity)),
 
@@ -117,28 +90,6 @@ struct RigidObject3D {
 	f_torque(0.)
 	{}
 
-	RigidObject3D(
-		double mass,
-		double c,
-		double mu,
-		glm::dvec3&& position,
-		glm::dvec3&& scale,
-		glm::dvec3&& angles,
-		glm::dvec3&& velocity,
-		glm::dvec3&& angularVelocity
-	):
-	f_mass(mass),
-	f_inertiaTensorInv(0.),
-	f_c(c),
-	f_mu(mu),
-
-	f_transform(std::move(position), std::move(scale), std::move(angles)),
-	f_velocity(std::move(velocity)),
-	f_angularVelocity(std::move(angularVelocity)),
-
-	f_centralForce(0.),
-	f_torque(0.)
-	{}
 	#pragma endregion Constructors
 
 	/// @brief Sets the force vector acting on the object to zero.
@@ -184,6 +135,8 @@ struct RigidObject3D {
 	}
 
 	/// @brief Applies a local force to the object, both central and torque.
+	/// @param force Local force to be applied.
+	/// @return Parameter force transformed to global force.
 	Force applyLocalForce(const Force& force) {
 		Force globalForce = f_transform.transformLocalForceToGlobalForce(force);
 		applyForce(globalForce);
@@ -295,4 +248,12 @@ struct RigidObject3D {
 	}
 
 	virtual void onDraw(Renderer &renderer) {};
+};
+
+/** @brief
+ * 3D rigid ball structure.
+ * Encompases kinematic properties and shape properties.
+ */
+struct RigidBall : public RigidObject3D {
+	//TODO: Write a Ball class with methods specific to given shape.
 };

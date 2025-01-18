@@ -2,14 +2,14 @@
 
 #include "Renderer.h"
 
-/**
+/** @brief
  * Force structure.
  * Encompases force vector and application position.
  */
 struct Force {
-	/// Force vector
+	/// @brief Force vector
 	glm::dvec3 f_force;
-	/// Force application point
+	/// @brief Force application point
 	glm::dvec3 f_applicationPoint;
 
     #pragma region Constructors

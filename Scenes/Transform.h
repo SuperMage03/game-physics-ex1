@@ -4,7 +4,7 @@
 #include "Force.h"
 #include <glm/gtx/quaternion.hpp>
 
-/** 
+/** @brief
 * Transform 3D structure that defines a 3D transformation tensor for a 3D object.
 * Encompases position, scale and rotation of a body.
 */ 
