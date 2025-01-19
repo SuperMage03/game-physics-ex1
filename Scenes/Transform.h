@@ -93,7 +93,8 @@ struct Transform3D {
 	/// @param position Poisition of point in the global coordinate frame.
 	/// @return glm::dvec3 position of point in the local coordinate frame.
 	glm::dvec3 transformGlobalToLocal(const glm::dvec3 position) const {
-		return glm::inverse(getRotationMatrix()) * position - glm::inverse(getRotationMatrix()) * f_position;
+		glm::dmat3 inv = inverse(getRotationMatrix());
+		return inv * position - inv * f_position;
 	}
 
     /// @brief Maps a free vector in the local coordinate frame to a free vector in the global coordinate frame using current transformation matrix.

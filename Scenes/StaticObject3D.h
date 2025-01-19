@@ -8,7 +8,8 @@
  * 3D static object structure.
  * Encompases properties of a static 3D object.
  */
-struct StaticObject3D {
+class StaticObject3D {
+public:
     /// @brief Object transform
     Transform3D f_transform;
 
@@ -41,11 +42,19 @@ struct StaticObject3D {
     #pragma endregion
 
     virtual void onDraw(Renderer &renderer) {};
+
+    friend std::ostream& operator<<(std::ostream& os, const StaticObject3D& object) {
+		os << std::setprecision(3)
+        << "        <^> Transform:   " << std::endl
+		<< object.f_transform << std::endl;
+
+        return os;
+    }
 };
 
 
-struct StaticCuboid : public StaticObject3D {
-    private:
+class StaticCuboid : public StaticObject3D {
+private:
 
     /// @brief List of vertice coordinate multipliers
     int f_vertices[8][3] = {
@@ -75,7 +84,7 @@ struct StaticCuboid : public StaticObject3D {
         {7, 4}
     };
     
-
+public:
     #pragma region Constructors
 
     StaticCuboid(): StaticObject3D() {}
@@ -103,7 +112,7 @@ struct StaticCuboid : public StaticObject3D {
     /// @brief Determines whether the cuboid contains the point.
 	/// @param point Point to check.
 	/// @return Returns true if the point is inside the cuboid or on the surface, returns false otherwise.
-    bool containsPoint(glm::dvec3 point) {
+    bool containsPoint(const glm::dvec3& point) const {
         glm::dvec3 pointLocal = f_transform.transformGlobalToLocal(point);
         return
             pointLocal.x >= -f_transform.f_scale.x / 2. && pointLocal.x <= f_transform.f_scale.x / 2. &&
@@ -114,7 +123,7 @@ struct StaticCuboid : public StaticObject3D {
     /// @brief Determines whether a cuboid bigger by margin along x contains the point.
 	/// @param point Point to check.
 	/// @return Returns true if the point is inside the extended cuboid or on the surface, returns false otherwise.
-    bool containsPointExtendedX(glm::dvec3 point, double margin) {
+    bool containsPointExtendedX(const glm::dvec3& point, double margin) const {
         glm::dvec3 pointLocal = f_transform.transformGlobalToLocal(point);
         return
             pointLocal.x >= -f_transform.f_scale.x / 2. - margin && pointLocal.x <= f_transform.f_scale.x / 2. + margin &&
@@ -125,7 +134,7 @@ struct StaticCuboid : public StaticObject3D {
     /// @brief Determines whether a cuboid bigger by margin along x contains the point.
 	/// @param point Point to check.
 	/// @return Returns true if the point is inside the extended cuboid or on the surface, returns false otherwise.
-    bool containsPointExtendedY(glm::dvec3 point, double margin) {
+    bool containsPointExtendedY(const glm::dvec3& point, double margin) const {
         glm::dvec3 pointLocal = f_transform.transformGlobalToLocal(point);
         return
             pointLocal.x >= -f_transform.f_scale.x / 2. && pointLocal.x <= f_transform.f_scale.x / 2. &&
@@ -136,7 +145,7 @@ struct StaticCuboid : public StaticObject3D {
     /// @brief Determines whether a cuboid bigger by margin along x contains the point.
 	/// @param point Point to check.
 	/// @return Returns true if the point is inside the extended cuboid or on the surface, returns false otherwise.
-    bool containsPointExtendedZ(glm::dvec3 point, double margin) {
+    bool containsPointExtendedZ(const glm::dvec3& point, double margin) const {
         glm::dvec3 pointLocal = f_transform.transformGlobalToLocal(point);
         return
             pointLocal.x >= -f_transform.f_scale.x / 2. && pointLocal.x <= f_transform.f_scale.x / 2. &&
@@ -147,7 +156,7 @@ struct StaticCuboid : public StaticObject3D {
     /// @brief Calculates coordinates of the corner vertice of a given id
     /// @param id Vertex id.
     /// @return glm::dvec3 corner vertice coordinates
-    glm::dvec3 getCornerVertexLocal(int id) {
+    glm::dvec3 getCornerVertexLocal(int id) const {
         glm::dvec3 localVertexCoordinates = glm::dvec3(
             f_vertices[id][0] * f_transform.f_scale.x / 2.,
             f_vertices[id][1] * f_transform.f_scale.y / 2.,
@@ -160,7 +169,7 @@ struct StaticCuboid : public StaticObject3D {
     /// @param position Ball position.
     /// @param radius Ball radius.
     /// @return Returns true if the cuboid intersects the ball (including single point intersections), returns false otherwise.
-    bool collidesWithBall(glm::dvec3 position, double radius) {
+    bool collidesWithBall(const glm::dvec3& position, double radius) const {
         // Check if the center of the ball is contained in the cuboids that are extended by radius in every direction
         bool contains = 
                containsPointExtendedX(position, radius) 
@@ -174,7 +183,7 @@ struct StaticCuboid : public StaticObject3D {
         for (unsigned i = 0; i < 8; i++) {
             // Check if ball center is close enough to vertex
             glm::dvec3 vertex = getCornerVertexLocal(i);
-            contains = (positionLocal - vertex).length() <= radius;
+            contains = glm::length(positionLocal - vertex) <= radius;
             if (contains) {
                 return contains;
             }
@@ -187,7 +196,7 @@ struct StaticCuboid : public StaticObject3D {
     /// @param position Ball position.
     /// @param radius Ball radius.
     /// @return Returns the normal at intersection if the cuboid intersects the ball (including single point intersections), returns zero vector otherwise.
-    glm::vec3 collidesWithBallNormal(glm::dvec3 position, double radius) {
+    glm::vec3 collidesWithBallNormal(const glm::dvec3& position, double radius) const {
         glm::dvec3 positionLocal = f_transform.transformGlobalToLocal(position);
         // Check if the center of the ball is contained in the cuboid
         if (containsPoint(position)) {
@@ -251,7 +260,7 @@ struct StaticCuboid : public StaticObject3D {
         for (unsigned i = 0; i < 8; i++) {
             // Check if ball center is close enough to vertex
             glm::dvec3 vertex = getCornerVertexLocal(i);
-            double distance = (positionLocal - vertex).length();
+            double distance = glm::length(positionLocal - vertex);
             if (distance <= radius) {
                 return f_transform.transformLocalToGlobalRotation((positionLocal - vertex) / distance);
             }
@@ -260,7 +269,7 @@ struct StaticCuboid : public StaticObject3D {
         return glm::vec3(0.);
     }
 
-    CollisionInfo collidesWithBallInfo(glm::dvec3 position, double radius) {
+    CollisionInfo collidesWithBallInfo(const glm::dvec3& position, double radius) const {
         CollisionInfo collInfo;
         glm::dvec3 positionLocal = f_transform.transformGlobalToLocal(position);
         // Check if the center of the ball is contained in the cuboid
@@ -361,7 +370,7 @@ struct StaticCuboid : public StaticObject3D {
         for (unsigned i = 0; i < 8; i++) {
             // Check if ball center is close enough to vertex
             glm::dvec3 vertex = getCornerVertexLocal(i);
-            double distance = (positionLocal - vertex).length();
+            double distance = glm::length(positionLocal - vertex);
             if (distance <= radius) {
                 collInfo.f_normal = f_transform.transformLocalToGlobalRotation((positionLocal - vertex) / distance);
                 collInfo.f_depth = radius - distance;
@@ -373,7 +382,8 @@ struct StaticCuboid : public StaticObject3D {
         return collInfo;
     }
 
-    void onDraw(Renderer &renderer, bool wire = false) {
+    void onDraw(Renderer &renderer) override {
+        bool wire = false;
         if (!wire) {
             renderer.drawCube(
                 f_transform.f_position,
@@ -415,4 +425,6 @@ struct StaticCuboid : public StaticObject3D {
             }
         }
 	}
+
+    
 };

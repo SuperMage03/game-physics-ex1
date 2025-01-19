@@ -139,13 +139,13 @@ namespace Physics {
                     std::shared_ptr<RigidObject3D> objA = f_rigidObjects.at(idA);
                     std::shared_ptr<RigidObject3D> objB = f_rigidObjects.at(idB);
                     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    // !!!!!!!!!!!!!! Cast to Ball !!!!!!!!!!!!!!
+                    // !!!!!!!!!!!!!! Cast to Ball !!!!!!!!!!!!!
                     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     // Should be done by introducing collider classes
                     std::shared_ptr<RigidBall> ballA = std::dynamic_pointer_cast<RigidBall>(objA);
                     std::shared_ptr<RigidBall> ballB = std::dynamic_pointer_cast<RigidBall>(objB);
                     // Check if ball collide
-                    CollisionInfo collInfo = ballA->collidesWithBallInfo(*ballB);
+                    CollisionInfo collInfo = ballB->collidesWithBallInfo(*ballA);
                     if (collInfo.f_normal != glm::dvec3(0.)) {
                         // Create collision
                         RigidObjectCollision collision(
@@ -160,62 +160,62 @@ namespace Physics {
                 }
             }
             
-            // // Handle collisions
-            // for (const auto collision: collisions) {
-            //     handleRigidBodyCollsion(collision);
-            // }
+            // Handle collisions
+            for (const auto collision: collisions) {
+                handleRigidBodyCollsion(collision);
+            }
 
-            // // Hadle wall collisions
-            // for (const auto objA: f_rigidObjects) {
-            //     for (const auto wall: f_staticObjects) {
-            //         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //         // !!!!!!!!!!!!!! Cast to Box !!!!!!!!!!!!!!
-            //         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //         // Should be done by introducing collider classes
-            //         std::shared_ptr<Box> boxA = std::dynamic_pointer_cast<Box>(objA);
-            //         // Get collision point of object A if exists
-            //         int collisionCornerAId = wall.pointInside(boxA->getCornerPoints());
-            //         if (collisionCornerAId == -1) continue;
-            //         // Collision point
-            //         glm::dvec3 collisionPoint =  boxA->getCornerPointId(collisionCornerAId);
-            //         // Collision point local
-            //         // Relative velocity
-            //         glm::dvec3 relativeVelocity = boxA->getCornerPointVelocityId(collisionCornerAId);
-            //         glm::dvec3 collisionPointALocal = boxA->getCornerPointId(collisionCornerAId) - boxA->f_transform.f_position;
-            //         // Calculate impulse
-            //         double J = -(1. + boxA->f_c) * std::min(glm::dot(relativeVelocity, wall.f_normal), 0.)
-            //             / (
-            //                 1. / boxA->f_mass
-            //                 + glm::dot(glm::cross((boxA->f_inertiaTensorInv * glm::cross(collisionPointALocal, wall.f_normal)), collisionPointALocal), wall.f_normal)
-            //             );
-            //         // std::cout << collisionCornerAId << std::endl;
-            //         // std::cout << J << std::endl;
-            //         // Calculate tangent
-            //         glm::dvec3 tangentNonNormed = glm::cross(glm::cross(wall.f_normal, relativeVelocity), wall.f_normal);
-            //         glm::dvec3 tangent = glm::dvec3(0.);
-            //         if (glm::length(tangentNonNormed) != 0) {
-            //             tangent = glm::normalize(tangentNonNormed);
-            //         }
+            // Hadle wall collisions
+            for (const auto objA: f_rigidObjects) {
+                for (const auto objB: f_staticObjects) {
+                    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    // !!!!!!!!!!!!!! Cast to Ball !!!!!!!!!!!!!
+                    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    // Should be done by introducing collider classes
+                    std::shared_ptr<RigidBall> ballA = std::dynamic_pointer_cast<RigidBall>(objA);
+                    std::shared_ptr<StaticCuboid> wallB = std::dynamic_pointer_cast<StaticCuboid>(objB);
+                    // Get collision info
+                    CollisionInfo collInfo = wallB->collidesWithBallInfo(ballA->f_transform.f_position, ballA->f_transform.f_scale.x);
+                    if (collInfo.f_normal == glm::dvec3(0.)) continue;
+
+                    // Collision point
+                    glm::dvec3 collisionPoint =  collInfo.f_collisionPoint;
+                    // Collision point local
+                    // Relative velocity
+                    glm::dvec3 relativeVelocity = ballA->getVelocityAtGlobalPoint(collisionPoint);
+                    glm::dvec3 collisionPointALocal = collisionPoint - ballA->f_transform.f_position;
+                    // Calculate impulse
+                    double J = -(1. + ballA->f_c) * std::min(glm::dot(relativeVelocity, collInfo.f_normal), 0.)
+                        / (
+                            1. / ballA->f_mass
+                            + glm::dot(glm::cross((ballA->f_inertiaTensorInv * glm::cross(collisionPointALocal, collInfo.f_normal)), collisionPointALocal), collInfo.f_normal)
+                        );
+                    // std::cout << collisionCornerAId << std::endl;
+                    // std::cout << J << std::endl;
+                    // Calculate tangent
+                    glm::dvec3 tangentNonNormed = glm::cross(glm::cross(collInfo.f_normal, relativeVelocity), collInfo.f_normal);
+                    glm::dvec3 tangent = glm::dvec3(0.);
+                    if (glm::length(tangentNonNormed) != 0) {
+                        tangent = glm::normalize(tangentNonNormed);
+                    }
                     
-            //         // Update box velocity
-            //         boxA->f_velocity += 
-            //             J
-            //             * (wall.f_normal - boxA->f_mu * tangent) 
-            //             / boxA->f_mass;
-            //         // Update box angular momentum
-            //         boxA->f_angularMomentum += J * glm::cross(collisionPointALocal, wall.f_normal);
-            //         // Recalculate angular velocity
-            //         boxA->calculateAngularVelocity();
+                    // Update box velocity
+                    ballA->f_velocity += 
+                        J
+                        * (collInfo.f_normal - ballA->f_mu * tangent) 
+                        / ballA->f_mass;
+                    // Update box angular momentum
+                    ballA->f_angularMomentum += J * glm::cross(collisionPointALocal, collInfo.f_normal);
+                    // Recalculate angular velocity
+                    ballA->calculateAngularVelocity();
 
-            //         // Look at result velocity
-            //         glm::dvec3 resultVelocity = boxA->getCornerPointVelocityId(collisionCornerAId);
+                    // Look at result velocity
+                    glm::dvec3 resultVelocity = relativeVelocity;
                     
-            //         // Push out of the wall
-            //         boxA->f_transform.f_position += (wall.f_surface - glm::dot(collisionPoint, wall.f_normal) + 0.00001) * wall.f_normal;
-            //     }
-            // }
-
-            
+                    // Push out of the wall
+                    ballA->f_transform.f_position += (collInfo.f_depth + 0.00001) * collInfo.f_normal;
+                }
+            }
         }
 
         /// @brief Handles a single RigidObjectCollision.
@@ -252,9 +252,16 @@ namespace Physics {
 
         friend std::ostream& operator<<(std::ostream& os, const RigidObjectPhysicsEngine& ROPE) {
             os << std::setprecision(3)
-            << "    <^> Objects:   " << std::endl;
+            << "    <^> Rigid Objects:   " << std::endl;
             uint32_t id = 0;
             for (auto object: ROPE.f_rigidObjects) {
+                os << "Object #" << id << std::endl
+                << *object << std::endl << std::endl;
+                id++;
+            }
+            os << "    <^> Static Objects:   " << std::endl;
+            id = 0;
+            for (auto object: ROPE.f_staticObjects) {
                 os << "Object #" << id << std::endl
                 << *object << std::endl << std::endl;
                 id++;
