@@ -115,9 +115,22 @@ namespace Grid {
             f_steps = glm::dvec2(0.);
         }
 
-        //TODO: Fix the calcuation error
-        glm::ivec2 getGridPositionFromWorldPosition(const glm::dvec2& world_position) {
-            return {(f_origin.x - world_position.x + (f_size.x / 2.0)) / f_steps.x, (f_origin.y - world_position.y + (f_size.y / 2.0)) / f_steps.y};
+        /// @brief Returns a pair of indices of a grid vertex that is closest to a given point.
+        /// @param point Point to get the respective closest grid vertex indices for.
+        /// @return glm::ivec2 a pair of indices of the closest grid vertex.
+        glm::ivec2 getGridPositionFromWorldPosition(const glm::dvec3& point) {
+            glm::ivec2 indices;
+            // Calculculate indices as if the grid is infinite
+            indices.x = static_cast<int>(std::round((point.x - f_origin.x) / f_steps.x));
+            indices.y = static_cast<int>(std::round((point.y - f_origin.y) / f_steps.y));
+            
+            // Check if invalid index and shift to border
+            if (indices.x < 0) indices.x = 0;
+            if (indices.x >= f_n) indices.x = f_n - 1;
+            if (indices.y < 0) indices.y = 0;
+            if (indices.y >= f_m) indices.y = f_m - 1;
+
+            return indices;
         }
 
         #pragma endregion
@@ -141,13 +154,13 @@ namespace Grid {
 
         glm::dvec3 getPoint3D(unsigned i, unsigned j) const {
             // Check if invalid indices
-            if (i >= f_n || j >= f_m) return glm::dvec3(f_origin.x, f_origin.y, -2.5);
+            if (i >= f_n || j >= f_m) return glm::dvec3(f_origin.x, f_origin.y, 0.);
 
             // Otherwise calculate point coordinates
             return glm::dvec3(
                 f_origin.x + f_steps.x * i,
                 f_origin.y + f_steps.y * j,
-                -2.5
+                0.
             );
         }
 

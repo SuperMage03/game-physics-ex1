@@ -15,8 +15,8 @@ private:
 
     bool f_singleStep = false;
     float f_diffusivity = 0.1;
-    int f_n = 50;
-    int f_m = 50;
+    int f_n = 10;
+    int f_m = 10;
     float f_X = 5.;
     float f_Y = 5.;
     bool f_changedProblem = false;
@@ -61,18 +61,18 @@ public:
             glm::dvec3(0., 0., 0.)
         ));
 
-        std::shared_ptr<RigidBall> ball2(new RigidBall(
-            1.,
-            1.0,
-            0.0,
-            Transform3D(
-                glm::dvec3(0.5, 0., 0.),
-                glm::dvec3(0.4, 0.4, 0.4),
-                glm::dvec3(0., 0., 0.)
-            ),
-            glm::dvec3(0., 0., 0.),
-            glm::dvec3(0., 0., 0.)
-        ));
+        // std::shared_ptr<RigidBall> ball2(new RigidBall(
+        //     1.,
+        //     1.0,
+        //     0.0,
+        //     Transform3D(
+        //         glm::dvec3(0.5, 0., 0.),
+        //         glm::dvec3(0.4, 0.4, 0.4),
+        //         glm::dvec3(0., 0., 0.)
+        //     ),
+        //     glm::dvec3(0., 0., 0.),
+        //     glm::dvec3(0., 0., 0.)
+        // ));
 
         std::shared_ptr<StaticCuboid> wallB(new StaticCuboid(
             Transform3D(
@@ -84,10 +84,10 @@ public:
         ));
 
         ball1->f_color = glm::dvec4(1.0, 0.1, 0.05, 1.);
-        ball2->f_color = glm::dvec4(0.1, 1.0, 0.05, 1.);
+        // ball2->f_color = glm::dvec4(0.1, 1.0, 0.05, 1.);
 
         ROPE.addRigidObject(ball1);
-        ROPE.addRigidObject(ball2);
+        // ROPE.addRigidObject(ball2);
         
         ROPE.addStaticObject(wallB);
 
@@ -155,7 +155,7 @@ public:
         if (!f_pause) {
             if (gravity) {
                 ROPE.applyForceToRigidObject(0, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(0)->f_transform.f_position));
-                ROPE.applyForceToRigidObject(1, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(1)->f_transform.f_position));
+                // ROPE.applyForceToRigidObject(1, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(1)->f_transform.f_position));
             }
             ROPE.simulateStep(f_delta);
             propagateState();

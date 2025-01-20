@@ -229,13 +229,15 @@ namespace Physics {
                 std::shared_ptr<RigidBall> ballA = std::dynamic_pointer_cast<RigidBall>(objA);
                 for (unsigned i = 0; i < f_gridFunction->getN(); i++) {
                     for (unsigned j = 0; j < f_gridFunction->getM(); j++) {
-                        glm::dvec3 cur_gridpoint = f_gridFunction->getPoint3D(i, j);
-                        if (ballA->containsPoint(cur_gridpoint)) {
-                            std::cout << "Gamer" << std::endl;
+                        glm::dvec3 vertex = f_gridFunction->getPoint3D(i, j);
+                        if (ballA->containsPoint(vertex)) {
+                            std::cout << "Ball contains point: (" << vertex.x << ", " << vertex.y << ", " << vertex.z << ")"  << std::endl;
                         }
                     }
                 }
-                // std::cout << f_gridObject->getGridPositionFromWorldPosition({-2.5, -2.5}).x << ", " << f_gridObject->getGridPositionFromWorldPosition({-2.5, -2.5}).y << std::endl;
+                // glm::ivec2 vertexId = f_gridFunction->getGrid().getGridPositionFromWorldPosition(ballA->f_transform.f_position);
+                // std::cout << "Grid point closest to ball center: {" 
+                // << vertexId.x << ", " << vertexId.y << "}" << std::endl;
             }
         }
 
