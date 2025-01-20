@@ -319,6 +319,13 @@ public:
 		return glm::length(point - f_transform.f_position) - f_transform.f_scale.x;
 	}
 
+	/// @brief Calculates a push-out vector of magnitude of depth.
+	/// @param point Point to check.
+	/// @return Returns glm::dvec3 push-out vector.
+	glm::dvec3 pointDepthVector(const glm::dvec3& point) const {
+		return glm::normalize(f_transform.f_position - point) * (glm::length(point - f_transform.f_position) - f_transform.f_scale.x);
+	}
+
 	/// @brief Determines whether the ball collides with another ball.
 	/// @param other Ball to check collision with.
 	/// @return Returns true if the balls collide, returns false otherwise.
