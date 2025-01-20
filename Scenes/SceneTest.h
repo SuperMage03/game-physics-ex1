@@ -91,7 +91,7 @@ public:
         
         ROPE.addStaticObject(wallB);
 
-        ROPE.setGridObject(&(f_heatField.getGrid()));
+        ROPE.setGridFunction(&f_heatField);
         
         std::cout << "+++++++++++ SCENE TEST +++++++++++" << std::endl;
         std::cout << "======== Initial system state ========" << std::endl

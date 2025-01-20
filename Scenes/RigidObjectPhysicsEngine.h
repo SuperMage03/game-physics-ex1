@@ -4,7 +4,7 @@
 #include "RigidObject3D.h"
 #include "StaticObject3D.h"
 #include "Collision.h"
-#include "Grid.h"
+#include "GridFunction.h"
 
 namespace Physics {
     /** @brief
@@ -25,8 +25,8 @@ namespace Physics {
         std::vector<std::shared_ptr<RigidObject3D>> f_rigidObjects;
         /// @brief Vector of shared pointers to static objects of the system
         std::vector<std::shared_ptr<StaticObject3D>> f_staticObjects;
-        /// @brief pointer to grid object of the system
-        Grid::Grid2D* f_gridObject;
+        /// @brief pointer to grid function object of the system
+        GridFunction::ScalarGridFunction2D* f_gridFunction;
     public:
         /// @brief Integration type field
         IntegrationType f_integrationType;
@@ -76,8 +76,8 @@ namespace Physics {
             f_staticObjects.push_back(object);
         }
 
-        void setGridObject(Grid::Grid2D* grid) {
-            f_gridObject = grid;
+        void setGridFunction(GridFunction::ScalarGridFunction2D* gridFunction) {
+            f_gridFunction = gridFunction;
         }
 
         #pragma endregion
@@ -227,14 +227,14 @@ namespace Physics {
             // Hadle grid point collisions
             for (const auto objA: f_rigidObjects) {
                 std::shared_ptr<RigidBall> ballA = std::dynamic_pointer_cast<RigidBall>(objA);
-                // for (unsigned i = 0; i < f_gridObject->getN(); i++) {
-                //     for (unsigned j = 0; j < f_gridObject->getM(); j++) {
-                //         // glm::dvec3 cur_gridpoint = f_gridObject->getPoint3D(i, j);
-                //         // if (ballA->containsPoint(cur_gridpoint)) {
-                //         //     std::cout << "Gamer" << std::endl;
-                //         // }
-                //     }
-                // }
+                for (unsigned i = 0; i < f_gridFunction->getN(); i++) {
+                    for (unsigned j = 0; j < f_gridFunction->getM(); j++) {
+                        glm::dvec3 cur_gridpoint = f_gridFunction->getPoint3D(i, j);
+                        if (ballA->containsPoint(cur_gridpoint)) {
+                            std::cout << "Gamer" << std::endl;
+                        }
+                    }
+                }
                 // std::cout << f_gridObject->getGridPositionFromWorldPosition({-2.5, -2.5}).x << ", " << f_gridObject->getGridPositionFromWorldPosition({-2.5, -2.5}).y << std::endl;
             }
         }

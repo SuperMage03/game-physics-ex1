@@ -228,6 +228,10 @@ namespace GridFunction {
             return f_grid.getPoint(i, j);
         }
 
+        glm::dvec3 getPoint3D(unsigned i, unsigned j) const {
+            return f_grid.getPoint3D(i, j);
+        }
+
         unsigned getN() const {return f_function.getN();}
 
         unsigned getM() const {return f_function.getM();}
