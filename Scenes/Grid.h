@@ -115,6 +115,11 @@ namespace Grid {
             f_steps = glm::dvec2(0.);
         }
 
+        //TODO: Fix the calcuation error
+        glm::ivec2 getGridPositionFromWorldPosition(const glm::dvec2& world_position) {
+            return {(f_origin.x - world_position.x + (f_size.x / 2.0)) / f_steps.x, (f_origin.y - world_position.y + (f_size.y / 2.0)) / f_steps.y};
+        }
+
         #pragma endregion
 
         void calculateSteps() {

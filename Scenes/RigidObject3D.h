@@ -315,7 +315,7 @@ public:
 	/// @brief Determines whether the point is inside the ball.
 	/// @param point Point to check.
 	/// @return Returns double distance to the ball surface (negative if point is inside of the ball).
-	double contatinsPointD(const glm::dvec3& point) const {
+	double containsPointD(const glm::dvec3& point) const {
 		return glm::length(point - f_transform.f_position) - f_transform.f_scale.x;
 	}
 

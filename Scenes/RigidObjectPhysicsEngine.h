@@ -4,6 +4,7 @@
 #include "RigidObject3D.h"
 #include "StaticObject3D.h"
 #include "Collision.h"
+#include "Grid.h"
 
 namespace Physics {
     /** @brief
@@ -24,6 +25,8 @@ namespace Physics {
         std::vector<std::shared_ptr<RigidObject3D>> f_rigidObjects;
         /// @brief Vector of shared pointers to static objects of the system
         std::vector<std::shared_ptr<StaticObject3D>> f_staticObjects;
+        /// @brief pointer to grid object of the system
+        Grid::Grid2D* f_gridObject;
     public:
         /// @brief Integration type field
         IntegrationType f_integrationType;
@@ -71,6 +74,10 @@ namespace Physics {
 
         void addStaticObject(std::shared_ptr<StaticObject3D> object) {
             f_staticObjects.push_back(object);
+        }
+
+        void setGridObject(Grid::Grid2D* grid) {
+            f_gridObject = grid;
         }
 
         #pragma endregion
@@ -215,6 +222,20 @@ namespace Physics {
                     // Push out of the wall
                     ballA->f_transform.f_position += (collInfo.f_depth + 0.00001) * collInfo.f_normal;
                 }
+            }
+
+            // Hadle grid point collisions
+            for (const auto objA: f_rigidObjects) {
+                std::shared_ptr<RigidBall> ballA = std::dynamic_pointer_cast<RigidBall>(objA);
+                // for (unsigned i = 0; i < f_gridObject->getN(); i++) {
+                //     for (unsigned j = 0; j < f_gridObject->getM(); j++) {
+                //         // glm::dvec3 cur_gridpoint = f_gridObject->getPoint3D(i, j);
+                //         // if (ballA->containsPoint(cur_gridpoint)) {
+                //         //     std::cout << "Gamer" << std::endl;
+                //         // }
+                //     }
+                // }
+                // std::cout << f_gridObject->getGridPositionFromWorldPosition({-2.5, -2.5}).x << ", " << f_gridObject->getGridPositionFromWorldPosition({-2.5, -2.5}).y << std::endl;
             }
         }
 
