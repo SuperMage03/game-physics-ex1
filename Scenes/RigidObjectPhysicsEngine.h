@@ -240,8 +240,12 @@ namespace Physics {
                 std::vector<glm::dvec3> localCollisionPoints;
 
                 // Go over all vertices in the index radius
-                for (unsigned i = vertexId.x - indexRadius.x; i <= vertexId.x + indexRadius.x; i++) {
-                    for (unsigned j = vertexId.y - indexRadius.y; j <= vertexId.y + indexRadius.y; j++) {
+                unsigned iF = std::max(0, vertexId.x - indexRadius.x);
+                unsigned jF = std::max(0, vertexId.y - indexRadius.y);
+                unsigned iL = std::min(vertexId.x + indexRadius.x, int(f_gridFunction->getN() - 1));
+                unsigned jL = std::min(vertexId.y + indexRadius.y, int(f_gridFunction->getM() - 1));
+                for (unsigned i = iF; i <= iL; i++) {
+                    for (unsigned j = jF; j <= jL; j++) {
                         // Get vertex coordinates
                         glm::dvec3 collisionPoint = f_gridFunction->getPoint3D(i, j);
                         // If ball contains vertex (there is a collision)

@@ -15,8 +15,8 @@ private:
 
     bool f_singleStep = false;
     float f_diffusivity = 0.1;
-    int f_n = 10;
-    int f_m = 10;
+    int f_n = 50;
+    int f_m = 50;
     float f_X = 5.;
     float f_Y = 5.;
     bool f_changedProblem = false;
@@ -53,7 +53,7 @@ public:
             0.8,
             0.0,
             Transform3D(
-                glm::dvec3(-0.5, 0., 0.),
+                glm::dvec3(0.5, 0, 2.),
                 glm::dvec3(0.4, 0.4, 0.4),
                 glm::dvec3(0., 0., 0.)
             ),
