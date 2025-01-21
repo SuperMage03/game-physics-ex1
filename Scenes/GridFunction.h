@@ -311,9 +311,37 @@ namespace GridFunction {
             }
         }
 
+        glm::dvec3 getNormal(unsigned i, unsigned j) {
+            // Check if invalid indices
+            if (i >= f_function.getN() || j >= f_function.getM()) return glm::dvec3(0.);
+
+            glm::dvec3 cross1, cross2;
+
+            glm::dvec3 point = getPoint3D(i, j);
+
+            if (i == (f_function.getN() - 1) && j == (f_function.getM() - 1)) {
+                cross1 = glm::normalize(getPoint3D(i - 1, j) - point);
+                cross2 = glm::normalize(getPoint3D(i, j - 1) - point);
+            }
+            else if (j == (f_function.getM() - 1)) {
+                cross1 = glm::normalize(getPoint3D(i, j - 1) - point);
+                cross2 = glm::normalize(getPoint3D(i + 1, j) - point);
+            }
+            else if (i == (f_function.getN() - 1)) {
+                cross1 = glm::normalize(getPoint3D(i, j + 1) - point);
+                cross2 = glm::normalize(getPoint3D(i - 1, j) - point);
+            }
+            else {
+                cross1 = glm::normalize(getPoint3D(i + 1, j) - point);
+                cross2 = glm::normalize(getPoint3D(i, j + 1) - point);
+            }
+
+            return glm::cross(cross1, cross2);
+        }
+
         void onDraw(Renderer &renderer, glm::dvec3 shift = glm::dvec3(0.), double scale = 1.) {
             // Draw grid
-            f_grid.onDraw(renderer, shift, scale);
+            // f_grid.onDraw(renderer, shift, scale);
             // Draw function points
             for (unsigned i = 0; i < f_function.getN(); i++) {
                 for (unsigned j = 0; j < f_function.getM(); j++) {

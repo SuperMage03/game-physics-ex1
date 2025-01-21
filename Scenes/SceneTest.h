@@ -98,6 +98,33 @@ public:
         << ROPE << std::endl << std::endl;
 
         TPE = std::move(Physics::ThermodynamicPhysicsEngine(
+            // HeatProblem::HeatProblemRectDBC2D(
+            //     glm::dvec2(-f_X / 2., -f_Y / 2.),
+            //     glm::dvec2(f_X, f_Y),
+            //     0.1,
+            //     [](glm::dvec2 point, double t) {
+            //         return 0.;
+            //     },
+            //     [](glm::dvec2 point, double t) {
+            //         return 2 * sin(2. * point.x) * sin(2. * point.y) + 0.5 * ((double)(rand()) / (double)(RAND_MAX)) - 2.5;
+            //     },
+            //     [](double y, double t) {
+            //         return 2. * (sin(y - t) + 1.) + 0.5 * (sin(5. * (y + t)) + 1.) - 2.5;
+            //     },
+            //     [](double y, double t) {
+            //         return sin(t) * y - 2.5;
+            //     },
+            //     [](double x, double t) {
+            //         return 2. * (sin(x - t) + 1.) + 0.5 * (sin(5. * (x + t)) + 1.) - 2.5;
+            //     },
+            //     [](double x, double t) {
+            //         return sin(t) * x - 2.5;
+            //     },
+            //     HeatProblem::BoundaryConditionType::DIRICHLET,
+            //     HeatProblem::BoundaryConditionType::DIRICHLET,
+            //     HeatProblem::BoundaryConditionType::DIRICHLET,
+            //     HeatProblem::BoundaryConditionType::DIRICHLET
+            // )
             HeatProblem::HeatProblemRectDBC2D(
                 glm::dvec2(-f_X / 2., -f_Y / 2.),
                 glm::dvec2(f_X, f_Y),
@@ -106,19 +133,19 @@ public:
                     return 0.;
                 },
                 [](glm::dvec2 point, double t) {
-                    return 2 * sin(2. * point.x) * sin(2. * point.y) + 0.5 * ((double)(rand()) / (double)(RAND_MAX));
+                    return - 4. * (point.x - 2.5) * (point.x + 2.5) * (point.y - 2.5) * (point.y + 2.5) / 39. + 2.5;
                 },
                 [](double y, double t) {
-                    return 2. * (sin(y - t) + 1.) + 0.5 * (sin(5. * (y + t)) + 1.);
+                    return 2.5;
                 },
                 [](double y, double t) {
-                    return sin(t) * y;
+                    return 2.5;
                 },
                 [](double x, double t) {
-                    return 2. * (sin(x - t) + 1.) + 0.5 * (sin(5. * (x + t)) + 1.);
+                    return 2.5;
                 },
                 [](double x, double t) {
-                    return sin(t) * x;
+                    return 2.5;
                 },
                 HeatProblem::BoundaryConditionType::DIRICHLET,
                 HeatProblem::BoundaryConditionType::DIRICHLET,
@@ -132,16 +159,16 @@ public:
     }
 
     void propagateState() {
-        switch (f_solverType) {
-        case Physics::SolverType::EXPLICIT:
-            TPE.propagateStateExplicitOn(f_heatField, f_delta);
-            break;
-        case Physics::SolverType::IMPLICIT:
-            TPE.propagateStateImplicitOn(f_heatField, f_delta);
-            break;
-        default:
-            break;
-        }
+        // switch (f_solverType) {
+        // case Physics::SolverType::EXPLICIT:
+        //     TPE.propagateStateExplicitOn(f_heatField, f_delta);
+        //     break;
+        // case Physics::SolverType::IMPLICIT:
+        //     TPE.propagateStateImplicitOn(f_heatField, f_delta);
+        //     break;
+        // default:
+        //     break;
+        // }
     }
 
     void simulateStep() override {

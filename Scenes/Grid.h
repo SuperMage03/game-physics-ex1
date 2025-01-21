@@ -133,6 +133,19 @@ namespace Grid {
             return indices;
         }
 
+        /// @brief Calculates a radius in indices to consider for ball of given radius during collision detection.
+        /// @param radius Ball radius.
+        /// @return glm::ivec2 radii in indices along Ox and Oy.
+        glm::ivec2 getNeighbourhoodIndexRadius(double radius) {
+            glm::ivec2 indexRadius;
+
+            // Calculate extents using given ball radius and grid steps
+            indexRadius.x = std::ceil(2. * radius / f_steps.x);
+            indexRadius.y = std::ceil(2. * radius / f_steps.y);
+
+            return indexRadius;
+        }
+
         #pragma endregion
 
         void calculateSteps() {

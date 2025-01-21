@@ -197,8 +197,6 @@ namespace Physics {
                             1. / ballA->f_mass
                             + glm::dot(glm::cross((ballA->f_inertiaTensorInv * glm::cross(collisionPointALocal, collInfo.f_normal)), collisionPointALocal), collInfo.f_normal)
                         );
-                    // std::cout << collisionCornerAId << std::endl;
-                    // std::cout << J << std::endl;
                     // Calculate tangent
                     glm::dvec3 tangentNonNormed = glm::cross(glm::cross(collInfo.f_normal, relativeVelocity), collInfo.f_normal);
                     glm::dvec3 tangent = glm::dvec3(0.);
@@ -206,18 +204,15 @@ namespace Physics {
                         tangent = glm::normalize(tangentNonNormed);
                     }
                     
-                    // Update box velocity
+                    // Update ball velocity
                     ballA->f_velocity += 
                         J
                         * (collInfo.f_normal - ballA->f_mu * tangent) 
                         / ballA->f_mass;
-                    // Update box angular momentum
+                    // Update ball angular momentum
                     ballA->f_angularMomentum += J * glm::cross(collisionPointALocal, collInfo.f_normal);
                     // Recalculate angular velocity
                     ballA->calculateAngularVelocity();
-
-                    // Look at result velocity
-                    glm::dvec3 resultVelocity = relativeVelocity;
                     
                     // Push out of the wall
                     ballA->f_transform.f_position += (collInfo.f_depth + 0.00001) * collInfo.f_normal;
@@ -227,17 +222,121 @@ namespace Physics {
             // Hadle grid point collisions
             for (const auto objA: f_rigidObjects) {
                 std::shared_ptr<RigidBall> ballA = std::dynamic_pointer_cast<RigidBall>(objA);
-                for (unsigned i = 0; i < f_gridFunction->getN(); i++) {
-                    for (unsigned j = 0; j < f_gridFunction->getM(); j++) {
-                        glm::dvec3 vertex = f_gridFunction->getPoint3D(i, j);
-                        if (ballA->containsPoint(vertex)) {
-                            std::cout << "Ball contains point: (" << vertex.x << ", " << vertex.y << ", " << vertex.z << ")"  << std::endl;
+                // Get closest vertex
+                glm::ivec2 vertexId = f_gridFunction->getGrid().getGridPositionFromWorldPosition(ballA->f_transform.f_position);
+                // Get index radius to consider
+                glm::ivec2 indexRadius = f_gridFunction->getGrid().getNeighbourhoodIndexRadius(ballA->f_transform.f_scale.x);
+
+                // Initialize vectors for vertex collision data
+                // Vector for colliding grid function vertices coordinates
+                std::vector<glm::dvec3> collisionPoints;
+                // Vector of collision depths for colliding grid function vertices
+                std::vector<double> depths;
+                // Vector of collision normals for colliding grid function vertices
+                std::vector<glm::dvec3> normals;
+                // Vector of collision relative velocities for colliding grid function vertices
+                std::vector<glm::dvec3> relativeVelocities;
+                // Vector of local (w.r.t. to ballA) collision points for colliding grid function vertices
+                std::vector<glm::dvec3> localCollisionPoints;
+
+                // Go over all vertices in the index radius
+                for (unsigned i = vertexId.x - indexRadius.x; i <= vertexId.x + indexRadius.x; i++) {
+                    for (unsigned j = vertexId.y - indexRadius.y; j <= vertexId.y + indexRadius.y; j++) {
+                        // Get vertex coordinates
+                        glm::dvec3 collisionPoint = f_gridFunction->getPoint3D(i, j);
+                        // If ball contains vertex (there is a collision)
+                        if (ballA->containsPoint(collisionPoint)) {
+                            // Save colliding grid function vertex coordinates
+                            collisionPoints.push_back(collisionPoint);
+                            // Get normal to grid function at colliding vertex
+                            glm::dvec3 normal = f_gridFunction->getNormal(i, j);
+                            // Save normal
+                            normals.push_back(normal);
+                            // Get depth from cointainsPointD (returns distance to surface, so negative if point is inside)
+                            double depth = -ballA->containsPointD(collisionPoint);
+                            // Check if most of the ball is still above the surface
+                            // This is true when the normal to the surface is oriented to the opposite
+                            // direction compared to the push-out vector returned by pointDepthVector()
+                            if (glm::dot(normal, ballA->pointDepthVector(collisionPoint)) < 0) {
+                                // Then save the value returned by containsPointD()
+                                depths.push_back(depth);
+                            }
+                            else {
+                                // Otherwise the ball is more than halfway below the surface,
+                                // thus the depth is not the shortest distance to the surface,
+                                // but the distance to the diametrically opposed point
+                                depths.push_back(2. * ballA->f_transform.f_scale.x - depth);
+                            }
+                            // Save relative velocity
+                            relativeVelocities.push_back(ballA->getVelocityAtGlobalPoint(collisionPoint));
+                            // Save local collision point
+                            localCollisionPoints.push_back(collisionPoint - ballA->f_transform.f_position);
                         }
                     }
                 }
-                // glm::ivec2 vertexId = f_gridFunction->getGrid().getGridPositionFromWorldPosition(ballA->f_transform.f_position);
-                // std::cout << "Grid point closest to ball center: {" 
-                // << vertexId.x << ", " << vertexId.y << "}" << std::endl;
+
+                // If there is a colliding point
+                if (!collisionPoints.empty()) {
+                    std::cout << collisionPoints.size() << std::endl;
+
+                    // Initialize final data
+                    glm::dvec3 collisionPoint = glm::dvec3(0.);
+                    glm::dvec3 depthVector = glm::dvec3(0.);
+                    glm::dvec3 normal = glm::dvec3(0.);
+                    glm::dvec3 relativeVelocity = glm::dvec3(0.);
+                    glm::dvec3 localCollisionPoint = glm::dvec3(0.);
+
+                    // Initialize variables for max depth search
+                    double maxDepth = -1.;
+                    unsigned maxDepthId = -1;
+                    // Average/pick data over all collision points
+                    unsigned vertexCtr = collisionPoints.size();
+                    for (unsigned i = 0; i < vertexCtr; i++) {
+                        // Average the collision point location
+                        collisionPoint += collisionPoints.at(i) * (1. / vertexCtr);
+                        // Find maximum depth
+                        if (maxDepth < depths.at(i)) {
+                            maxDepth = depths.at(i);
+                            maxDepthId = i;
+                        }
+                        // Average the normal
+                        normal += normals.at(i) * (1. / vertexCtr);
+                        // Average the relative velocity
+                        relativeVelocity += relativeVelocities.at(i) * (1. / vertexCtr);
+                        // Average the local collision point
+                        localCollisionPoint += localCollisionPoints.at(i) * (1. / vertexCtr);
+                    }
+
+                    // Infer the depth vector as maximum collision depth times the normal at the respective vertex
+                    depthVector = maxDepth * normals.at(maxDepthId);
+
+                    // Handle collision
+                    // Calculate impulse
+                    double J = -(1. + ballA->f_c) * std::min(glm::dot(relativeVelocity, normal), 0.)
+                        / (
+                            1. / ballA->f_mass
+                            + glm::dot(glm::cross((ballA->f_inertiaTensorInv * glm::cross(localCollisionPoint, normal)), localCollisionPoint), normal)
+                        );
+                    // Calculate tangent
+                    glm::dvec3 tangentNonNormed = glm::cross(glm::cross(normal, relativeVelocity), normal);
+                    glm::dvec3 tangent = glm::dvec3(0.);
+                    if (glm::length(tangentNonNormed) != 0) {
+                        tangent = glm::normalize(tangentNonNormed);
+                    }
+                    
+                    // Update ball velocity
+                    ballA->f_velocity += 
+                        J
+                        * (normal - ballA->f_mu * tangent) 
+                        / ballA->f_mass;
+                    // Update ball angular momentum
+                    ballA->f_angularMomentum += J * glm::cross(localCollisionPoint, normal);
+                    // Recalculate angular velocity
+                    ballA->calculateAngularVelocity();
+                    
+                    // Push out of the wall
+                    ballA->f_transform.f_position += (1 + 0.00001) * depthVector;
+                }
             }
         }
 
