@@ -291,8 +291,8 @@ namespace Physics {
                     glm::dvec3 localCollisionPoint = glm::dvec3(0.);
 
                     // Initialize variables for max depth search
-                    double maxDepth = -1.;
-                    unsigned maxDepthId = -1;
+                    double maxDepth = 0.;
+                    unsigned maxDepthId = 0;
                     // Average/pick data over all collision points
                     unsigned vertexCtr = collisionPoints.size();
                     for (unsigned i = 0; i < vertexCtr; i++) {
