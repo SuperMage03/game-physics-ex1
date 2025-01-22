@@ -284,7 +284,10 @@ public:
 		velocity,
 		angularVelocity
 	)
-	{}
+	{
+		calculateInertiaTensorInv();
+		calculateAngularMomentum();
+	}
 
 	RigidBall(
 		double mass,
@@ -301,7 +304,10 @@ public:
 		std::move(velocity),
 		std::move(angularVelocity)
 	)
-	{}
+	{
+		calculateInertiaTensorInv();
+		calculateAngularMomentum();
+	}
 
 	#pragma endregion
 
@@ -371,6 +377,21 @@ public:
 			f_transform.f_position,
 			f_transform.f_scale.x,
 			f_color
+		);
+		renderer.drawLine(
+			f_transform.f_position, 
+			f_transform.f_position + 1.5 * f_transform.f_scale.x * f_transform.transformLocalToGlobalRotation(glm::dvec3(1., 0., 0.)),
+			glm::dvec3(1., 0., 0.)
+		);
+		renderer.drawLine(
+			f_transform.f_position, 
+			f_transform.f_position + 1.5 * f_transform.f_scale.x * f_transform.transformLocalToGlobalRotation(glm::dvec3(0., 1., 0.)),
+			glm::dvec3(0., 1., 0.)
+		);
+		renderer.drawLine(
+			f_transform.f_position, 
+			f_transform.f_position + 1.5 * f_transform.f_scale.x * f_transform.transformLocalToGlobalRotation(glm::dvec3(0., 0., 1.)),
+			glm::dvec3(0., 0., 1.)
 		);
 	}
 };

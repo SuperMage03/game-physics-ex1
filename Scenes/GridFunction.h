@@ -389,6 +389,17 @@ namespace GridFunction {
                     getColorForValue(f_function.getValue(i, j + 1))
                 );
             }
+
+            // //Draw normals
+            // for (unsigned i = 0; i < f_function.getN(); i++) {
+            //     for (unsigned j = 0; j < f_function.getM(); j++) {
+            //         renderer.drawLine(
+            //             getPoint3D(i, j),
+            //             getPoint3D(i, j) + getNormal(i, j),
+            //             glm::vec3(0.2, 0.3, 1.0)
+            //         );
+            //     }
+            // }
         }
     };
 }

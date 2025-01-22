@@ -51,14 +51,14 @@ public:
         std::shared_ptr<RigidBall> ball1(new RigidBall(
             1.,
             0.8,
-            0.0,
+            0.15,
             Transform3D(
-                glm::dvec3(0.5, 0, 2.),
+                glm::dvec3(0.5, 0, 0.),
                 glm::dvec3(0.4, 0.4, 0.4),
                 glm::dvec3(0., 0., 0.)
             ),
             glm::dvec3(0., 0., 0.),
-            glm::dvec3(0., 0., 0.)
+            glm::dvec3(10., 0., 0.)
         ));
 
         // std::shared_ptr<RigidBall> ball2(new RigidBall(

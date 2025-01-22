@@ -209,8 +209,14 @@ namespace Physics {
                         J
                         * (collInfo.f_normal - ballA->f_mu * tangent) 
                         / ballA->f_mass;
+                    
+                    // NEW AM UPDATE TEST !!!!!!!!!!!!!!!!!!!!!!!!!
+                    // // Update ball angular momentum
+                    // ballA->f_angularMomentum += J * glm::cross(collisionPointALocal, collInfo.f_normal);
                     // Update ball angular momentum
-                    ballA->f_angularMomentum += J * glm::cross(collisionPointALocal, collInfo.f_normal);
+                    ballA->f_angularMomentum += 
+                        J * glm::cross(collisionPointALocal, collInfo.f_normal)
+                        - 0.5 * ballA->f_mu * glm::length(relativeVelocity) * glm::cross(collisionPointALocal, tangent);
                     // Recalculate angular velocity
                     ballA->calculateAngularVelocity();
                     
@@ -281,7 +287,7 @@ namespace Physics {
 
                 // If there is a colliding point
                 if (!collisionPoints.empty()) {
-                    std::cout << collisionPoints.size() << std::endl;
+                    // std::cout << collisionPoints.size() << std::endl;
 
                     // Initialize final data
                     glm::dvec3 collisionPoint = glm::dvec3(0.);
@@ -311,6 +317,8 @@ namespace Physics {
                         localCollisionPoint += localCollisionPoints.at(i) * (1. / vertexCtr);
                     }
 
+                    // std::cout << relativeVelocity.x << "; " << relativeVelocity.y << ";" << relativeVelocity.z << std::endl;
+ 
                     // Infer the depth vector as maximum collision depth times the normal at the respective vertex
                     depthVector = maxDepth * normals.at(maxDepthId);
 
@@ -333,13 +341,21 @@ namespace Physics {
                         J
                         * (normal - ballA->f_mu * tangent) 
                         / ballA->f_mass;
+                    
+                    // NEW AM UPDATE TEST !!!!!!!!!!!!!!!!!!!!!!!!!
+                    // // Update ball angular momentum
+                    // ballA->f_angularMomentum += J * glm::cross(localCollisionPoint, normal);
                     // Update ball angular momentum
-                    ballA->f_angularMomentum += J * glm::cross(localCollisionPoint, normal);
+                    ballA->f_angularMomentum += 
+                        J * glm::cross(localCollisionPoint, normal)
+                        - 0.5 * ballA->f_mu * glm::length(relativeVelocity) * glm::cross(localCollisionPoint, tangent);
                     // Recalculate angular velocity
                     ballA->calculateAngularVelocity();
                     
                     // Push out of the wall
                     ballA->f_transform.f_position += (1 + 0.00001) * depthVector;
+
+                    // std::cout << ballA->f_transform.f_position.x << std::endl;
                 }
             }
         }
@@ -354,8 +370,13 @@ namespace Physics {
                 // Take average roughness to conserve momentum 
                 * (collision.f_normal - (collision.f_objA->f_mu + collision.f_objB->f_mu) * collision.f_tangent / 2.) 
                 / collision.f_objA->f_mass;
+            // NEW AM UPDATE TEST !!!!!!!!!!!!!!!!!!!!!!!!!
+            // // Update angular momentum
+            // collision.f_objA->f_angularMomentum += collision.f_impulse * glm::cross(collision.f_collisionPointALocal, collision.f_normal);
             // Update angular momentum
-            collision.f_objA->f_angularMomentum += glm::cross(collision.f_collisionPointALocal, collision.f_impulse * collision.f_normal);
+            collision.f_objA->f_angularMomentum += 
+                collision.f_impulse * glm::cross(collision.f_collisionPointALocal, collision.f_normal)
+                - 0.5 * (collision.f_objA->f_mu + collision.f_objB->f_mu) * glm::length(collision.f_relativeVelocity) * glm::cross(collision.f_collisionPointALocal, collision.f_tangent) / 2.;
             // Recalculate angular velocity
             collision.f_objA->calculateAngularVelocity();
 
@@ -366,12 +387,18 @@ namespace Physics {
                 // Take average roughness to conserve momentum 
                 * (collision.f_normal - (collision.f_objA->f_mu + collision.f_objB->f_mu) * collision.f_tangent / 2.) 
                 / collision.f_objB->f_mass;
+            
+            // NEW AM UPDATE TEST !!!!!!!!!!!!!!!!!!!!!!!!!
+            // // Update angular momentum
+            // collision.f_objB->f_angularMomentum -= collision.f_impulse * glm::cross(collision.f_collisionPointBLocal, collision.f_normal);
             // Update angular momentum
-            collision.f_objB->f_angularMomentum -= glm::cross(collision.f_collisionPointBLocal, collision.f_impulse * collision.f_normal);
+            collision.f_objB->f_angularMomentum -= 
+                collision.f_impulse * glm::cross(collision.f_collisionPointBLocal, collision.f_normal)
+                - 0.5 * (collision.f_objA->f_mu + collision.f_objB->f_mu) * glm::length(collision.f_relativeVelocity) * glm::cross(collision.f_collisionPointBLocal, collision.f_tangent) / 2.;
             // Recalculate angular velocity
             collision.f_objB->calculateAngularVelocity();
 
-            //Push boxes out of eachother
+            //Push objects out of eachother
             collision.f_objA->f_transform.f_position += collision.f_depth * collision.f_normal / 2.;
             collision.f_objB->f_transform.f_position -= collision.f_depth * collision.f_normal / 2.;
         }
