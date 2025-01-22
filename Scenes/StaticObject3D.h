@@ -366,6 +366,8 @@ public:
             }
         }
 
+        // TODO: Add edge collision detection!
+
         // Check every vertex separately
         for (unsigned i = 0; i < 8; i++) {
             // Check if ball center is close enough to vertex
