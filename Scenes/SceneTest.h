@@ -311,7 +311,7 @@ public:
         }
     }
 
-    std::pair<bool, double> planeRayIntersection(const glm::vec3& planeNormal, const glm::vec3& rayDir, const glm::vec3& pointOnPlane, const glm::vec3& rayOrigin) {
+    std::pair<bool, double> planeRayIntersection(const glm::dvec3& planeNormal, const glm::dvec3& rayDir, const glm::dvec3& pointOnPlane, const glm::dvec3& rayOrigin) {
         double denom = glm::dot(planeNormal, rayDir);
 
         // If not parallel
@@ -327,22 +327,70 @@ public:
         return std::make_pair(false, 0.0);
     }
 
-    double calculateTrianglePlaneArea(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c) {
+    double calculateTrianglePlaneArea(const glm::dvec3& a, const glm::dvec3& b, const glm::dvec3& c) {
         return 0.5 * glm::length(glm::cross(b - a, c - a));
     }
 
-    // Using barycentric coordinates
+    bool PointInSegment(const glm::dvec3& point, const glm::dvec3& a, const glm::dvec3& b) {
+        glm::dvec3 direction = glm::normalize(b - a);
+        double length = glm::length(b - a);
+        glm::dvec3 pointRelativeToA = point - a;
+        double projection = glm::dot(direction, pointRelativeToA);
+        projection = std::clamp(projection, 0.0, length);
+        glm::dvec3 closestPoint = a + projection * direction;
+        return glm::distance2(point, closestPoint) < 0.000001;
+    }
+
     bool PointInTriangle(const glm::dvec3& point, const GridFunction::ScalarGridFunction2D::TrianglePlane& trianglePlane) {
-        double a1 = calculateTrianglePlaneArea(point, trianglePlane.p1, trianglePlane.p2);
-        double a2 = calculateTrianglePlaneArea(point, trianglePlane.p2, trianglePlane.p3);
-        double a3 = calculateTrianglePlaneArea(point, trianglePlane.p3, trianglePlane.p1);
-        double resultArea = a1 + a2 + a3;
-        double expectedArea = calculateTrianglePlaneArea(trianglePlane.p1, trianglePlane.p2, trianglePlane.p3);
-        // If resultArea and expectedArea is close enough
-        if (fabs(expectedArea - resultArea) < 0.0001) {
-            return true;
+        // ----- Using barycentric coordinates area -----
+        // double a1 = calculateTrianglePlaneArea(point, trianglePlane.p1, trianglePlane.p2);
+        // double a2 = calculateTrianglePlaneArea(point, trianglePlane.p2, trianglePlane.p3);
+        // double a3 = calculateTrianglePlaneArea(point, trianglePlane.p3, trianglePlane.p1);
+        // double resultArea = a1 + a2 + a3;
+        // double expectedArea = calculateTrianglePlaneArea(trianglePlane.p1, trianglePlane.p2, trianglePlane.p3);
+        // // If resultArea and expectedArea is close enough
+        // if (fabs(expectedArea - resultArea) < 0.0001) {
+        //     return true;
+        // }
+        // return false;
+
+        // ----- Using the normal of the three sub-triangles -----
+        // Move p1, p2, p3 to be in the perspective where point is the origin
+        glm::dvec3 a = trianglePlane.p1 - point;
+        glm::dvec3 b = trianglePlane.p2 - point;
+        glm::dvec3 c = trianglePlane.p3 - point;
+
+        // Compute the normal vectors for triangles:
+        // u = normal of PBC
+        // v = normal of PCA
+        // w = normal of PAB
+
+        glm::dvec3 u = glm::cross(b, c);
+        glm::dvec3 v = glm::cross(c, a);
+        glm::dvec3 w = glm::cross(a, b);
+
+        // If normal is the zero-vector, that means point is parallel with the other two points
+        //   thus we need to check if point is within the line segment formed by the other two points
+        if (glm::length2(u) == 0.0) {
+            return PointInSegment(glm::dvec3(0.0), b, c);
         }
-        return false;
+        if (glm::length2(v) == 0.0) {
+            return PointInSegment(glm::dvec3(0.0), c, a);
+        }
+        if (glm::length2(w) == 0.0) {
+            return PointInSegment(glm::dvec3(0.0), a, b);
+        }
+
+        // Test to see if the normals are facing the same direction, return false if not
+        if (fabs(1.0 - (glm::dot(u, v) / (glm::length(u)*glm::length(v)))) > 0.001) {
+            return false;
+        }
+        if (fabs(1.0 - (glm::dot(u, w) / (glm::length(u)*glm::length(w)))) > 0.001) {
+            return false;
+        }
+
+        // All normals facing the same way, return true
+        return true;
     }
 
     const GridFunction::ScalarGridFunction2D::TrianglePlane* getTrianglePlaneOnMouse(const ImVec2& mousePos, const ImVec2& screenSize) {
