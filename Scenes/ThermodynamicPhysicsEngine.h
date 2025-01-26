@@ -160,6 +160,7 @@ namespace Physics {
             setInitialConditionsOn(initialState);
             // Enforce boundary conditions
             enforceBoundaryConditionsOn(initialState);
+            initialState.updateAllTrianglePlanes();
             return initialState;
         }
 
@@ -187,6 +188,8 @@ namespace Physics {
 
             // Enforce boundary conditions
             enforceBoundaryConditionsOn(state);
+            // Update the triangle planes
+            state.updateAllTrianglePlanes();
         }
 
         /// @brief Returns a global enumeration id for a given grid vertex.
@@ -310,6 +313,8 @@ namespace Physics {
 
             // Enforce boundary conditions
             enforceBoundaryConditionsOn(state);
+            // Update the triangle planes
+            state.updateAllTrianglePlanes();
         }
     };
 }

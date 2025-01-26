@@ -28,8 +28,9 @@ private:
 
     bool f_restart = false;
 
-
+    glm::dmat4 projectionMatrix = glm::dmat4(1);
     glm::dmat4 cameraMatrix = glm::dmat4(1);
+    glm::dvec3 cameraPosition = glm::dvec3(0);
     glm::dvec3 fwd = glm::dvec3(1, 0, 0);
     glm::dvec3 right = glm::dvec3(0, 1, 0);
     glm::dvec3 up = glm::dvec3(0, 0, 1);
@@ -196,7 +197,9 @@ public:
     }
 
     void onDraw(Renderer &renderer) override {
+        projectionMatrix = renderer.camera.projectionMatrix();
         cameraMatrix = renderer.camera.viewMatrix;
+        cameraPosition = renderer.camera.position;
         fwd = inverse(cameraMatrix) * glm::dvec4(0, 0, 1, 0);
         right = inverse(cameraMatrix) * glm::dvec4(1, 0, 0, 0);
         up = inverse(cameraMatrix) * glm::dvec4(0, 1, 0, 0);
@@ -249,16 +252,29 @@ public:
         ImGui::Text("Hold E : Heat up depending on mouse cursor position");
         if (ImGui::IsKeyDown(ImGuiKey_E)) {
             if (!f_pause) {
-                auto mousePosition = ImGui::GetMousePos();
-                auto windowSize = ImGui::GetIO().DisplaySize;
-                double tx = (double)(mousePosition.x) / (double)(windowSize.x);
-                double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
-                glm::dvec2 tp(tx, ty);
-                int i = (int)(f_heatField.getN() * tp.x);
-                int j = (int)(f_heatField.getM() * tp.y);
-                for (int io = std::max(0, i - f_effectRadius); io <= i + f_effectRadius; io++) {
-                    for (int jo = std::max(0, j - f_effectRadius); jo <= j + f_effectRadius; jo++) {
-                        f_heatField.addToValue(io, jo, 0.5);
+                // auto mousePosition = ImGui::GetMousePos();
+                // auto windowSize = ImGui::GetIO().DisplaySize;
+                // double tx = (double)(mousePosition.x) / (double)(windowSize.x);
+                // double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
+                // glm::dvec2 tp(tx, ty);
+                // int i = (int)(f_heatField.getN() * tp.x);
+                // int j = (int)(f_heatField.getM() * tp.y);
+                // for (int io = std::max(0, i - f_effectRadius); io <= i + f_effectRadius; io++) {
+                //     for (int jo = std::max(0, j - f_effectRadius); jo <= j + f_effectRadius; jo++) {
+                //         f_heatField.addToValue(io, jo, 0.5);
+                //     }
+                // }
+
+                ImVec2 mousePos = ImGui::GetMousePos();
+                ImVec2 screenSize = ImGui::GetIO().DisplaySize;
+
+                const GridFunction::ScalarGridFunction2D::TrianglePlane* planeHit = getTrianglePlaneOnMouse(mousePos, screenSize);
+
+                if (planeHit != nullptr) {
+                    for (int io = std::max(0, planeHit->p1Index.x - f_effectRadius); io <= planeHit->p1Index.x + f_effectRadius; io++) {
+                        for (int jo = std::max(0, planeHit->p1Index.y - f_effectRadius); jo <= planeHit->p1Index.y + f_effectRadius; jo++) {
+                            f_heatField.addToValue(io, jo, 0.5);
+                        }
                     }
                 }
             }
@@ -266,19 +282,118 @@ public:
         ImGui::Text("Hold Q : Cool down depending on mouse cursor position");
         if (ImGui::IsKeyDown(ImGuiKey_Q)) {
             if (!f_pause) {
-                auto mousePosition = ImGui::GetMousePos();
-                auto windowSize = ImGui::GetIO().DisplaySize;
-                double tx = (double)(mousePosition.x) / (double)(windowSize.x);
-                double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
-                glm::dvec2 tp(tx, ty);
-                int i = (int)(f_heatField.getN() * tp.x);
-                int j = (int)(f_heatField.getM() * tp.y);
-                for (int io = std::max(0, i - f_effectRadius); io <= i + f_effectRadius; io++) {
-                    for (int jo = std::max(0, j - f_effectRadius); jo <= j + f_effectRadius; jo++) {
-                        f_heatField.addToValue(io, jo, -0.5);
+                // auto mousePosition = ImGui::GetMousePos();
+                // auto windowSize = ImGui::GetIO().DisplaySize;
+                // double tx = (double)(mousePosition.x) / (double)(windowSize.x);
+                // double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
+                // glm::dvec2 tp(tx, ty);
+                // int i = (int)(f_heatField.getN() * tp.x);
+                // int j = (int)(f_heatField.getM() * tp.y);
+                // for (int io = std::max(0, i - f_effectRadius); io <= i + f_effectRadius; io++) {
+                //     for (int jo = std::max(0, j - f_effectRadius); jo <= j + f_effectRadius; jo++) {
+                //         f_heatField.addToValue(io, jo, -0.5);
+                //     }
+                // }
+
+                ImVec2 mousePos = ImGui::GetMousePos();
+                ImVec2 screenSize = ImGui::GetIO().DisplaySize;
+
+                const GridFunction::ScalarGridFunction2D::TrianglePlane* planeHit = getTrianglePlaneOnMouse(mousePos, screenSize);
+
+                if (planeHit != nullptr) {
+                    for (int io = std::max(0, planeHit->p1Index.x - f_effectRadius); io <= planeHit->p1Index.x + f_effectRadius; io++) {
+                        for (int jo = std::max(0, planeHit->p1Index.y - f_effectRadius); jo <= planeHit->p1Index.y + f_effectRadius; jo++) {
+                            f_heatField.addToValue(io, jo, -0.5);
+                        }
                     }
                 }
             }
         }
+    }
+
+    std::pair<bool, double> planeRayIntersection(const glm::vec3& planeNormal, const glm::vec3& rayDir, const glm::vec3& pointOnPlane, const glm::vec3& rayOrigin) {
+        double denom = glm::dot(planeNormal, rayDir);
+
+        // If not parallel
+        if (denom != 0.0) {
+            double d = -glm::dot(planeNormal, pointOnPlane);
+            double t = -(glm::dot(planeNormal, rayOrigin) + d) / denom;
+            // Intersection is at the opposite direction of the ray
+            if (t < 0) {
+                return std::make_pair(false, t);
+            }
+            return std::make_pair(true, t); // hit, intersection value
+        }
+        return std::make_pair(false, 0.0);
+    }
+
+    double calculateTrianglePlaneArea(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c) {
+        return 0.5 * glm::length(glm::cross(b - a, c - a));
+    }
+
+    // Using barycentric coordinates
+    bool PointInTriangle(const glm::dvec3& point, const GridFunction::ScalarGridFunction2D::TrianglePlane& trianglePlane) {
+        double a1 = calculateTrianglePlaneArea(point, trianglePlane.p1, trianglePlane.p2);
+        double a2 = calculateTrianglePlaneArea(point, trianglePlane.p2, trianglePlane.p3);
+        double a3 = calculateTrianglePlaneArea(point, trianglePlane.p3, trianglePlane.p1);
+        double resultArea = a1 + a2 + a3;
+        double expectedArea = calculateTrianglePlaneArea(trianglePlane.p1, trianglePlane.p2, trianglePlane.p3);
+        // If resultArea and expectedArea is close enough
+        if (fabs(expectedArea - resultArea) < 0.0001) {
+            return true;
+        }
+        return false;
+    }
+
+    const GridFunction::ScalarGridFunction2D::TrianglePlane* getTrianglePlaneOnMouse(const ImVec2& mousePos, const ImVec2& screenSize) {
+        // The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
+        glm::dvec4 lRayStart_NDC(
+            ((double)mousePos.x/(double)screenSize.x - 0.5) * 2.0, // [0,1024] -> [-1,1]
+            -((double)mousePos.y/(double)screenSize.y - 0.5) * 2.0, // [0, 768] -> [-1,1]
+            -1.0, // The near plane maps to Z=-1 in Normalized Device Coordinates
+            1.0
+        );
+        glm::dvec4 lRayEnd_NDC(
+            ((double)mousePos.x/(double)screenSize.x - 0.5) * 2.0, // [0,1024] -> [-1,1]
+            -((double)mousePos.y/(double)screenSize.y - 0.5) * 2.0, // [0, 768] -> [-1,1]
+            0.0, // The far plane
+            1.0
+        );
+
+        glm::dvec4 lRayStart_camera = glm::inverse(projectionMatrix) * lRayStart_NDC;
+        lRayStart_camera /= lRayStart_camera.w;
+
+        glm::dvec4 lRayStart_world = glm::inverse(cameraMatrix) * lRayStart_camera;
+        lRayStart_world /= lRayStart_world.w;
+
+        glm::dvec4 lRayEnd_camera = glm::inverse(projectionMatrix) * lRayEnd_NDC;
+        lRayEnd_camera /= lRayEnd_camera.w;
+
+        glm::dvec4 lRayEnd_world = glm::inverse(cameraMatrix) * lRayEnd_camera;
+        lRayEnd_world /= lRayEnd_world.w;
+
+        glm::dvec3 lRayDir_world = glm::normalize(lRayEnd_world - lRayStart_world);
+
+        const unsigned trianglePlanesCount = f_heatField.getTrianglePlanesCount();
+        const GridFunction::ScalarGridFunction2D::TrianglePlane* trianglePlanes = f_heatField.getTrianglePlanes();
+
+
+        double closestT = std::numeric_limits<double>::infinity();
+        const GridFunction::ScalarGridFunction2D::TrianglePlane* planeHit = nullptr;
+
+        for (unsigned i = 0; i < trianglePlanesCount; i++) {
+            const GridFunction::ScalarGridFunction2D::TrianglePlane& curTrianglePlane = trianglePlanes[i];
+            const glm::dvec3& planeNormal = curTrianglePlane.normal;
+            
+            auto [hasHit, t] = planeRayIntersection(planeNormal, lRayDir_world, curTrianglePlane.p1, cameraPosition);
+            if (hasHit) {
+                glm::dvec3 hitPoint = cameraPosition + lRayDir_world * t;
+                if (PointInTriangle(hitPoint, curTrianglePlane) && (closestT > t)) {
+                    closestT = t;
+                    planeHit = &curTrianglePlane;
+                }
+            }
+        }
+        return planeHit;
     }
 };
