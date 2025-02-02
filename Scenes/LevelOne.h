@@ -74,7 +74,7 @@ public:
             1.,
             0.8,
             // friction
-            0.8,
+            0.2,
             Transform3D(
                 glm::dvec3(0.5, 0, 0.),
                 glm::dvec3(0.4, 0.4, 0.4),
