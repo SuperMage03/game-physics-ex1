@@ -6,7 +6,7 @@
 #include <imgui.h>
 #include <random>
 
-class SceneTest : public Scene {
+class LevelOne : public Scene {
 private:
     Physics::RigidObjectPhysicsEngine ROPE;
     // Size of time step
@@ -17,11 +17,14 @@ private:
 
     bool f_singleStep = false;
     float f_diffusivity = 0.1;
+    // Grid dimension along Ox
     int f_n = 50;
+    // Grid dimension along Oy
     int f_m = 50;
     float f_X = 5.;
     float f_Y = 5.;
     bool f_changedProblem = false;
+    // Wether the heatmap is currently advancing in time
     bool heatmap_change = true;
     Physics::SolverType f_solverType = Physics::SolverType::IMPLICIT;
     int f_effectRadius = 2;
@@ -38,8 +41,15 @@ private:
     glm::dvec3 right = glm::dvec3(0, 1, 0);
     glm::dvec3 up = glm::dvec3(0, 0, 1);
 
+    // Time steps completed
+    int time_passed = 0;
+    // Time steps you need to survive to win
+    int timesteps_win = 1500;
+    bool won = false;
+    bool lost = false;
+
 public:
-    SceneTest():
+    LevelOne():
     ROPE(),
     TPE(),
     // For random colors
@@ -74,19 +84,19 @@ public:
             glm::dvec3(10., 0., 0.)
         ));
 
-        std::shared_ptr<RigidBall> ball2(new RigidBall(
-            1.,
-            0.8,
-            // friction
-            0.8,
-            Transform3D(
-                glm::dvec3(-1.0, 0, 0.),
-                glm::dvec3(0.4, 0.4, 0.4),
-                glm::dvec3(0., 0., 0.)
-            ),
-            glm::dvec3(0., 0., 0.),
-            glm::dvec3(10., 0., 0.)
-        ));
+        // std::shared_ptr<RigidBall> ball2(new RigidBall(
+        //     1.,
+        //     0.8,
+        //     // friction
+        //     0.8,
+        //     Transform3D(
+        //         glm::dvec3(-1.0, 0, 0.),
+        //         glm::dvec3(0.4, 0.4, 0.4),
+        //         glm::dvec3(0., 0., 0.)
+        //     ),
+        //     glm::dvec3(0., 0., 0.),
+        //     glm::dvec3(10., 0., 0.)
+        // ));
 
         // std::shared_ptr<RigidBall> ball2(new RigidBall(
         //     1.,
@@ -111,10 +121,10 @@ public:
         ));
 
         ball1->f_color = glm::vec4(dis(gen), dis(gen), dis(gen), 1);
-        ball2->f_color = glm::vec4(dis(gen), dis(gen), dis(gen), 1);
+        // ball2->f_color = glm::vec4(dis(gen), dis(gen), dis(gen), 1);
 
         ROPE.addRigidObject(ball1);
-        ROPE.addRigidObject(ball2);
+        // ROPE.addRigidObject(ball2);
         
         ROPE.addStaticObject(wallB);
 
@@ -211,10 +221,23 @@ public:
         if (!f_pause) {
             if (gravity) {
                 ROPE.applyForceToRigidObject(0, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(0)->f_transform.f_position));
-                ROPE.applyForceToRigidObject(1, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(1)->f_transform.f_position));
+                // ROPE.applyForceToRigidObject(1, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(1)->f_transform.f_position));
             }
             ROPE.simulateStep(f_delta);
             propagateState();
+
+            if(!lost) time_passed += 1;
+
+            // If enough time has passed, player wins
+            if(time_passed >= timesteps_win && lost == false) {
+                won = true;
+            }
+
+            // If sphere left heatmap area, player looses
+            // Add -0.4 or 0.4, because that's sphere radius, and a bit on top (tweaked the value until it seamed to fit)
+            if(!ROPE.isPointInArea(0, -0.7 +  -0.5 * f_X, 0.7 + 0.5 * f_X, -0.7 + -0.5 * f_Y, 0.7 + 0.5 * f_Y) && won == false) {
+                lost = true;
+            }
         }
         else {
             if (f_singleStep) {
@@ -234,15 +257,27 @@ public:
 
         ROPE.onDraw(renderer);
         f_heatField.onDraw(renderer);
+        // renderer.drawLine(glm::vec3(-0.5 * f_X,0,0), glm::vec3(0.5 * f_X,0,0), glm::vec3(0.,0.,1.));
     }
 
     void onGUI() override {
-        ImGui::SliderFloat("Delta", &this->f_delta, 0.f, 0.1);
+        ImGui::Text("------------------ GAME ------------------");
+        ImGui::Text("Can you keep the ball on the heatmap long enough?");
+        ImGui::Text("Time passed: %d", time_passed);
+        ImGui::ProgressBar((float) time_passed / (float) timesteps_win, ImVec2(300, 0), "Victory progress :)");
         ImGui::Checkbox("Pause", &this->f_pause);
+        if(won) {
+            ImGui::Text("Congrats! YOU WON !!!");
+        }
+        else if(lost) {
+            ImGui::Text("You lost. Press 'Reload scene to try again'.");
+        } else {
+            ImGui::Text("Game ongoing");
+        }
+        ImGui::Text("");
+        ImGui::Text("----------------- SYSTEM -----------------");
+        ImGui::SliderFloat("Delta", &this->f_delta, 0.f, 0.1);
         ImGui::Text("Space : f_pause/unpause");
-        ImGui::Checkbox("Gravity", &this->gravity);
-        ImGui::Checkbox("Heatmap advancing", &this->heatmap_change);
-        ImGui::Text("RMB + drag : apply force to one of the objects.");
         if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
             this->f_pause = !this->f_pause;
         }
@@ -309,36 +344,36 @@ public:
                 }
             }
         }
-        ImGui::Text("Hold Q : Cool down depending on mouse cursor position");
-        if (ImGui::IsKeyDown(ImGuiKey_Q)) {
-            if (!f_pause) {
-                // auto mousePosition = ImGui::GetMousePos();
-                // auto windowSize = ImGui::GetIO().DisplaySize;
-                // double tx = (double)(mousePosition.x) / (double)(windowSize.x);
-                // double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
-                // glm::dvec2 tp(tx, ty);
-                // int i = (int)(f_heatField.getN() * tp.x);
-                // int j = (int)(f_heatField.getM() * tp.y);
-                // for (int io = std::max(0, i - f_effectRadius); io <= i + f_effectRadius; io++) {
-                //     for (int jo = std::max(0, j - f_effectRadius); jo <= j + f_effectRadius; jo++) {
-                //         f_heatField.addToValue(io, jo, -0.5);
-                //     }
-                // }
+        // ImGui::Text("Hold Q : Cool down depending on mouse cursor position");
+        // if (ImGui::IsKeyDown(ImGuiKey_Q)) {
+        //     if (!f_pause) {
+        //         // auto mousePosition = ImGui::GetMousePos();
+        //         // auto windowSize = ImGui::GetIO().DisplaySize;
+        //         // double tx = (double)(mousePosition.x) / (double)(windowSize.x);
+        //         // double ty = 1 - (double)(mousePosition.y) / (double)(windowSize.y);
+        //         // glm::dvec2 tp(tx, ty);
+        //         // int i = (int)(f_heatField.getN() * tp.x);
+        //         // int j = (int)(f_heatField.getM() * tp.y);
+        //         // for (int io = std::max(0, i - f_effectRadius); io <= i + f_effectRadius; io++) {
+        //         //     for (int jo = std::max(0, j - f_effectRadius); jo <= j + f_effectRadius; jo++) {
+        //         //         f_heatField.addToValue(io, jo, -0.5);
+        //         //     }
+        //         // }
 
-                ImVec2 mousePos = ImGui::GetMousePos();
-                ImVec2 screenSize = ImGui::GetIO().DisplaySize;
+        //         ImVec2 mousePos = ImGui::GetMousePos();
+        //         ImVec2 screenSize = ImGui::GetIO().DisplaySize;
 
-                const GridFunction::ScalarGridFunction2D::TrianglePlane* planeHit = getTrianglePlaneOnMouse(mousePos, screenSize);
+        //         const GridFunction::ScalarGridFunction2D::TrianglePlane* planeHit = getTrianglePlaneOnMouse(mousePos, screenSize);
 
-                if (planeHit != nullptr) {
-                    for (int io = std::max(0, planeHit->p1Index.x - f_effectRadius); io <= planeHit->p1Index.x + f_effectRadius; io++) {
-                        for (int jo = std::max(0, planeHit->p1Index.y - f_effectRadius); jo <= planeHit->p1Index.y + f_effectRadius; jo++) {
-                            f_heatField.addToValue(io, jo, -0.1);
-                        }
-                    }
-                }
-            }
-        }
+        //         if (planeHit != nullptr) {
+        //             for (int io = std::max(0, planeHit->p1Index.x - f_effectRadius); io <= planeHit->p1Index.x + f_effectRadius; io++) {
+        //                 for (int jo = std::max(0, planeHit->p1Index.y - f_effectRadius); jo <= planeHit->p1Index.y + f_effectRadius; jo++) {
+        //                     f_heatField.addToValue(io, jo, -0.1);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     std::pair<bool, double> planeRayIntersection(const glm::dvec3& planeNormal, const glm::dvec3& rayDir, const glm::dvec3& pointOnPlane, const glm::dvec3& rayOrigin) {

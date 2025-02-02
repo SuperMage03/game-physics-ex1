@@ -370,6 +370,7 @@ namespace Physics {
                 // Take average roughness to conserve momentum 
                 * (collision.f_normal - (collision.f_objA->f_mu + collision.f_objB->f_mu) * collision.f_tangent / 2.) 
                 / collision.f_objA->f_mass;
+
             // NEW AM UPDATE TEST !!!!!!!!!!!!!!!!!!!!!!!!!
             // // Update angular momentum
             // collision.f_objA->f_angularMomentum += collision.f_impulse * glm::cross(collision.f_collisionPointALocal, collision.f_normal);
@@ -430,6 +431,13 @@ namespace Physics {
             for (auto object: f_rigidObjects) {
                 object->onDraw(renderer);
             }
+        }
+
+        bool isPointInArea(int point_index, int x_min, int x_max, int y_min, int y_max) {
+            glm::dvec3 point = f_rigidObjects.at(point_index)->f_transform.f_position;
+            if(point.x < x_min || point.x > x_max) return false;
+            if(point.y < y_min || point.y > y_max) return false;
+            return true;
         }
     };
 }
