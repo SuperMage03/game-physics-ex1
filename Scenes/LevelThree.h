@@ -44,7 +44,7 @@ private:
     // Time steps completed
     int time_passed = 0;
     // Time steps you need to survive to win
-    int timesteps_win = 750;
+    int timesteps_win = 3000;
     bool won = false;
     bool lost = false;
 
