@@ -385,7 +385,7 @@ public:
     }
 
     void onDraw(Renderer &renderer) override {
-        bool wire = false;
+        bool wire = true;
         if (!wire) {
             renderer.drawCube(
                 f_transform.f_position,
