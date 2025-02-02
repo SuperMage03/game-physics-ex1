@@ -423,6 +423,13 @@ namespace Physics {
             return os;
         }
 
+        bool isPointInArea(int point_index, int x_min, int x_max, int y_min, int y_max) {
+            glm::dvec3 point = f_rigidObjects.at(point_index)->f_transform.f_position;
+            if(point.x < x_min || point.x > x_max) return false;
+            if(point.y < y_min || point.y > y_max) return false;
+            return true;
+        }
+
         void onDraw(Renderer &renderer) {
             for (auto object: f_staticObjects) {
                 object->onDraw(renderer);

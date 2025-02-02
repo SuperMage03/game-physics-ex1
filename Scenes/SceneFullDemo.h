@@ -4,25 +4,22 @@
 #include "RigidObjectPhysicsEngine.h"
 #include "ThermodynamicPhysicsEngine.h"
 #include <imgui.h>
-#include <random>
 
-class SceneTest : public Scene {
+class SceneFullDemo : public Scene {
 private:
     Physics::RigidObjectPhysicsEngine ROPE;
-    // Size of time step
-    float f_delta = 0.02;
+    float f_delta = 0.01;
     bool f_pause = true;
     bool gravity = true;
     Physics::IntegrationType f_integrationType = Physics::IntegrationType::MIDPOINT;
 
     bool f_singleStep = false;
-    float f_diffusivity = 0.1;
-    int f_n = 50;
-    int f_m = 50;
+    float f_diffusivity = 0.6;
+    int f_n = 60;
+    int f_m = 60;
     float f_X = 5.;
     float f_Y = 5.;
     bool f_changedProblem = false;
-    bool heatmap_change = true;
     Physics::SolverType f_solverType = Physics::SolverType::IMPLICIT;
     int f_effectRadius = 2;
 
@@ -39,35 +36,28 @@ private:
     glm::dvec3 up = glm::dvec3(0, 0, 1);
 
 public:
-    SceneTest():
+    SceneFullDemo():
     ROPE(),
-    TPE(),
-    // For random colors
-    gen(rd()), 
-    dis(0.f, 1.f)
+    TPE()
     {}
 
     void init() override {
         initialize();
     }
 
-    // For random colors
-    std::random_device rd;
-    std::mt19937 gen;
-    std::uniform_real_distribution<float> dis;
-
     void initialize() {
         ROPE = Physics::RigidObjectPhysicsEngine();
         ROPE.f_integrationType = f_integrationType;
 
+        double ballSize = 0.3;
+
         std::shared_ptr<RigidBall> ball1(new RigidBall(
             1.,
             0.8,
-            // friction
-            0.3,
+            0.15,
             Transform3D(
-                glm::dvec3(0.5, 0, 0.),
-                glm::dvec3(0.4, 0.4, 0.4),
+                glm::dvec3(0.6, 0, 0.),
+                glm::dvec3(ballSize, ballSize, ballSize),
                 glm::dvec3(0., 0., 0.)
             ),
             glm::dvec3(0., 0., 0.),
@@ -77,46 +67,121 @@ public:
         std::shared_ptr<RigidBall> ball2(new RigidBall(
             1.,
             0.8,
-            // friction
-            0.3,
+            0.15,
             Transform3D(
-                glm::dvec3(-1.0, 0, 0.),
-                glm::dvec3(0.4, 0.4, 0.4),
+                glm::dvec3(-0.6, 0., 0.),
+                glm::dvec3(ballSize, ballSize, ballSize),
                 glm::dvec3(0., 0., 0.)
             ),
             glm::dvec3(0., 0., 0.),
-            glm::dvec3(10., 0., 0.)
+            glm::dvec3(-10., 0., 0.)
         ));
 
-        // std::shared_ptr<RigidBall> ball2(new RigidBall(
-        //     1.,
-        //     1.0,
-        //     0.0,
-        //     Transform3D(
-        //         glm::dvec3(0.5, 0., 0.),
-        //         glm::dvec3(0.4, 0.4, 0.4),
-        //         glm::dvec3(0., 0., 0.)
-        //     ),
-        //     glm::dvec3(0., 0., 0.),
-        //     glm::dvec3(0., 0., 0.)
-        // ));
-
-        std::shared_ptr<StaticCuboid> wallB(new StaticCuboid(
+        std::shared_ptr<RigidBall> ball3(new RigidBall(
+            1.,
+            0.8,
+            0.15,
             Transform3D(
-                glm::dvec3(0., 0., -3.),
-                glm::dvec3(f_X, f_Y, 1.),
+                glm::dvec3(0., 0.6, 0.),
+                glm::dvec3(ballSize, ballSize, ballSize),
                 glm::dvec3(0., 0., 0.)
             ),
-            glm::dvec4(0.8, 0.8, 0.8, 0.8)
+            glm::dvec3(0., 0., 0.),
+            glm::dvec3(0., 0., 0.)
         ));
 
-        ball1->f_color = glm::vec4(dis(gen), dis(gen), dis(gen), 1);
-        ball2->f_color = glm::vec4(dis(gen), dis(gen), dis(gen), 1);
+        std::shared_ptr<RigidBall> ball4(new RigidBall(
+            1.,
+            0.8,
+            0.15,
+            Transform3D(
+                glm::dvec3(0., -0.6, 0.),
+                glm::dvec3(ballSize, ballSize, ballSize),
+                glm::dvec3(0., 0., 0.)
+            ),
+            glm::dvec3(0., 0., 0.),
+            glm::dvec3(0., 0., 0.)
+        ));
+
+        std::shared_ptr<RigidBall> ball5(new RigidBall(
+            1.,
+            0.8,
+            0.15,
+            Transform3D(
+                glm::dvec3(-0.6, 0.6, 0.),
+                glm::dvec3(ballSize, ballSize, ballSize),
+                glm::dvec3(0., 0., 0.)
+            ),
+            glm::dvec3(0., 0., 0.),
+            glm::dvec3(0., 0., 0.)
+        ));
+
+        std::shared_ptr<RigidBall> ball6(new RigidBall(
+            1.,
+            0.8,
+            0.15,
+            Transform3D(
+                glm::dvec3(0.6, -0.6, 0.),
+                glm::dvec3(ballSize, ballSize, ballSize),
+                glm::dvec3(0., 0., 0.)
+            ),
+            glm::dvec3(0., 0., 0.),
+            glm::dvec3(0., 0., 0.)
+        ));
+
+        double wallThickness = 1.;
+
+        std::shared_ptr<StaticCuboid> wallL(new StaticCuboid(
+            Transform3D(
+                glm::dvec3(-2.5 - wallThickness / 2., 0., 0.),
+                glm::dvec3(wallThickness, f_Y, 2. * f_X),
+                glm::dvec3(0., 0., 0.)
+            ),
+            glm::dvec4(0.2, 0.2, 0.2, 0.2)
+        ));
+        std::shared_ptr<StaticCuboid> wallR(new StaticCuboid(
+            Transform3D(
+                glm::dvec3(2.5 + wallThickness / 2., 0., 0.),
+                glm::dvec3(wallThickness, f_Y, 2. * f_X),
+                glm::dvec3(0., 0., 0.)
+            ),
+            glm::dvec4(0.2, 0.2, 0.2, 0.2)
+        ));
+        std::shared_ptr<StaticCuboid> wallB(new StaticCuboid(
+            Transform3D(
+                glm::dvec3(0., -2.5 - wallThickness / 2., 0.),
+                glm::dvec3(f_X, wallThickness, 2. * f_X),
+                glm::dvec3(0., 0., 0.)
+            ),
+            glm::dvec4(0.2, 0.2, 0.2, 0.2)
+        ));
+        std::shared_ptr<StaticCuboid> wallF(new StaticCuboid(
+            Transform3D(
+                glm::dvec3(0., 2.5 + wallThickness / 2., 0.),
+                glm::dvec3(f_X, wallThickness, 2. * f_X),
+                glm::dvec3(0., 0., 0.)
+            ),
+            glm::dvec4(0.2, 0.2, 0.2, 0.2)
+        ));
+
+        ball1->f_color = glm::dvec4(1.0, 0.1, 0.05, 1.);
+        ball2->f_color = glm::dvec4(0.1, 1.0, 0.05, 1.);
+        ball3->f_color = glm::dvec4(0.1, 0.05, 1.0, 1.);
+        ball4->f_color = glm::dvec4(0.75, 0.75, 0.05, 1.);
+        ball5->f_color = glm::dvec4(0.05, 0.75, 0.75, 1.);
+        ball6->f_color = glm::dvec4(0.9, 0.9, 0.9, 1.);
 
         ROPE.addRigidObject(ball1);
         ROPE.addRigidObject(ball2);
+        ROPE.addRigidObject(ball3);
+        ROPE.addRigidObject(ball4);
+        ROPE.addRigidObject(ball5);
+        ROPE.addRigidObject(ball6);
         
+        ROPE.addStaticObject(wallL);
+        ROPE.addStaticObject(wallR);
         ROPE.addStaticObject(wallB);
+        ROPE.addStaticObject(wallF);
 
         ROPE.setGridFunction(&f_heatField);
         
@@ -125,6 +190,33 @@ public:
         << ROPE << std::endl << std::endl;
 
         TPE = std::move(Physics::ThermodynamicPhysicsEngine(
+            HeatProblem::HeatProblemRectDBC2D(
+                glm::dvec2(-f_X / 2., -f_Y / 2.),
+                glm::dvec2(f_X, f_Y),
+                0.1,
+                [](glm::dvec2 point, double t) {
+                    return 0.05 * sin(2. * t) * sin(1.256635 * point.x + t) * sin(1.256635 * point.y - t);
+                },
+                [](glm::dvec2 point, double t) {
+                    return -2.5;
+                },
+                [](double y, double t) {
+                    return sin(2. * t) * sin(1.256635 * y + t) - 2.5;
+                },
+                [](double y, double t) {
+                    return sin(2. * t) * sin(1.256635 * y - t) - 2.5;
+                },
+                [](double x, double t) {
+                    return sin(2. * t) * sin(1.256635 * x + t) - 2.5;
+                },
+                [](double x, double t) {
+                    return sin(2. * t) * sin(1.256635 * x - t) - 2.5;
+                },
+                HeatProblem::BoundaryConditionType::DIRICHLET,
+                HeatProblem::BoundaryConditionType::DIRICHLET,
+                HeatProblem::BoundaryConditionType::DIRICHLET,
+                HeatProblem::BoundaryConditionType::DIRICHLET
+            )
             // HeatProblem::HeatProblemRectDBC2D(
             //     glm::dvec2(-f_X / 2., -f_Y / 2.),
             //     glm::dvec2(f_X, f_Y),
@@ -133,52 +225,25 @@ public:
             //         return 0.;
             //     },
             //     [](glm::dvec2 point, double t) {
-            //         return 2 * sin(2. * point.x) * sin(2. * point.y) + 0.5 * ((double)(rand()) / (double)(RAND_MAX)) - 2.5;
+            //         return - 4. * (point.x - 2.5) * (point.x + 2.5) * (point.y - 2.5) * (point.y + 2.5) / 39. + 2.5;
             //     },
             //     [](double y, double t) {
-            //         return 2. * (sin(y - t) + 1.) + 0.5 * (sin(5. * (y + t)) + 1.) - 2.5;
+            //         return 2.5;
             //     },
             //     [](double y, double t) {
-            //         return sin(t) * y - 2.5;
+            //         return 2.5;
             //     },
             //     [](double x, double t) {
-            //         return 2. * (sin(x - t) + 1.) + 0.5 * (sin(5. * (x + t)) + 1.) - 2.5;
+            //         return 2.5;
             //     },
             //     [](double x, double t) {
-            //         return sin(t) * x - 2.5;
+            //         return 2.5;
             //     },
             //     HeatProblem::BoundaryConditionType::DIRICHLET,
             //     HeatProblem::BoundaryConditionType::DIRICHLET,
             //     HeatProblem::BoundaryConditionType::DIRICHLET,
             //     HeatProblem::BoundaryConditionType::DIRICHLET
             // )
-            HeatProblem::HeatProblemRectDBC2D(
-                glm::dvec2(-f_X / 2., -f_Y / 2.),
-                glm::dvec2(f_X, f_Y),
-                0.1,
-                [](glm::dvec2 point, double t) {
-                    return 0.;
-                },
-                [](glm::dvec2 point, double t) {
-                    return - 4. * (point.x - 2.5) * (point.x + 2.5) * (point.y - 2.5) * (point.y + 2.5) / 39. + 2.5;
-                },
-                [](double y, double t) {
-                    return 2.5;
-                },
-                [](double y, double t) {
-                    return 2.5;
-                },
-                [](double x, double t) {
-                    return 2.5;
-                },
-                [](double x, double t) {
-                    return 2.5;
-                },
-                HeatProblem::BoundaryConditionType::DIRICHLET,
-                HeatProblem::BoundaryConditionType::DIRICHLET,
-                HeatProblem::BoundaryConditionType::DIRICHLET,
-                HeatProblem::BoundaryConditionType::DIRICHLET
-            )
         ));
         TPE.f_solverType = f_solverType;
 
@@ -186,17 +251,15 @@ public:
     }
 
     void propagateState() {
-        if(heatmap_change) {
-            switch (f_solverType) {
-            case Physics::SolverType::EXPLICIT:
-                TPE.propagateStateExplicitOn(f_heatField, f_delta);
-                break;
-            case Physics::SolverType::IMPLICIT:
-                TPE.propagateStateImplicitOn(f_heatField, f_delta);
-                break;
-            default:
-                break;
-            }
+        switch (f_solverType) {
+        case Physics::SolverType::EXPLICIT:
+            TPE.propagateStateExplicitOn(f_heatField, f_delta);
+            break;
+        case Physics::SolverType::IMPLICIT:
+            TPE.propagateStateImplicitOn(f_heatField, f_delta);
+            break;
+        default:
+            break;
         }
     }
 
@@ -212,6 +275,10 @@ public:
             if (gravity) {
                 ROPE.applyForceToRigidObject(0, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(0)->f_transform.f_position));
                 ROPE.applyForceToRigidObject(1, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(1)->f_transform.f_position));
+                ROPE.applyForceToRigidObject(2, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(2)->f_transform.f_position));
+                ROPE.applyForceToRigidObject(3, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(3)->f_transform.f_position));
+                ROPE.applyForceToRigidObject(4, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(4)->f_transform.f_position));
+                ROPE.applyForceToRigidObject(5, Force(glm::dvec3(0.0, 0.0, -9.81), ROPE.getRigidObject(5)->f_transform.f_position));
             }
             ROPE.simulateStep(f_delta);
             propagateState();
@@ -241,7 +308,6 @@ public:
         ImGui::Checkbox("Pause", &this->f_pause);
         ImGui::Text("Space : f_pause/unpause");
         ImGui::Checkbox("Gravity", &this->gravity);
-        ImGui::Checkbox("Heatmap advancing", &this->heatmap_change);
         ImGui::Text("RMB + drag : apply force to one of the objects.");
         if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
             this->f_pause = !this->f_pause;
@@ -302,8 +368,7 @@ public:
                 if (planeHit != nullptr) {
                     for (int io = std::max(0, planeHit->p1Index.x - f_effectRadius); io <= planeHit->p1Index.x + f_effectRadius; io++) {
                         for (int jo = std::max(0, planeHit->p1Index.y - f_effectRadius); jo <= planeHit->p1Index.y + f_effectRadius; jo++) {
-                            // Third parameter: Effect of heat source
-                            f_heatField.addToValue(io, jo, 0.1);
+                            f_heatField.addToValue(io, jo, 0.2);
                         }
                     }
                 }
@@ -333,7 +398,7 @@ public:
                 if (planeHit != nullptr) {
                     for (int io = std::max(0, planeHit->p1Index.x - f_effectRadius); io <= planeHit->p1Index.x + f_effectRadius; io++) {
                         for (int jo = std::max(0, planeHit->p1Index.y - f_effectRadius); jo <= planeHit->p1Index.y + f_effectRadius; jo++) {
-                            f_heatField.addToValue(io, jo, -0.1);
+                            f_heatField.addToValue(io, jo, -0.2);
                         }
                     }
                 }

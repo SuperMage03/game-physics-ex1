@@ -3,6 +3,10 @@
 
 #include "Scene1.h"
 #include "SceneTest.h"
+#include "SceneFullDemo.h"
+#include "LevelOne.h"
+#include "LevelTwo.h"
+#include "LevelThree.h"
 
 using SceneCreator = std::function<std::unique_ptr<Scene>()>;
 
@@ -16,5 +20,9 @@ SceneCreator creator()
 std::map<std::string, SceneCreator> scenesCreators = {
     // {"Demo Scene", creator<Scene1>()},
     {"Scene Test", creator<SceneTest>()},
+    {"Scene Full Demo", creator<SceneFullDemo>()},
+    {"Level 1", creator<LevelOne>()},
+    {"Level 2", creator<LevelTwo>()},
+    {"Level 3", creator<LevelThree>()}
     // add more Scene types here
 };

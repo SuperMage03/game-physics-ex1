@@ -171,12 +171,35 @@ namespace GridFunction {
         IntegerGridScalarFunction2D f_function;
     
     public:
+        struct TrianglePlane {
+            glm::dvec3 p1{0};
+            glm::dvec3 p2{0};
+            glm::dvec3 p3{0};
+            glm::dvec3 normal{0};
+            glm::ivec2 p1Index{0};
+            glm::ivec2 p2Index{0};
+            glm::ivec2 p3Index{0};
+            void updateNormal() {
+                normal = glm::cross(p2 - p1, p3 - p1);
+                if (glm::length2(normal) != 0.0) {
+                    normal = glm::normalize(normal);
+                }
+            }
+        };
+    
+    private:
+        unsigned f_trianglePlanesCount{0};
+        std::unique_ptr<TrianglePlane[]> f_trianglePlanes{nullptr};
+    
+    public:
         #pragma region Constructors
 
         ScalarGridFunction2D():
         f_grid(),
         f_function()
-        {}
+        {
+            initializeTrianglePlanes();
+        }
 
         ScalarGridFunction2D(
             unsigned n,
@@ -186,7 +209,9 @@ namespace GridFunction {
         ):
         f_grid(n, m, origin, size),
         f_function(n, m)
-        {}
+        {
+            initializeTrianglePlanes();
+        }
 
         ScalarGridFunction2D(
             unsigned n,
@@ -196,7 +221,9 @@ namespace GridFunction {
         ):
         f_grid(n, m, origin, size),
         f_function(n, m)
-        {}
+        {
+            initializeTrianglePlanes();
+        }
 
         ScalarGridFunction2D(
             unsigned n,
@@ -207,7 +234,9 @@ namespace GridFunction {
         ):
         f_grid(n, m, origin, size),
         f_function(n, m, value)
-        {}
+        {
+            initializeTrianglePlanes();
+        }
 
         ScalarGridFunction2D(
             unsigned n,
@@ -218,7 +247,9 @@ namespace GridFunction {
         ):
         f_grid(n, m, origin, size),
         f_function(n, m, value)
-        {}
+        {
+            initializeTrianglePlanes();
+        }
 
         #pragma endregion
 
@@ -261,15 +292,24 @@ namespace GridFunction {
         }
 
         bool setValue(unsigned i, unsigned j, double value) {
-            return f_function.setValue(i, j, value);
+            if (f_function.setValue(i, j, value)) {
+                updateTrianglePlane(i, j);
+                return true;
+            };
+            return false;
         }
 
         bool addToValue(unsigned i, unsigned j, double value) {
-            return f_function.addToValue(i, j, value);
+            if (f_function.addToValue(i, j, value)) {
+                updateTrianglePlane(i, j);
+                return true;
+            };
+            return false;
         }
 
         void setAllValues(double value) {
             f_function.setAllValues(value);
+            updateAllTrianglePlanes();
         }
 
         void clear() {
@@ -337,6 +377,79 @@ namespace GridFunction {
             }
 
             return glm::cross(cross1, cross2);
+        }
+
+        void updateTrianglePlane(int i, int j) {
+            if (f_trianglePlanesCount == 0) return;
+            int n = f_function.getN();
+            int m = f_function.getM();
+
+            for (int x = i-1; x <= i; x++) {
+                for (int y = j-1; y <= j; y++) {
+                    if ((x < 0) || (x >= n-1) || (y < 0) || (y >= m-1)) {
+                        continue;
+                    }
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y].p1 = getPoint3D(x, y);
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y].p2 = getPoint3D(x+1, y);
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y].p3 = getPoint3D(x+1, y+1);
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y].updateNormal();
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y].p1Index = {x, y};
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y].p2Index = {x+1, y};
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y].p3Index = {x+1, y+1};
+
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y + 1].p1 = getPoint3D(x, y);
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y + 1].p2 = getPoint3D(x, y+1);
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y + 1].p3 = getPoint3D(x+1, y+1);
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y + 1].updateNormal();
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y + 1].p1Index = {x, y};
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y + 1].p2Index = {x, y+1};
+                    f_trianglePlanes[2 * (n-1) * x + 2 * y + 1].p3Index = {x+1, y+1};
+                }
+            }
+
+        }
+        void updateAllTrianglePlanes() {
+            int n = f_function.getN();
+            int m = f_function.getM();
+            for (unsigned i = 0; i < n - 1; i++) {
+                for (unsigned j = 0; j < m - 1; j++) {
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j].p1 = getPoint3D(i, j);
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j].p2 = getPoint3D(i+1, j);
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j].p3 = getPoint3D(i+1, j+1);
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j].updateNormal();
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j].p1Index = {i, j};
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j].p2Index = {i+1, j};
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j].p3Index = {i+1, j+1};
+
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j + 1].p1 = getPoint3D(i, j);
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j + 1].p2 = getPoint3D(i, j+1);
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j + 1].p3 = getPoint3D(i+1, j+1);
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j + 1].updateNormal();
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j + 1].p1Index = {i, j};
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j + 1].p2Index = {i, j+1};
+                    f_trianglePlanes[2 * (n-1) * i + 2 * j + 1].p3Index = {i+1, j+1};
+                }
+            }
+        }
+
+        void initializeTrianglePlanes() {
+            if ((f_function.getN() == 0) || (f_function.getM() == 0)) {
+                f_trianglePlanesCount = 0;
+                f_trianglePlanes.release();
+                return;
+            }
+
+            f_trianglePlanesCount = 2 * (f_function.getN()-1) * (f_function.getM()-1);
+            f_trianglePlanes = std::make_unique<TrianglePlane[]>(f_trianglePlanesCount);
+            updateAllTrianglePlanes();
+        }
+
+        const TrianglePlane* getTrianglePlanes() const {
+            return f_trianglePlanes.get();
+        }
+
+        unsigned getTrianglePlanesCount() const {
+            return f_trianglePlanesCount;
         }
 
         void onDraw(Renderer &renderer, glm::dvec3 shift = glm::dvec3(0.), double scale = 1.) {
